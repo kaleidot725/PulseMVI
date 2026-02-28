@@ -2,18 +2,18 @@ package jp.kaleidot725.doma.demo.counter.display
 
 import jp.kaleidot725.doma.demo.counter.CounterTelegram
 import jp.kaleidot725.doma.demo.counter.repository.CounterRepository
-import jp.kaleidot725.doma.mvi.DomaStore
+import jp.kaleidot725.doma.mvi.DomaSubStore
 import kotlinx.coroutines.launch
 
-class CounterDisplayStore(
+class CounterDisplaySubStore(
     private val repository: CounterRepository,
-) : DomaStore<CounterDisplayState, CounterTelegram, CounterDisplayEvent>(
+) : DomaSubStore<CounterDisplayState, CounterTelegram, CounterDisplayEvent>(
     initialUiState = CounterDisplayState(),
 ) {
     override fun onReceive(telegram: CounterTelegram) {
         coroutineScope.launch {
             when (telegram) {
-                is CounterTelegram.UpdateCounter -> {
+                is CounterTelegram.Update -> {
                     update { copy(count = telegram.value) }
                     if (telegram.value == 10) event(CounterDisplayEvent.ShowMessage("10 Count"))
                 }

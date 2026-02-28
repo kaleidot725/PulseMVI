@@ -7,7 +7,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 
 @Composable
-public fun <State : DomaState, Action : DomaAction, Event : DomaEvent, Telegram : DomaTelegram> DomaPlatformContent(
+public fun <State : DomaState, Action : DomaAction, Event : DomaEvent, Telegram : DomaTelegram> DomaContent(
     platforms: DomaPlatform<State, Action, Event, Telegram>,
     onEvent: (Event) -> Unit = {},
     content: @Composable ((State, ((Action) -> Unit)) -> Unit) = { _, _ -> },
@@ -27,12 +27,12 @@ public fun <State : DomaState, Action : DomaAction, Event : DomaEvent, Telegram 
 }
 
 @Composable
-public fun <State : DomaState, Telegram : DomaTelegram, Event : DomaEvent> DomaStoreContent(
-    store: DomaStore<State, Telegram, Event>,
+public fun <State : DomaState, Telegram : DomaTelegram, Event : DomaEvent> DomaSubContent(
+    subStore: DomaSubStore<State, Telegram, Event>,
     onEvent: (Event) -> Unit = {},
     content: @Composable (State) -> Unit = { _ -> },
 ) {
-    val state by store.state.collectAsState()
-    LaunchedEffect(store) { store.event.collect { onEvent(it) } }
+    val state by subStore.state.collectAsState()
+    LaunchedEffect(subStore) { subStore.event.collect { onEvent(it) } }
     content(state)
 }

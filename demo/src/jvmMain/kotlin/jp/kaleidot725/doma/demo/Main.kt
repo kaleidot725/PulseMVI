@@ -19,29 +19,27 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.application
 import jp.kaleidot725.doma.demo.counter.display.CounterDisplayEvent
-import jp.kaleidot725.doma.demo.counter.display.CounterDisplayStore
+import jp.kaleidot725.doma.demo.counter.display.CounterDisplaySubStore
 import jp.kaleidot725.doma.demo.counter.operator.CounterOperatorAction
-import jp.kaleidot725.doma.demo.counter.operator.CounterOperatorPlatform
+import jp.kaleidot725.doma.demo.counter.operator.CounterOperatorStore
 import jp.kaleidot725.doma.demo.counter.repository.CounterRepository
-import jp.kaleidot725.doma.mvi.DomaPlatformContent
-import jp.kaleidot725.doma.mvi.DomaStoreContent
+import jp.kaleidot725.doma.mvi.DomaContent
+import jp.kaleidot725.doma.mvi.DomaSubContent
 import kotlinx.coroutines.launch
 
 fun main() =
     application {
         val repository = remember { CounterRepository() }
-        val displayStore = remember { CounterDisplayStore(repository) }
-        val operatorPlatform = remember { CounterOperatorPlatform(stores = listOf(displayStore), repository = repository) }
+        val displayStore = remember { CounterDisplaySubStore(repository) }
+        val operatorPlatform = remember { CounterOperatorStore(subStores = listOf(displayStore), repository = repository) }
 
         Window(
             onCloseRequest = ::exitApplication,
             title = "DomaKt Demo - Counter",
         ) {
-            val snackbarHostState = remember { SnackbarHostState() }
             val scope = rememberCoroutineScope()
-
             MaterialTheme {
-                DomaPlatformContent(platforms = operatorPlatform) { _, onAction ->
+                DomaContent(platforms = operatorPlatform) { _, onAction ->
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
                         Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
                             Button(onClick = { onAction(CounterOperatorAction.Decrement) }) {
@@ -58,8 +56,9 @@ fun main() =
                             Text("Reset")
                         }
 
-                        DomaStoreContent(
-                            store = displayStore,
+                        val snackbarHostState = remember { SnackbarHostState() }
+                        DomaSubContent(
+                            subStore = displayStore,
                             onEvent = {
                                 when (it) {
                                     is CounterDisplayEvent.ShowMessage -> {
@@ -74,9 +73,9 @@ fun main() =
                             )
 
                             Spacer(modifier = Modifier.height(32.dp))
-                        }
 
-                        SnackbarHost(hostState = snackbarHostState)
+                            SnackbarHost(hostState = snackbarHostState)
+                        }
                     }
                 }
             }

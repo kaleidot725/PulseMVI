@@ -16,7 +16,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 public abstract class DomaPlatform<UiState : DomaState, UiAction : DomaAction, Event : DomaEvent, Telegram : DomaTelegram>(
-    private val stores: List<DomaStore<*, Telegram, *>>,
+    private val stores: List<DomaSubStore<*, Telegram, *>>,
     private val initialUiState: UiState,
 ) {
     public var coroutineScope: CoroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.Main + Dispatchers.IO)
