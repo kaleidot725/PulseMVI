@@ -15,7 +15,8 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-public abstract class DomaBase<UiState : DomaState, UiAction : DomaAction, Event : DomaEvent>(
+public abstract class DomaPlatform<UiState : DomaState, UiAction : DomaAction, Event : DomaEvent, Telegram : DomaTelegram>(
+    private val stores: List<DomaStore<*, Telegram, *>>,
     private val initialUiState: UiState,
 ) {
     public var coroutineScope: CoroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.Main + Dispatchers.IO)
@@ -41,7 +42,7 @@ public abstract class DomaBase<UiState : DomaState, UiAction : DomaAction, Event
     public var event: Flow<Event> = _event.receiveAsFlow()
         private set
 
-    public abstract fun onSetup()
+    public open fun onSetup() {}
 
     public fun onReset() {
         coroutineScope.cancel()
@@ -63,6 +64,10 @@ public abstract class DomaBase<UiState : DomaState, UiAction : DomaAction, Event
 
     public fun update(block: UiState.() -> UiState) {
         uiState.update { block(it) }
+    }
+
+    public fun broadcast(telegram: Telegram) {
+        stores.forEach { it.onReceive(telegram) }
     }
 
     public fun event(effect: Event) {

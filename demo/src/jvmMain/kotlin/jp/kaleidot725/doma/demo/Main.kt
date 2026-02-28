@@ -1,11 +1,9 @@
 package jp.kaleidot725.doma.demo
 
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.material.Button
 import androidx.compose.material.MaterialTheme
@@ -20,72 +18,67 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.application
-import jp.kaleidot725.doma.demo.counter.platform.CounterPlatform
-import jp.kaleidot725.doma.demo.counter.platform.CounterPlatformAction
+import jp.kaleidot725.doma.demo.counter.display.CounterDisplayEvent
+import jp.kaleidot725.doma.demo.counter.display.CounterDisplayStore
+import jp.kaleidot725.doma.demo.counter.operator.CounterOperatorAction
+import jp.kaleidot725.doma.demo.counter.operator.CounterOperatorPlatform
 import jp.kaleidot725.doma.demo.counter.repository.CounterRepository
-import jp.kaleidot725.doma.demo.counter.store.CounterStore
-import jp.kaleidot725.doma.demo.counter.store.CounterStoreEvent
-import jp.kaleidot725.doma.mvi.DomaRootContent
+import jp.kaleidot725.doma.mvi.DomaPlatformContent
+import jp.kaleidot725.doma.mvi.DomaStoreContent
 import kotlinx.coroutines.launch
 
-fun main() = application {
-    val repository = remember { CounterRepository() }
-    val platform = remember { CounterPlatform(repository) }
-    val store = remember { CounterStore(repository) }
+fun main() =
+    application {
+        val repository = remember { CounterRepository() }
+        val displayStore = remember { CounterDisplayStore(repository) }
+        val operatorPlatform = remember { CounterOperatorPlatform(stores = listOf(displayStore), repository = repository) }
 
-    Window(
-        onCloseRequest = ::exitApplication,
-        title = "DomaKt Demo - Counter",
-    ) {
-        val snackbarHostState = remember { SnackbarHostState() }
-        val scope = rememberCoroutineScope()
+        Window(
+            onCloseRequest = ::exitApplication,
+            title = "DomaKt Demo - Counter",
+        ) {
+            val snackbarHostState = remember { SnackbarHostState() }
+            val scope = rememberCoroutineScope()
 
-        MaterialTheme {
-            DomaRootContent(
-                base = store,
-                onEvent = { effect ->
-                    when (effect) {
-                        is CounterStoreEvent.ShowMessage -> {
-                            scope.launch { snackbarHostState.showSnackbar(effect.message) }
-                        }
-                    }
-                },
-            ) { state, _ ->
-                Box(modifier = Modifier.fillMaxSize()) {
-                    Column(
-                        modifier = Modifier.fillMaxSize(),
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        verticalArrangement = Arrangement.Center,
-                    ) {
-                        Text(
-                            text = "${state.count}",
-                            fontSize = 72.sp,
-                        )
-
-                        Spacer(modifier = Modifier.height(32.dp))
-
+            MaterialTheme {
+                DomaPlatformContent(platforms = operatorPlatform) { _, onAction ->
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
                         Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-                            Button(onClick = { platform.onAction(CounterPlatformAction.Decrement) }) {
+                            Button(onClick = { onAction(CounterOperatorAction.Decrement) }) {
                                 Text("-")
                             }
-                            Button(onClick = { platform.onAction(CounterPlatformAction.Increment) }) {
+                            Button(onClick = { onAction(CounterOperatorAction.Increment) }) {
                                 Text("+")
                             }
                         }
 
                         Spacer(modifier = Modifier.height(16.dp))
 
-                        Button(onClick = { platform.onAction(CounterPlatformAction.Reset) }) {
+                        Button(onClick = { onAction(CounterOperatorAction.Reset) }) {
                             Text("Reset")
                         }
-                    }
 
-                    SnackbarHost(
-                        hostState = snackbarHostState,
-                        modifier = Modifier.align(Alignment.BottomCenter),
-                    )
+                        DomaStoreContent(
+                            store = displayStore,
+                            onEvent = {
+                                when (it) {
+                                    is CounterDisplayEvent.ShowMessage -> {
+                                        scope.launch { snackbarHostState.showSnackbar(it.message) }
+                                    }
+                                }
+                            },
+                        ) { state ->
+                            Text(
+                                text = "${state.count}",
+                                fontSize = 72.sp,
+                            )
+
+                            Spacer(modifier = Modifier.height(32.dp))
+                        }
+
+                        SnackbarHost(hostState = snackbarHostState)
+                    }
                 }
             }
         }
     }
-}

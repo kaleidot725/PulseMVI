@@ -7,42 +7,32 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 
 @Composable
-public fun <State : DomaState, Action : DomaAction, Event : DomaEvent> DomaRootContent(
-    base: DomaStore<State, Action, Event>,
+public fun <State : DomaState, Action : DomaAction, Event : DomaEvent, Telegram : DomaTelegram> DomaPlatformContent(
+    platforms: DomaPlatform<State, Action, Event, Telegram>,
     onEvent: (Event) -> Unit = {},
     content: @Composable ((State, ((Action) -> Unit)) -> Unit) = { _, _ -> },
 ) {
-    val state by base.state.collectAsState()
-    val onAction = base::onAction
+    val state by platforms.state.collectAsState()
+    val onAction = platforms::onAction
     LaunchedEffect(Unit) {
-        base.onSetup()
+        platforms.onSetup()
     }
     LaunchedEffect(Unit) {
-        base.event.collect { onEvent(it) }
+        platforms.event.collect { onEvent(it) }
     }
     DisposableEffect(Unit) {
-        onDispose { base.onReset() }
+        onDispose { platforms.onReset() }
     }
     content(state, onAction)
 }
 
 @Composable
-public fun <State : DomaState, Action : DomaAction, Event : DomaEvent> DomaChildContent(
-    base: DomaStore<State, Action, Event>,
+public fun <State : DomaState, Telegram : DomaTelegram, Event : DomaEvent> DomaStoreContent(
+    store: DomaStore<State, Telegram, Event>,
     onEvent: (Event) -> Unit = {},
-    content: @Composable (State, (Action) -> Unit) -> Unit = { _, _ -> },
+    content: @Composable (State) -> Unit = { _ -> },
 ) {
-    val state by base.state.collectAsState()
-    val onAction = base::onAction
-    LaunchedEffect(base) { base.event.collect { onEvent(it) } }
-    content(state, onAction)
-}
-
-@Composable
-public fun <State : DomaState, Action : DomaAction, Event : DomaEvent> DomaDialogContent(
-    base: DomaStore<State, Action, Event>,
-    onEvent: (Event) -> Unit = {},
-    content: @Composable (State, (Action) -> Unit) -> Unit = { _, _ -> },
-) {
-    DomaRootContent(base, onEvent, content)
+    val state by store.state.collectAsState()
+    LaunchedEffect(store) { store.event.collect { onEvent(it) } }
+    content(state)
 }

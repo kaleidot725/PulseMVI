@@ -1,7 +1,7 @@
-package jp.kaleidot725.doma.demo.counter.store
+package jp.kaleidot725.doma.demo.counter.display
 
 import jp.kaleidot725.doma.mvi.DomaState
 
-data class CounterStoreState(
+data class CounterDisplayState(
     val count: Int = 0,
 ) : DomaState

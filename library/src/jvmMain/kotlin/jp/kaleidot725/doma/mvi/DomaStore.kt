@@ -3,7 +3,6 @@ package jp.kaleidot725.doma.mvi
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.cancel
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -15,7 +14,7 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-public abstract class DomaStore<UiState : DomaState, UiAction : DomaAction, Event : DomaEvent>(
+public abstract class DomaStore<UiState : DomaState, Telegram : DomaTelegram, Event : DomaEvent>(
     private val initialUiState: UiState,
 ) {
     public var coroutineScope: CoroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.Main + Dispatchers.IO)
@@ -41,21 +40,9 @@ public abstract class DomaStore<UiState : DomaState, UiAction : DomaAction, Even
     public var event: Flow<Event> = _event.receiveAsFlow()
         private set
 
-    public abstract fun onSetup()
+    public open fun onSetup() {}
 
-    public abstract fun onRefresh()
-
-    public abstract fun onAction(uiAction: UiAction)
-
-    public fun onReset() {
-        coroutineScope.cancel()
-        coroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.Main + Dispatchers.IO)
-        uiState.update { initialUiState }
-        state = uiState
-            .onSubscription { onSetup() }
-            .stateIn(coroutineScope, SharingStarted.WhileSubscribed(), initialUiState)
-        event = _event.receiveAsFlow()
-    }
+    public open fun onReceive(telegram: Telegram) {}
 
     public fun update(block: UiState.() -> UiState) {
         uiState.update { block(it) }
