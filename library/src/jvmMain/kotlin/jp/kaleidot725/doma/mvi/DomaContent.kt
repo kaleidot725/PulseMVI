@@ -18,7 +18,7 @@ public fun <State : DomaState, Action : DomaAction, Event : DomaEvent> DomaRootC
         base.onSetup()
     }
     LaunchedEffect(Unit) {
-        base.sideEffect.collect { onEvent(it) }
+        base.event.collect { onEvent(it) }
     }
     DisposableEffect(Unit) {
         onDispose { base.onReset() }
@@ -34,7 +34,7 @@ public fun <State : DomaState, Action : DomaAction, Event : DomaEvent> DomaChild
 ) {
     val state by base.state.collectAsState()
     val onAction = base::onAction
-    LaunchedEffect(base) { base.sideEffect.collect { onEvent(it) } }
+    LaunchedEffect(base) { base.event.collect { onEvent(it) } }
     content(state, onAction)
 }
 

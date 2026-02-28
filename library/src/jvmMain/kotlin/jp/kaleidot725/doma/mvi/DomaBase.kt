@@ -36,16 +36,16 @@ public abstract class DomaBase<UiState : DomaState, UiAction : DomaAction, Event
 
     public val currentState: UiState get() = state.value
 
-    private val _sideEffect: Channel<Event> by lazy { Channel() }
+    private val _event: Channel<Event> by lazy { Channel() }
 
-    public var sideEffect: Flow<Event> = _sideEffect.receiveAsFlow()
+    public var event: Flow<Event> = _event.receiveAsFlow()
         private set
 
     public abstract fun onSetup()
 
-    public abstract fun onAction(uiAction: UiAction)
-
     public abstract fun onRefresh()
+
+    public abstract fun onAction(uiAction: UiAction)
 
     public fun onReset() {
         coroutineScope.cancel()
@@ -60,14 +60,14 @@ public abstract class DomaBase<UiState : DomaState, UiAction : DomaAction, Event
                     SharingStarted.WhileSubscribed(),
                     initialUiState,
                 )
-        sideEffect = _sideEffect.receiveAsFlow()
+        event = _event.receiveAsFlow()
     }
 
     public fun update(block: UiState.() -> UiState) {
         uiState.update { block(it) }
     }
 
-    public fun sideEffect(effect: Event) {
-        coroutineScope.launch { _sideEffect.send(effect) }
+    public fun event(effect: Event) {
+        coroutineScope.launch { _event.send(effect) }
     }
 }
