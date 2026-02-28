@@ -7,9 +7,16 @@ import kotlinx.coroutines.launch
 
 class CounterDisplaySubStore(
     private val repository: CounterRepository,
-) : DomaSubStore<CounterDisplayState, CounterTelegram, CounterDisplayEvent>(
+) : DomaSubStore<CounterDisplayState, CounterDisplayAction, CounterDisplayEvent, CounterTelegram>(
     initialUiState = CounterDisplayState(),
 ) {
+    override fun onSetup() {
+        super.onSetup()
+    }
+
+    override fun onAction(uiAction: CounterDisplayAction) {
+    }
+
     override fun onReceive(telegram: CounterTelegram) {
         coroutineScope.launch {
             when (telegram) {

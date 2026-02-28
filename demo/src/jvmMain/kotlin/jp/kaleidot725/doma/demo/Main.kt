@@ -66,7 +66,7 @@ fun main() =
                                     }
                                 }
                             },
-                        ) { state ->
+                        ) { state, onAction ->
                             Text(
                                 text = "${state.count}",
                                 fontSize = 72.sp,

@@ -8,7 +8,7 @@ import androidx.compose.runtime.getValue
 
 @Composable
 public fun <State : DomaState, Action : DomaAction, Event : DomaEvent, Telegram : DomaTelegram> DomaContent(
-    platforms: DomaPlatform<State, Action, Event, Telegram>,
+    platforms: DomaStore<State, Action, Event, Telegram>,
     onEvent: (Event) -> Unit = {},
     content: @Composable ((State, ((Action) -> Unit)) -> Unit) = { _, _ -> },
 ) {
@@ -27,12 +27,13 @@ public fun <State : DomaState, Action : DomaAction, Event : DomaEvent, Telegram 
 }
 
 @Composable
-public fun <State : DomaState, Telegram : DomaTelegram, Event : DomaEvent> DomaSubContent(
-    subStore: DomaSubStore<State, Telegram, Event>,
+public fun <State : DomaState, Action: DomaAction, Event : DomaEvent, Telegram : DomaTelegram> DomaSubContent(
+    subStore: DomaSubStore<State,Action, Event, Telegram>,
     onEvent: (Event) -> Unit = {},
-    content: @Composable (State) -> Unit = { _ -> },
+    content: @Composable ((State, ((Action) -> Unit)) -> Unit) = { _, _ -> },
 ) {
     val state by subStore.state.collectAsState()
+    val onAction = subStore::onAction
     LaunchedEffect(subStore) { subStore.event.collect { onEvent(it) } }
-    content(state)
+    content(state, onAction)
 }
