@@ -1,8 +1,8 @@
 package jp.kaleidot725.doma.demo
 
-import jp.kaleidot725.doma.mvi.MVIBase
+import jp.kaleidot725.doma.mvi.DomaBase
 
-class CounterViewModel : MVIBase<CounterState, CounterAction, CounterSideEffect>(
+class CounterViewModel : DomaBase<CounterState, CounterAction, CounterEvent>(
     initialUiState = CounterState(),
 ) {
     override fun onSetup() {
@@ -18,18 +18,18 @@ class CounterViewModel : MVIBase<CounterState, CounterAction, CounterSideEffect>
             CounterAction.Increment -> {
                 update { copy(count = count + 1) }
                 if (currentState.count % 10 == 0) {
-                    sideEffect(CounterSideEffect.ShowMessage("${currentState.count} reached!"))
+                    sideEffect(CounterEvent.ShowMessage("${currentState.count} reached!"))
                 }
             }
             CounterAction.Decrement -> {
                 update { copy(count = count - 1) }
                 if (currentState.count % 10 == 0) {
-                    sideEffect(CounterSideEffect.ShowMessage("${currentState.count} reached!"))
+                    sideEffect(CounterEvent.ShowMessage("${currentState.count} reached!"))
                 }
             }
             CounterAction.Reset -> {
                 update { copy(count = 0) }
-                sideEffect(CounterSideEffect.ShowMessage("Counter reset!"))
+                sideEffect(CounterEvent.ShowMessage("Counter reset!"))
             }
         }
     }

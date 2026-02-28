@@ -20,7 +20,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.application
-import jp.kaleidot725.doma.mvi.MVIRootContent
+import jp.kaleidot725.doma.mvi.DomaRootContent
 import kotlinx.coroutines.launch
 
 fun main() = application {
@@ -34,11 +34,11 @@ fun main() = application {
         val scope = rememberCoroutineScope()
 
         MaterialTheme {
-            MVIRootContent(
-                mvi = viewModel,
-                onSideEffect = { effect ->
+            DomaRootContent(
+                base = viewModel,
+                onEvent = { effect ->
                     when (effect) {
-                        is CounterSideEffect.ShowMessage -> {
+                        is CounterEvent.ShowMessage -> {
                             scope.launch { snackbarHostState.showSnackbar(effect.message) }
                         }
                     }

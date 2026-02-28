@@ -15,7 +15,7 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-public abstract class MVIBase<UiState : MVIState, UiAction : MVIAction, SideEffect : MVISideEffect>(
+public abstract class DomaBase<UiState : DomaState, UiAction : DomaAction, Event : DomaEvent>(
     private val initialUiState: UiState,
 ) {
     public var coroutineScope: CoroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.Main + Dispatchers.IO)
@@ -36,9 +36,9 @@ public abstract class MVIBase<UiState : MVIState, UiAction : MVIAction, SideEffe
 
     public val currentState: UiState get() = state.value
 
-    private val _sideEffect: Channel<SideEffect> by lazy { Channel() }
+    private val _sideEffect: Channel<Event> by lazy { Channel() }
 
-    public var sideEffect: Flow<SideEffect> = _sideEffect.receiveAsFlow()
+    public var sideEffect: Flow<Event> = _sideEffect.receiveAsFlow()
         private set
 
     public abstract fun onSetup()
@@ -67,7 +67,7 @@ public abstract class MVIBase<UiState : MVIState, UiAction : MVIAction, SideEffe
         uiState.update { block(it) }
     }
 
-    public fun sideEffect(effect: SideEffect) {
+    public fun sideEffect(effect: Event) {
         coroutineScope.launch { _sideEffect.send(effect) }
     }
 }

@@ -1,3 +1,3 @@
 package jp.kaleidot725.doma.mvi
 
-public interface MVIState
+public interface DomaState
