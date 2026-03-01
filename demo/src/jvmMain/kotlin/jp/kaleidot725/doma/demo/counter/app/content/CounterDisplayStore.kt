@@ -40,8 +40,7 @@ class CounterDisplayStore(
     override fun onReceive(telegram: CounterAppBroadcast) {
         coroutineScope.launch {
             when (telegram) {
-                is CounterAppBroadcast.Restart -> {
-                    update { copy(count = 0) }
+                is CounterAppBroadcast.Refresh -> {
                     event(CounterDisplayEvent.ShowMessage("Restart"))
                 }
             }

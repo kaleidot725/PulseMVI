@@ -8,11 +8,13 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.onSubscription
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import java.util.UUID
 
 public abstract class DomaStore<UiState : DomaState,  UiAction: DomaAction, Event : DomaEvent, Broadcast : DomaBroadcast,>(
     private val initialUiState: UiState,
@@ -21,7 +23,7 @@ public abstract class DomaStore<UiState : DomaState,  UiAction: DomaAction, Even
         private set
 
     private val uiState: MutableStateFlow<UiState> = MutableStateFlow(initialUiState)
-    
+
     public var state: StateFlow<UiState> =
         uiState.
             onSubscription{

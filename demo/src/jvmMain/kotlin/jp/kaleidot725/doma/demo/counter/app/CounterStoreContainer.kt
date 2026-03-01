@@ -11,12 +11,4 @@ import kotlinx.coroutines.launch
 
 class CounterStoreContainer(
     stores: List<DomaStore<*, *, *, CounterAppBroadcast>>,
-) : DomaStoreContainer<CounterAppBroadcast>(stores = stores) {
-    override fun onBroadcast(broadcast: CounterAppBroadcast) {
-        coroutineScope.launch {
-            when (broadcast) {
-                CounterAppBroadcast.Restart -> broadcast(CounterAppBroadcast.Restart)
-            }
-        }
-    }
-}
+) : DomaStoreContainer<CounterAppBroadcast>(stores = stores)
