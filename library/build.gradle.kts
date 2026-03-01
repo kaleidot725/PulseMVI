@@ -39,12 +39,12 @@ publishing {
             from(components["kotlin"])
 
             groupId = "com.github.kaleidot725"
-            artifactId = "doma"
+            artifactId = "pulsemvi"
 
             pom {
-                name.set("Doma")
+                name.set("PulseMVI")
                 description.set("A Kotlin MVI library for Compose Multiplatform")
-                url.set("https://github.com/kaleidot725/Doma")
+                url.set("https://github.com/kaleidot725/PulseMVI")
 
                 licenses {
                     license {

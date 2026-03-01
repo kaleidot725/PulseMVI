@@ -1,4 +1,4 @@
-package jp.kaleidot725.doma.demo.counter.repository
+package jp.kaleidot725.pulse.demo.counter.repository
 
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow

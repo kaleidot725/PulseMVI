@@ -1,4 +1,4 @@
-package jp.kaleidot725.doma.demo.counter.app
+package jp.kaleidot725.pulse.demo.counter.app
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -11,17 +11,17 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import jp.kaleidot725.doma.demo.counter.app.content.CounterOperatorContent
-import jp.kaleidot725.doma.demo.counter.app.content.CounterOperatorStore
-import jp.kaleidot725.doma.demo.counter.app.state.CounterAppBroadcast
-import jp.kaleidot725.doma.mvi.DomaApp
+import jp.kaleidot725.pulse.demo.counter.app.content.CounterOperatorContent
+import jp.kaleidot725.pulse.demo.counter.app.content.CounterOperatorStore
+import jp.kaleidot725.pulse.demo.counter.app.state.CounterAppBroadcast
+import jp.kaleidot725.pulse.mvi.PulseApp
 
 @Composable
 fun CounterApp(
     container: CounterContainer,
     store: CounterOperatorStore,
 ) {
-    DomaApp(container = container) { onRefresh, onBroadcast ->
+    PulseApp(container = container) { onRefresh, onBroadcast ->
         Box(modifier = Modifier.fillMaxSize().padding(16.dp)) {
             Row(
                 modifier = Modifier.align(Alignment.TopEnd).padding(16.dp),

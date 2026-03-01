@@ -1,16 +1,16 @@
-package jp.kaleidot725.doma.demo.counter.app.content
+package jp.kaleidot725.pulse.demo.counter.app.content
 
-import jp.kaleidot725.doma.demo.counter.app.content.state.CounterOperatorAction
-import jp.kaleidot725.doma.demo.counter.app.content.state.CounterOperatorEvent
-import jp.kaleidot725.doma.demo.counter.app.content.state.CounterOperatorState
-import jp.kaleidot725.doma.demo.counter.app.state.CounterAppBroadcast
-import jp.kaleidot725.doma.demo.counter.repository.CounterRepository
-import jp.kaleidot725.doma.mvi.DomaStore
+import jp.kaleidot725.pulse.demo.counter.app.content.state.CounterOperatorAction
+import jp.kaleidot725.pulse.demo.counter.app.content.state.CounterOperatorEvent
+import jp.kaleidot725.pulse.demo.counter.app.content.state.CounterOperatorState
+import jp.kaleidot725.pulse.demo.counter.app.state.CounterAppBroadcast
+import jp.kaleidot725.pulse.demo.counter.repository.CounterRepository
+import jp.kaleidot725.pulse.mvi.PulseStore
 import kotlinx.coroutines.launch
 
 class CounterOperatorStore(
     private val repository: CounterRepository,
-) : DomaStore<CounterOperatorState, CounterOperatorAction, CounterOperatorEvent, CounterAppBroadcast>(
+) : PulseStore<CounterOperatorState, CounterOperatorAction, CounterOperatorEvent, CounterAppBroadcast>(
         initialUiState = CounterOperatorState(),
     ) {
     override fun onSetup() {

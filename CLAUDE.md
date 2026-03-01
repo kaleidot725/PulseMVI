@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-Doma is a Kotlin MVI (Model-View-Intent) library for Compose Multiplatform. It provides a lightweight, coroutine-based MVI framework for building reactive UIs with Compose Desktop and other JVM Compose targets.
+PulseMVI is a Kotlin MVI (Model-View-Intent) library for Compose Multiplatform. It provides a lightweight, coroutine-based MVI framework for building reactive UIs with Compose Desktop and other JVM Compose targets.
 
 ### Purpose
 
@@ -22,11 +22,11 @@ This library provides the core MVI building blocks — `MVIBase`, `MVIState`, `M
 ## Project Structure
 
 ```
-Doma/
+PulseMVI/
 ├── library/                     # MVI library module
 │   ├── build.gradle.kts
 │   └── src/jvmMain/kotlin/
-│       └── jp/kaleidot725/doma/mvi/
+│       └── jp/kaleidot725/pulse/mvi/
 │           ├── MVIAction.kt     # Marker interface for actions
 │           ├── MVIBase.kt       # Abstract base class for ViewModels
 │           ├── MVIContent.kt    # Compose helper functions
@@ -51,6 +51,6 @@ Doma/
 ## Key Configuration
 
 - Group ID: `com.github.kaleidot725`
-- Artifact ID: `doma`
-- Package: `jp.kaleidot725.doma.mvi`
-- JitPack dependency: `implementation("com.github.kaleidot725:Doma:<version>")`
+- Artifact ID: `pulsemvi`
+- Package: `jp.kaleidot725.pulse.mvi`
+- JitPack dependency: `implementation("com.github.kaleidot725:PulseMVI:<version>")`

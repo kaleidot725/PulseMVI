@@ -1,12 +1,12 @@
-# Doma
+# PulseMVI
 
 [![Kotlin](https://img.shields.io/badge/kotlin-2.3.10-blue.svg?logo=kotlin)](http://kotlinlang.org)
 [![Compose Multiplatform](https://img.shields.io/badge/Compose%20Multiplatform-1.10.1-blue)](https://www.jetbrains.com/lp/compose-multiplatform/)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
-[![](https://jitpack.io/v/kaleidot725/Doma.svg)](https://jitpack.io/#kaleidot725/Doma)
+[![](https://jitpack.io/v/kaleidot725/PulseMVI.svg)](https://jitpack.io/#kaleidot725/PulseMVI)
 
 A lightweight MVI library for **Compose Desktop**.
-Designed for Desktop's multi-Composable layouts, Doma adds **Broadcast** to notify all Stores simultaneously and **View Refresh** to reconstruct the view tree on demand.
+Designed for Desktop's multi-Composable layouts, PulseMVI adds **Broadcast** to notify all Stores simultaneously and **View Refresh** to reconstruct the view tree on demand.
 
 ![demo](docs/demo.png)
 
@@ -39,7 +39,7 @@ repositories {
 }
 
 dependencies {
-    implementation("com.github.kaleidot725:Doma:Tag")
+    implementation("com.github.kaleidot725:PulseMVI:Tag")
 }
 ```
 
@@ -51,7 +51,7 @@ repositories {
 }
 
 dependencies {
-    implementation 'com.github.kaleidot725:Doma:Tag'
+    implementation 'com.github.kaleidot725:PulseMVI:Tag'
 }
 ```
 
@@ -67,7 +67,7 @@ dependencies {
 
 <dependency>
     <groupId>com.github.kaleidot725</groupId>
-    <artifactId>Doma</artifactId>
+    <artifactId>PulseMVI</artifactId>
     <version>Tag</version>
 </dependency>
 ```
@@ -76,24 +76,24 @@ dependencies {
 
 ## Architecture
 
-Doma provides two complementary components:
+PulseMVI provides two complementary components:
 
-- **DomaStore** — Manages UI state for a specific screen component. Handles user actions directly and reacts to broadcasts from the Container.
-- **DomaContainer** — Coordinates multiple Stores. Delivers typed `DomaBroadcast` messages to all registered Stores, and can trigger a view refresh.
+- **PulseStore** — Manages UI state for a specific screen component. Handles user actions directly and reacts to broadcasts from the Container.
+- **PulseContainer** — Coordinates multiple Stores. Delivers typed `PulseBroadcast` messages to all registered Stores, and can trigger a view refresh.
 
 ```
 User Action
     │
     ▼
-DomaStore.onAction()
+PulseStore.onAction()
     │
     └── update { ... } ──▶ UI re-renders
 
-DomaContainer.broadcast(broadcast)      ← Notify all Stores simultaneously
+PulseContainer.broadcast(broadcast)      ← Notify all Stores simultaneously
     │
-    └── DomaStore.onReceive(broadcast) ──▶ update { ... } ──▶ UI re-renders
+    └── PulseStore.onReceive(broadcast) ──▶ update { ... } ──▶ UI re-renders
 
-DomaContainer.refresh()                 ← Reconstruct the view tree
+PulseContainer.refresh()                 ← Reconstruct the view tree
     │
     └── View reconstructs (Store state is preserved)
 ```
@@ -104,34 +104,34 @@ DomaContainer.refresh()                 ← Reconstruct the view tree
 
 ```kotlin
 // State: the UI state managed by Store
-data class CounterState(val count: Int = 0) : DomaState
+data class CounterState(val count: Int = 0) : PulseState
 
 // Action: user intents dispatched directly to Store
-sealed class CounterAction : DomaAction {
+sealed class CounterAction : PulseAction {
     data object Increment : CounterAction()
     data object Decrement : CounterAction()
     data object Reset : CounterAction()
 }
 
 // Event: one-time side effects emitted from Store
-sealed class CounterEvent : DomaEvent {
+sealed class CounterEvent : PulseEvent {
     data class ShowMessage(val message: String) : CounterEvent()
 }
 
 // Broadcast: messages delivered from Container to all Stores
-sealed class CounterBroadcast : DomaBroadcast {
+sealed class CounterBroadcast : PulseBroadcast {
     data object Refresh : CounterBroadcast()
 }
 ```
 
 ### 2. Create a Store
 
-`DomaStore` manages its own UI state and handles user actions. Override `onSetup` to initialize subscriptions, `onAction` to handle user intents, and `onReceive` to react to broadcasts.
+`PulseStore` manages its own UI state and handles user actions. Override `onSetup` to initialize subscriptions, `onAction` to handle user intents, and `onReceive` to react to broadcasts.
 
 ```kotlin
 class CounterStore(
     private val repository: CounterRepository,
-) : DomaStore<CounterState, CounterAction, CounterEvent, CounterBroadcast>(
+) : PulseStore<CounterState, CounterAction, CounterEvent, CounterBroadcast>(
     initialUiState = CounterState(),
 ) {
     override fun onSetup() {
@@ -165,17 +165,17 @@ class CounterStore(
 
 ### 3. Create a Container
 
-`DomaContainer` coordinates multiple Stores. Use `broadcast` to send a typed message to all registered Stores, and `refresh` to reconstruct the view.
+`PulseContainer` coordinates multiple Stores. Use `broadcast` to send a typed message to all registered Stores, and `refresh` to reconstruct the view.
 
 ```kotlin
 class CounterContainer(
-    stores: List<DomaStore<*, *, *, CounterBroadcast>>,
-) : DomaContainer<CounterBroadcast>(stores = stores)
+    stores: List<PulseStore<*, *, *, CounterBroadcast>>,
+) : PulseContainer<CounterBroadcast>(stores = stores)
 ```
 
 ### 4. Connect to Compose UI
 
-Instantiate stores in the entry point, then use `DomaApp` for layout and `DomaContent` inside it to observe each Store. `DomaContent` automatically responds to `refresh()` when nested inside `DomaApp`.
+Instantiate stores in the entry point, then use `PulseApp` for layout and `PulseContent` inside it to observe each Store. `PulseContent` automatically responds to `refresh()` when nested inside `PulseApp`.
 
 **Entry point** — create stores once and pass them down:
 
@@ -193,12 +193,12 @@ fun main() = application {
 }
 ```
 
-**App composable** — wrap with `DomaApp` and expose refresh/broadcast controls:
+**App composable** — wrap with `PulseApp` and expose refresh/broadcast controls:
 
 ```kotlin
 @Composable
 fun CounterApp(container: CounterContainer, store: CounterStore) {
-    DomaApp(container = container) { onRefresh, onBroadcast ->
+    PulseApp(container = container) { onRefresh, onBroadcast ->
         Box(modifier = Modifier.fillMaxSize().padding(16.dp)) {
             Row(modifier = Modifier.align(Alignment.TopEnd)) {
                 Button(onClick = { onRefresh() }) { Text("Refresh View") }
@@ -210,7 +210,7 @@ fun CounterApp(container: CounterContainer, store: CounterStore) {
 }
 ```
 
-**Content composable** — use `DomaContent` to observe a Store and handle events:
+**Content composable** — use `PulseContent` to observe a Store and handle events:
 
 ```kotlin
 @Composable
@@ -219,7 +219,7 @@ fun CounterContent(store: CounterStore) {
     val snackbarHostState = remember { SnackbarHostState() }
 
     Box {
-        DomaContent(
+        PulseContent(
             store = store,
             onEvent = { event ->
                 when (event) {
@@ -243,7 +243,7 @@ fun CounterContent(store: CounterStore) {
 
 ## API Reference
 
-### DomaStore
+### PulseStore
 
 Base class for managing UI state within a specific screen component.
 
@@ -260,7 +260,7 @@ Base class for managing UI state within a specific screen component.
 | `event(effect)` | Emits a one-time side effect |
 | `cancel()` | Cancels the coroutine scope and prepares the Store for reuse |
 
-### DomaContainer
+### PulseContainer
 
 Base class for coordinating multiple Stores.
 
@@ -271,25 +271,25 @@ Base class for coordinating multiple Stores.
 
 ### Composable Helpers
 
-#### DomaApp
+#### PulseApp
 
-Manages a `DomaContainer` and provides `onRefresh` and `onBroadcast` callbacks to the content block. `DomaContent` placed inside automatically responds to `refresh()`.
+Manages a `PulseContainer` and provides `onRefresh` and `onBroadcast` callbacks to the content block. `PulseContent` placed inside automatically responds to `refresh()`.
 
 ```kotlin
-DomaApp(container = myContainer) { onRefresh, onBroadcast ->
+PulseApp(container = myContainer) { onRefresh, onBroadcast ->
     // Compose UI
-    DomaContent(store = myStore) { state, onAction ->
+    PulseContent(store = myStore) { state, onAction ->
         // Compose UI
     }
 }
 ```
 
-#### DomaContent
+#### PulseContent
 
-Observes a `DomaStore` and provides state and action dispatcher to the content block. Automatically cancels the Store's coroutine scope when removed from composition.
+Observes a `PulseStore` and provides state and action dispatcher to the content block. Automatically cancels the Store's coroutine scope when removed from composition.
 
 ```kotlin
-DomaContent(
+PulseContent(
     store = myStore,
     onEvent = { event -> /* handle side effects */ },
 ) { state, onAction ->
@@ -297,12 +297,12 @@ DomaContent(
 }
 ```
 
-### DomaBroadcast
+### PulseBroadcast
 
-Marker interface for type-safe messages delivered from `DomaContainer` to all registered `DomaStore` instances.
+Marker interface for type-safe messages delivered from `PulseContainer` to all registered `PulseStore` instances.
 
 ```kotlin
-sealed class MyBroadcast : DomaBroadcast {
+sealed class MyBroadcast : PulseBroadcast {
     data object Refresh : MyBroadcast()
     data class DataChanged(val value: Int) : MyBroadcast()
 }

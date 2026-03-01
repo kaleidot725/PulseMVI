@@ -21,6 +21,6 @@ kotlin {
 
 compose.desktop {
     application {
-        mainClass = "jp.kaleidot725.doma.demo.MainKt"
+        mainClass = "jp.kaleidot725.pulse.demo.MainKt"
     }
 }

@@ -1,4 +1,4 @@
-package jp.kaleidot725.doma.mvi
+package jp.kaleidot725.pulse.mvi
 
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -15,7 +15,7 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-public abstract class DomaStore<UiState : DomaState, UiAction : DomaAction, Event : DomaEvent, Broadcast : DomaBroadcast>(
+public abstract class PulseStore<UiState : PulseState, UiAction : PulseAction, Event : PulseEvent, Broadcast : PulseBroadcast>(
     private val initialUiState: UiState,
 ) {
     public var coroutineScope: CoroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.Main + Dispatchers.IO)

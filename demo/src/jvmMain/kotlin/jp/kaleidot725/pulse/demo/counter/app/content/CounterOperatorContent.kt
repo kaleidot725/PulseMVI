@@ -1,4 +1,4 @@
-package jp.kaleidot725.doma.demo.counter.app.content
+package jp.kaleidot725.pulse.demo.counter.app.content
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -29,9 +29,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import jp.kaleidot725.doma.demo.counter.app.content.state.CounterOperatorAction
-import jp.kaleidot725.doma.demo.counter.app.content.state.CounterOperatorEvent
-import jp.kaleidot725.doma.mvi.DomaContent
+import jp.kaleidot725.pulse.demo.counter.app.content.state.CounterOperatorAction
+import jp.kaleidot725.pulse.demo.counter.app.content.state.CounterOperatorEvent
+import jp.kaleidot725.pulse.mvi.PulseContent
 import kotlinx.coroutines.launch
 import java.util.Date
 
@@ -41,7 +41,7 @@ fun CounterOperatorContent(store: CounterOperatorStore) {
     val snackbarHostState = remember { SnackbarHostState() }
 
     Box {
-        DomaContent(
+        PulseContent(
             store = store,
             onEvent = {
                 when (it) {

@@ -1,12 +1,12 @@
-package jp.kaleidot725.doma.mvi
+package jp.kaleidot725.pulse.mvi
 
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import java.util.UUID
 
-public abstract class DomaContainer<Broadcast : DomaBroadcast>(
-    private val stores: List<DomaStore<*, *, *, Broadcast>>,
+public abstract class PulseContainer<Broadcast : PulseBroadcast>(
+    private val stores: List<PulseStore<*, *, *, Broadcast>>,
 ) {
     private val containerKey: MutableStateFlow<String> = MutableStateFlow(UUID.randomUUID().toString())
     internal val key: StateFlow<String> = containerKey.asStateFlow()
