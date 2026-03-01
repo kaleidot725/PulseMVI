@@ -5,7 +5,9 @@
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 [![](https://jitpack.io/v/kaleidot725/Doma.svg)](https://jitpack.io/#kaleidot725/Doma)
 
-A lightweight MVI (Model-View-Intent) library for Compose Multiplatform, providing a clean coroutine-based architecture for building reactive UIs.
+A lightweight MVI (Model-View-Intent) library for **Compose Desktop**, providing a clean coroutine-based architecture for building reactive UIs.
+
+Compose Desktop has no built-in navigation system, so screens are often composed of multiple independent Composables that need to share state and stay in sync. Doma addresses this with two Desktop-oriented features: **View Refresh** — forces the entire view tree to reconstruct when needed (e.g. language or theme changes), and **Broadcast** — delivers a typed message from the container to all registered Stores simultaneously, allowing loosely coupled components to react to the same event.
 
 ![demo](docs/demo.png)
 
@@ -13,7 +15,8 @@ A lightweight MVI (Model-View-Intent) library for Compose Multiplatform, providi
 
 - 🏗️ **MVI Architecture** - Clear separation of State, Action, Event, and Broadcast
 - 🔄 **Store & StoreContainer** - Store manages state autonomously; StoreContainer coordinates multiple Stores
-- 📡 **Broadcast** - Type-safe messages delivered from StoreContainer to all registered Stores
+- 📡 **Broadcast** - Type-safe messages delivered from StoreContainer to all registered Stores simultaneously
+- 🖥️ **View Refresh** - Forces the view tree to reconstruct on demand while preserving Store state
 - ⚡ **Coroutine-Based** - Built on Kotlin Coroutines and StateFlow
 - 🎨 **Compose Integration** - Ready-to-use Composable helpers with automatic lifecycle management
 
@@ -87,11 +90,11 @@ DomaStore.onAction()
     │
     └── update { ... } ──▶ UI re-renders
 
-DomaStoreContainer.broadcast(broadcast)
+DomaStoreContainer.broadcast(broadcast)      ← Notify all Stores simultaneously
     │
     └── DomaStore.onReceive(broadcast) ──▶ update { ... } ──▶ UI re-renders
 
-DomaStoreContainer.refresh()
+DomaStoreContainer.refresh()                 ← Reconstruct the view tree
     │
     └── View reconstructs (Store state is preserved)
 ```
