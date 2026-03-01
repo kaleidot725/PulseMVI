@@ -1,36 +1,39 @@
 package jp.kaleidot725.doma.demo.counter.app.content
 
+import jp.kaleidot725.doma.demo.counter.app.content.state.CounterOperatorAction
+import jp.kaleidot725.doma.demo.counter.app.content.state.CounterOperatorEvent
+import jp.kaleidot725.doma.demo.counter.app.content.state.CounterOperatorState
 import jp.kaleidot725.doma.demo.counter.app.state.CounterAppBroadcast
 import jp.kaleidot725.doma.demo.counter.repository.CounterRepository
 import jp.kaleidot725.doma.mvi.DomaStore
 import kotlinx.coroutines.launch
 
-class CounterDisplayStore(
+class CounterOperatorStore(
     private val repository: CounterRepository,
-) : DomaStore<CounterDisplayState, CounterDisplayAction, CounterDisplayEvent, CounterAppBroadcast>(
-        initialUiState = CounterDisplayState(),
+) : DomaStore<CounterOperatorState, CounterOperatorAction, CounterOperatorEvent, CounterAppBroadcast>(
+        initialUiState = CounterOperatorState(),
     ) {
     override fun onSetup() {
         coroutineScope.launch {
             repository.count.collect { count ->
                 update { copy(count = count) }
-                if (count == 10) event(CounterDisplayEvent.ShowMessage("10 Count"))
+                if (count == 10) event(CounterOperatorEvent.ShowMessage("10 Count"))
             }
         }
     }
 
-    override fun onAction(uiAction: CounterDisplayAction) {
+    override fun onAction(uiAction: CounterOperatorAction) {
         coroutineScope.launch {
             when (uiAction) {
-                CounterDisplayAction.Increment -> {
+                CounterOperatorAction.Increment -> {
                     repository.increment()
                 }
 
-                CounterDisplayAction.Decrement -> {
+                CounterOperatorAction.Decrement -> {
                     repository.decrement()
                 }
 
-                CounterDisplayAction.Reset -> {
+                CounterOperatorAction.Reset -> {
                     repository.reset()
                 }
             }
@@ -41,7 +44,7 @@ class CounterDisplayStore(
         coroutineScope.launch {
             when (broadcast) {
                 is CounterAppBroadcast.Refresh -> {
-                    event(CounterDisplayEvent.ShowMessage("Restart"))
+                    event(CounterOperatorEvent.ShowMessage("Restart"))
                 }
             }
         }

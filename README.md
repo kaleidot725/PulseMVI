@@ -7,13 +7,15 @@
 
 A lightweight MVI (Model-View-Intent) library for Compose Multiplatform, providing a clean coroutine-based architecture for building reactive UIs.
 
+![demo](docs/demo.png)
+
 ## Features
 
-- 🏗️ **MVI Architecture** - Clear separation of State, Action, Event, and Telegram
-- 🔄 **Platform & Store** - Two complementary components for coordinating UI logic
-- 📡 **Telegram Broadcasting** - Type-safe messaging from Platform to Stores
+- 🏗️ **MVI Architecture** - Clear separation of State, Action, Event, and Broadcast
+- 🔄 **Store & StoreContainer** - Store manages state autonomously; StoreContainer coordinates multiple Stores
+- 📡 **Broadcast** - Type-safe messages delivered from StoreContainer to all registered Stores
 - ⚡ **Coroutine-Based** - Built on Kotlin Coroutines and StateFlow
-- 🎨 **Compose Integration** - Ready-to-use Composable helpers for Platform and Store
+- 🎨 **Compose Integration** - Ready-to-use Composable helpers with automatic lifecycle management
 
 ## Requirements
 
@@ -74,31 +76,35 @@ dependencies {
 
 Doma provides two complementary components:
 
-- **DomaPlatform** — Handles user actions and coordinates multiple Stores. Broadcasts `DomaTelegram` messages to notify Stores of changes.
-- **DomaStore** — Manages UI state for a specific part of the screen. Receives telegrams from the Platform and updates its own state.
+- **DomaStore** — Manages UI state for a specific screen component. Handles user actions directly and reacts to broadcasts from the StoreContainer.
+- **DomaStoreContainer** — Coordinates multiple Stores. Delivers typed `DomaBroadcast` messages to all registered Stores, and can trigger a view refresh.
 
 ```
 User Action
     │
     ▼
-DomaPlatform.onAction()
+DomaStore.onAction()
     │
-    ├─── broadcast(telegram) ──▶ DomaStore.onReceive(telegram)
-    │                                    │
-    │                              update { ... }
-    │                                    │
-    └─────────────────────────────── UI re-renders
+    └── update { ... } ──▶ UI re-renders
+
+DomaStoreContainer.broadcast(broadcast)
+    │
+    └── DomaStore.onReceive(broadcast) ──▶ update { ... } ──▶ UI re-renders
+
+DomaStoreContainer.refresh()
+    │
+    └── View reconstructs (Store state is preserved)
 ```
 
 ## Quick Start
 
-### 1. Define State, Action, Event, and Telegram
+### 1. Define State, Action, Event, and Broadcast
 
 ```kotlin
 // State: the UI state managed by Store
 data class CounterState(val count: Int = 0) : DomaState
 
-// Action: user intents sent to Platform
+// Action: user intents dispatched directly to Store
 sealed class CounterAction : DomaAction {
     data object Increment : CounterAction()
     data object Decrement : CounterAction()
@@ -110,22 +116,20 @@ sealed class CounterEvent : DomaEvent {
     data class ShowMessage(val message: String) : CounterEvent()
 }
 
-// Telegram: messages broadcast from Platform to Stores
-sealed class CounterTelegram : DomaTelegram {
-    data object Incremented : CounterTelegram()
-    data object Decremented : CounterTelegram()
-    data object Reset : CounterTelegram()
+// Broadcast: messages delivered from StoreContainer to all Stores
+sealed class CounterBroadcast : DomaBroadcast {
+    data object Refresh : CounterBroadcast()
 }
 ```
 
 ### 2. Create a Store
 
-`DomaStore` manages the UI state. Override `onSetup` to initialize subscriptions, and `onReceive` to react to telegrams from the Platform.
+`DomaStore` manages its own UI state and handles user actions. Override `onSetup` to initialize subscriptions, `onAction` to handle user intents, and `onReceive` to react to broadcasts.
 
 ```kotlin
 class CounterStore(
     private val repository: CounterRepository,
-) : DomaStore<CounterState, CounterAction, CounterEvent, CounterTelegram>(
+) : DomaStore<CounterState, CounterAction, CounterEvent, CounterBroadcast>(
     initialUiState = CounterState(),
 ) {
     override fun onSetup() {
@@ -139,76 +143,98 @@ class CounterStore(
         }
     }
 
-    override fun onReceive(telegram: CounterTelegram) {
-        // React to telegrams broadcast from Platform
+    override fun onAction(uiAction: CounterAction) {
+        coroutineScope.launch {
+            when (uiAction) {
+                CounterAction.Increment -> repository.increment()
+                CounterAction.Decrement -> repository.decrement()
+                CounterAction.Reset -> repository.reset()
+            }
+        }
     }
 
-    override fun onAction(uiAction: CounterAction) {
-        // No-op: actions are handled by the Platform
+    override fun onReceive(broadcast: CounterBroadcast) {
+        when (broadcast) {
+            is CounterBroadcast.Refresh -> event(CounterEvent.ShowMessage("Refreshed!"))
+        }
     }
 }
 ```
 
-### 3. Create a Platform
+### 3. Create a StoreContainer
 
-`DomaPlatform` receives user actions and coordinates Stores via `broadcast`.
+`DomaStoreContainer` coordinates multiple Stores. Use `broadcast` to send a typed message to all registered Stores, and `refresh` to reconstruct the view.
 
 ```kotlin
-class CounterPlatform(
-    stores: List<DomaStore<*, *, *, CounterTelegram>>,
-    private val repository: CounterRepository,
-) : DomaPlatform<CounterState, CounterAction, CounterEvent, CounterTelegram>(
-    stores = stores,
-    initialUiState = CounterState(),
-) {
-    override fun onAction(uiAction: CounterAction) {
-        when (uiAction) {
-            CounterAction.Increment -> {
-                repository.increment()
-                broadcast(CounterTelegram.Incremented)
-            }
-            CounterAction.Decrement -> {
-                repository.decrement()
-                broadcast(CounterTelegram.Decremented)
-            }
-            CounterAction.Reset -> {
-                repository.reset()
-                broadcast(CounterTelegram.Reset)
-            }
-        }
-    }
-}
+class CounterStoreContainer(
+    stores: List<DomaStore<*, *, *, CounterBroadcast>>,
+) : DomaStoreContainer<CounterBroadcast>(stores = stores)
 ```
 
 ### 4. Connect to Compose UI
 
-Use `DomaPlatformContent` to manage the Platform lifecycle, and `DomaStoreContent` to observe Store state.
+Instantiate stores in the entry point, then use `DomaContainer` for layout and `DomaContent` inside it to observe each Store. `DomaContent` automatically responds to `refresh()` when nested inside `DomaContainer`.
+
+**Entry point** — create stores once and pass them down:
+
+```kotlin
+fun main() = application {
+    val repository = remember { CounterRepository() }
+    val store = remember { CounterStore(repository) }
+    val storeContainer = remember { CounterStoreContainer(stores = listOf(store)) }
+
+    Window(onCloseRequest = ::exitApplication, title = "Counter") {
+        MaterialTheme {
+            CounterApp(storeContainer = storeContainer, store = store)
+        }
+    }
+}
+```
+
+**App composable** — wrap with `DomaContainer` and expose refresh/broadcast controls:
 
 ```kotlin
 @Composable
-fun CounterScreen() {
-    val repository = remember { CounterRepository() }
-    val store = remember { CounterStore(repository) }
-    val platform = remember {
-        CounterPlatform(stores = listOf(store), repository = repository)
-    }
-
-    DomaPlatformContent(platforms = platform) { _, onAction ->
-        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-            DomaStoreContent(store = store) { state, _ ->
-                Text(
-                    text = "${state.count}",
-                    fontSize = 72.sp,
-                )
+fun CounterApp(storeContainer: CounterStoreContainer, store: CounterStore) {
+    DomaContainer(storeContainer = storeContainer) { onRefresh, onBroadcast ->
+        Box(modifier = Modifier.fillMaxSize().padding(16.dp)) {
+            Row(modifier = Modifier.align(Alignment.TopEnd)) {
+                Button(onClick = { onRefresh() }) { Text("Refresh View") }
+                Button(onClick = { onBroadcast(CounterBroadcast.Refresh) }) { Text("Send Broadcast") }
             }
-
-            Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-                Button(onClick = { onAction(CounterAction.Decrement) }) { Text("-") }
-                Button(onClick = { onAction(CounterAction.Increment) }) { Text("+") }
-            }
-
-            Button(onClick = { onAction(CounterAction.Reset) }) { Text("Reset") }
+            CounterContent(store = store, modifier = Modifier.align(Alignment.Center))
         }
+    }
+}
+```
+
+**Content composable** — use `DomaContent` to observe a Store and handle events:
+
+```kotlin
+@Composable
+fun CounterContent(store: CounterStore) {
+    val scope = rememberCoroutineScope()
+    val snackbarHostState = remember { SnackbarHostState() }
+
+    Box {
+        DomaContent(
+            store = store,
+            onEvent = { event ->
+                when (event) {
+                    is CounterEvent.ShowMessage -> scope.launch { snackbarHostState.showSnackbar(event.message) }
+                }
+            },
+        ) { state, onAction ->
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                Text(text = "${state.count}", fontSize = 72.sp)
+                Row {
+                    Button(onClick = { onAction(CounterAction.Decrement) }) { Text("−") }
+                    Button(onClick = { onAction(CounterAction.Increment) }) { Text("+") }
+                }
+                OutlinedButton(onClick = { onAction(CounterAction.Reset) }) { Text("Reset") }
+            }
+        }
+        SnackbarHost(hostState = snackbarHostState, modifier = Modifier.align(Alignment.BottomCenter))
     }
 }
 ```
@@ -226,49 +252,42 @@ Base class for managing UI state within a specific screen component.
 | `event: Flow<Event>` | Stream of one-time side effects |
 | `coroutineScope` | CoroutineScope tied to the Store's lifecycle |
 | `onSetup()` | Called when the Store is first subscribed to |
-| `onReceive(telegram)` | Called when the Platform broadcasts a telegram |
 | `onAction(uiAction)` | Called when a user action is dispatched |
+| `onReceive(broadcast)` | Called when the StoreContainer broadcasts a message |
 | `update { }` | Updates the UI state |
 | `event(effect)` | Emits a one-time side effect |
+| `cancel()` | Cancels the coroutine scope and prepares the Store for reuse |
 
-### DomaPlatform
+### DomaStoreContainer
 
-Base class for handling user actions and coordinating multiple Stores.
+Base class for coordinating multiple Stores.
 
 | Member | Description |
 |---|---|
-| `state: StateFlow<UiState>` | The current UI state as a StateFlow |
-| `currentState: UiState` | Snapshot of the current UI state |
-| `event: Flow<Event>` | Stream of one-time side effects |
-| `coroutineScope` | CoroutineScope tied to the Platform's lifecycle |
-| `onSetup()` | Called when the Platform is first subscribed to |
-| `onReset()` | Called when the Platform is disposed |
-| `onAction(uiAction)` | Called when a user action is dispatched |
-| `broadcast(telegram)` | Broadcasts a telegram to all registered Stores |
-| `update { }` | Updates the UI state |
-| `event(effect)` | Emits a one-time side effect |
+| `broadcast(broadcast)` | Delivers a broadcast message to all registered Stores |
+| `refresh()` | Reconstructs the view while preserving Store state |
 
 ### Composable Helpers
 
-#### DomaPlatformContent
+#### DomaContainer
 
-Manages the lifecycle of a `DomaPlatform` and provides state and action dispatcher to the content block.
+Manages a `DomaStoreContainer` and provides `onRefresh` and `onBroadcast` callbacks to the content block. `DomaContent` placed inside automatically responds to `refresh()`.
 
 ```kotlin
-DomaPlatformContent(
-    platforms = myPlatform,
-    onEvent = { event -> /* handle side effects */ },
-) { state, onAction ->
+DomaContainer(storeContainer = myStoreContainer) { onRefresh, onBroadcast ->
     // Compose UI
+    DomaContent(store = myStore) { state, onAction ->
+        // Compose UI
+    }
 }
 ```
 
-#### DomaStoreContent
+#### DomaContent
 
-Observes a `DomaStore` and provides state and action dispatcher to the content block.
+Observes a `DomaStore` and provides state and action dispatcher to the content block. Automatically cancels the Store's coroutine scope when removed from composition.
 
 ```kotlin
-DomaStoreContent(
+DomaContent(
     store = myStore,
     onEvent = { event -> /* handle side effects */ },
 ) { state, onAction ->
@@ -276,20 +295,20 @@ DomaStoreContent(
 }
 ```
 
-### DomaTelegram
+### DomaBroadcast
 
-Marker interface for type-safe messages broadcast from `DomaPlatform` to registered `DomaStore` instances.
+Marker interface for type-safe messages delivered from `DomaStoreContainer` to all registered `DomaStore` instances.
 
 ```kotlin
-sealed class MyTelegram : DomaTelegram {
-    data object Updated : MyTelegram()
-    data class DataChanged(val value: Int) : MyTelegram()
+sealed class MyBroadcast : DomaBroadcast {
+    data object Refresh : MyBroadcast()
+    data class DataChanged(val value: Int) : MyBroadcast()
 }
 ```
 
 ## Example Application
 
-See the [`demo`](demo/) module for a complete counter application demonstrating Platform, Store, and Telegram in action.
+See the [`demo`](demo/) module for a complete counter application demonstrating Store, StoreContainer, and Broadcast in action.
 
 Run the demo:
 
