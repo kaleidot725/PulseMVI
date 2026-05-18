@@ -1,8 +1,8 @@
 # PulseContainer
 
 ```kotlin
-abstract class PulseContainer<Broadcast : PulseBroadcast>(
-    stores: List<PulseStore<*, *, *, Broadcast>>,
+abstract class PulseContainer<Broadcast : PulseBroadcast, Unicast : PulseUnicast>(
+    stores: List<PulseStore<*, *, *, Broadcast, Unicast>>,
 )
 ```
 
@@ -24,16 +24,16 @@ container.broadcast(AppBroadcast.UserLoggedOut)
 
 ---
 
-### `onUnicast(unicast)`
+### `onReceived(unicast)`
 
 ```kotlin
-open fun onUnicast(unicast: PulseUnicast)
+open fun onReceived(unicast: Unicast)
 ```
 
 Called when a registered `PulseStore` emits an unicast. `PulseContainer` collects each Store's `unicast` flow internally and forwards each value to this hook.
 
 ```kotlin
-override fun onUnicast(unicast: PulseUnicast) {
+override fun onReceived(unicast: AppUnicast) {
     when (unicast) {
         AppUnicast.SaveRequested -> broadcast(AppBroadcast.SaveStarted)
     }
@@ -58,9 +58,9 @@ container.refresh()
 
 ```kotlin
 class AppContainer(
-    stores: List<PulseStore<*, *, *, AppBroadcast>>,
-) : PulseContainer<AppBroadcast>(stores = stores) {
-    override fun onUnicast(unicast: PulseUnicast) {
+    stores: List<PulseStore<*, *, *, AppBroadcast, AppUnicast>>,
+) : PulseContainer<AppBroadcast, AppUnicast>(stores = stores) {
+    override fun onReceived(unicast: AppUnicast) {
         when (unicast) {
             AppUnicast.SaveRequested -> broadcast(AppBroadcast.SaveStarted)
         }

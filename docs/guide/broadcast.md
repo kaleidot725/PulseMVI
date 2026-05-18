@@ -48,14 +48,14 @@ override fun onReceive(broadcast: AppBroadcast) {
 ## Example: Syncing Multiple Stores
 
 ```kotlin
-// Two Stores sharing the same Broadcast type
-class HeaderStore : PulseStore<HeaderState, HeaderAction, HeaderEvent, AppBroadcast>(...) {
+// Two Stores sharing the same Broadcast and Unicast types
+class HeaderStore : PulseStore<HeaderState, HeaderAction, HeaderEvent, AppBroadcast, AppUnicast>(...) {
     override fun onReceive(broadcast: AppBroadcast) {
         if (broadcast is AppBroadcast.UserLoggedOut) update { HeaderState() }
     }
 }
 
-class SidebarStore : PulseStore<SidebarState, SidebarAction, SidebarEvent, AppBroadcast>(...) {
+class SidebarStore : PulseStore<SidebarState, SidebarAction, SidebarEvent, AppBroadcast, AppUnicast>(...) {
     override fun onReceive(broadcast: AppBroadcast) {
         if (broadcast is AppBroadcast.UserLoggedOut) update { SidebarState() }
     }

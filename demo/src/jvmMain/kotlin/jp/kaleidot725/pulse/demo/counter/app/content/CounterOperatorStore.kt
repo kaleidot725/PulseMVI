@@ -11,7 +11,7 @@ import kotlinx.coroutines.launch
 
 class CounterOperatorStore(
     private val repository: CounterRepository,
-) : PulseStore<CounterOperatorState, CounterOperatorAction, CounterOperatorEvent, CounterAppBroadcast>(
+) : PulseStore<CounterOperatorState, CounterOperatorAction, CounterOperatorEvent, CounterAppBroadcast, CounterAppUnicast>(
         initialUiState = CounterOperatorState(),
     ) {
     override fun onSetup() {

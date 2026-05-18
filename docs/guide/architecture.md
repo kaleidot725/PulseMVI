@@ -48,7 +48,7 @@ When a child Store needs to notify its parent Container, use `PulseStore.unicast
 ```
 StoreA.unicast(MyUnicast.SaveRequested)
         │
-        └──▶ Container.onUnicast(SaveRequested)
+        └──▶ Container.onReceived(SaveRequested)
                   │
                   ├──▶ broadcast(...)
                   └──▶ refresh()

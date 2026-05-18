@@ -18,7 +18,13 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-public abstract class PulseStore<UiState : PulseState, UiAction : PulseAction, Event : PulseEvent, Broadcast : PulseBroadcast>(
+public abstract class PulseStore<
+    UiState : PulseState,
+    UiAction : PulseAction,
+    Event : PulseEvent,
+    Broadcast : PulseBroadcast,
+    Unicast : PulseUnicast,
+>(
     private val initialUiState: UiState,
 ) {
     public var coroutineScope: CoroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.Main + Dispatchers.IO)
@@ -44,9 +50,9 @@ public abstract class PulseStore<UiState : PulseState, UiAction : PulseAction, E
     public var event: Flow<Event> = _event.receiveAsFlow()
         private set
 
-    private val _unicast: MutableSharedFlow<PulseUnicast> = MutableSharedFlow(extraBufferCapacity = 64)
+    private val _unicast: MutableSharedFlow<Unicast> = MutableSharedFlow(extraBufferCapacity = 64)
 
-    public val unicast: SharedFlow<PulseUnicast> = _unicast.asSharedFlow()
+    public val unicast: SharedFlow<Unicast> = _unicast.asSharedFlow()
 
     public open fun onSetup() {}
 
@@ -77,7 +83,7 @@ public abstract class PulseStore<UiState : PulseState, UiAction : PulseAction, E
         coroutineScope.launch { _event.send(effect) }
     }
 
-    public fun unicast(unicast: PulseUnicast) {
+    public fun unicast(unicast: Unicast) {
         _unicast.tryEmit(unicast)
     }
 }

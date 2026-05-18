@@ -4,8 +4,8 @@
 
 ```kotlin
 @Composable
-fun <Broadcast : PulseBroadcast> PulseApp(
-    container: PulseContainer<Broadcast>,
+fun <Broadcast : PulseBroadcast, Unicast : PulseUnicast> PulseApp(
+    container: PulseContainer<Broadcast, Unicast>,
     content: @Composable (
         onRefresh: () -> Unit,
         onBroadcast: (Broadcast) -> Unit,
@@ -19,7 +19,7 @@ Wraps a `PulseContainer` and provides `onRefresh` and `onBroadcast` callbacks to
 
 | Parameter | Type | Description |
 |---|---|---|
-| `container` | `PulseContainer<Broadcast>` | The container to observe |
+| `container` | `PulseContainer<Broadcast, Unicast>` | The container to observe |
 | `content` | `@Composable (onRefresh, onBroadcast) -> Unit` | Content block receiving the two callbacks |
 
 ### Example
@@ -44,9 +44,15 @@ PulseApp(container = appContainer) { onRefresh, onBroadcast ->
 
 ```kotlin
 @Composable
-fun <State : PulseState, Action : PulseAction, Event : PulseEvent, Broadcast : PulseBroadcast>
+fun <
+    State : PulseState,
+    Action : PulseAction,
+    Event : PulseEvent,
+    Broadcast : PulseBroadcast,
+    Unicast : PulseUnicast,
+>
 PulseContent(
-    store: PulseStore<State, Action, Event, Broadcast>,
+    store: PulseStore<State, Action, Event, Broadcast, Unicast>,
     onEvent: (Event) -> Unit = {},
     content: @Composable (State, (Action) -> Unit) -> Unit = { _, _ -> },
 )
@@ -58,7 +64,7 @@ Observes a `PulseStore` and provides state and an action dispatcher to the conte
 
 | Parameter | Type | Description |
 |---|---|---|
-| `store` | `PulseStore<State, Action, Event, Broadcast>` | The Store to observe |
+| `store` | `PulseStore<State, Action, Event, Broadcast, Unicast>` | The Store to observe |
 | `onEvent` | `(Event) -> Unit` | Called for each one-time side effect emitted by the Store |
 | `content` | `@Composable (State, (Action) -> Unit) -> Unit` | Renders the current state; receives a dispatcher to send actions |
 

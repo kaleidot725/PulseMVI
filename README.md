@@ -96,7 +96,7 @@ PulseContainer.broadcast(broadcast)      ← Notify all Stores simultaneously
 
 PulseStore.unicast(unicast)          ← Notify parent Container
     │
-    └── PulseContainer.onUnicast(unicast) ──▶ broadcast(...) / refresh(...) / app logic
+    └── PulseContainer.onReceived(unicast) ──▶ broadcast(...) / refresh(...) / app logic
 
 PulseContainer.refresh()                 ← Reconstruct the view tree
     │
@@ -142,7 +142,7 @@ sealed interface CounterUnicast : PulseUnicast {
 ```kotlin
 class CounterStore(
     private val repository: CounterRepository,
-) : PulseStore<CounterState, CounterAction, CounterEvent, CounterBroadcast>(
+) : PulseStore<CounterState, CounterAction, CounterEvent, CounterBroadcast, CounterUnicast>(
     initialUiState = CounterState(),
 ) {
     override fun onSetup() {
@@ -184,9 +184,9 @@ class CounterStore(
 
 ```kotlin
 class CounterContainer(
-    stores: List<PulseStore<*, *, *, CounterBroadcast>>,
-) : PulseContainer<CounterBroadcast>(stores = stores) {
-    override fun onUnicast(unicast: PulseUnicast) {
+    stores: List<PulseStore<*, *, *, CounterBroadcast, CounterUnicast>>,
+) : PulseContainer<CounterBroadcast, CounterUnicast>(stores = stores) {
+    override fun onReceived(unicast: CounterUnicast) {
         when (unicast) {
             CounterUnicast.ResetRequested -> broadcast(CounterBroadcast.ResetNotified)
         }
@@ -289,7 +289,7 @@ Base class for coordinating multiple Stores.
 | Member | Description |
 |---|---|
 | `broadcast(broadcast)` | Delivers a broadcast message to all registered Stores |
-| `onUnicast(unicast)` | Called when a child Store emits an unicast |
+| `onReceived(unicast)` | Called when a child Store emits an unicast |
 | `refresh()` | Reconstructs the view while preserving Store state |
 
 ### Composable Helpers

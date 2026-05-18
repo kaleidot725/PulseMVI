@@ -12,8 +12,8 @@ import androidx.compose.runtime.key
 internal val LocalPulseContainerKey = compositionLocalOf { "" }
 
 @Composable
-public fun <Broadcast : PulseBroadcast> PulseApp(
-    container: PulseContainer<Broadcast>,
+public fun <Broadcast : PulseBroadcast, Unicast : PulseUnicast> PulseApp(
+    container: PulseContainer<Broadcast, Unicast>,
     content: @Composable ((onRefresh: () -> Unit, onBroadcast: (Broadcast) -> Unit) -> Unit) = { _, _ -> },
 ) {
     val containerKey by container.key.collectAsState()
@@ -24,8 +24,14 @@ public fun <Broadcast : PulseBroadcast> PulseApp(
 }
 
 @Composable
-public fun <State : PulseState, Action : PulseAction, Event : PulseEvent, Broadcast : PulseBroadcast> PulseContent(
-    store: PulseStore<State, Action, Event, Broadcast>,
+public fun <
+    State : PulseState,
+    Action : PulseAction,
+    Event : PulseEvent,
+    Broadcast : PulseBroadcast,
+    Unicast : PulseUnicast,
+> PulseContent(
+    store: PulseStore<State, Action, Event, Broadcast, Unicast>,
     onEvent: (Event) -> Unit = {},
     content: @Composable ((State, ((Action) -> Unit)) -> Unit) = { _, _ -> },
 ) {

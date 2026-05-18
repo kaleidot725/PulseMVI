@@ -10,8 +10,8 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import java.util.UUID
 
-public abstract class PulseContainer<Broadcast : PulseBroadcast>(
-    private val stores: List<PulseStore<*, *, *, Broadcast>>,
+public abstract class PulseContainer<Broadcast : PulseBroadcast, Unicast : PulseUnicast>(
+    private val stores: List<PulseStore<*, *, *, Broadcast, Unicast>>,
 ) {
     private val coroutineScope: CoroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.Main + Dispatchers.IO)
 
@@ -34,5 +34,5 @@ public abstract class PulseContainer<Broadcast : PulseBroadcast>(
         stores.forEach { it.onReceive(broadcast) }
     }
 
-    public open fun onReceived(unicast: PulseUnicast) {}
+    public open fun onReceived(unicast: Unicast) {}
 }

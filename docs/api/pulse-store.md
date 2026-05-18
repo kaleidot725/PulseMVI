@@ -6,6 +6,7 @@ abstract class PulseStore<
     UiAction : PulseAction,
     Event : PulseEvent,
     Broadcast : PulseBroadcast,
+    Unicast : PulseUnicast,
 >(
     initialUiState: UiState,
 )
@@ -50,7 +51,7 @@ A cold `Flow` of one-time side effects emitted via `event()`. Collected by `Puls
 ### `unicast`
 
 ```kotlin
-val unicast: SharedFlow<PulseUnicast>
+val unicast: SharedFlow<Unicast>
 ```
 
 A hot stream of child-to-parent unicasts emitted via `unicast()`.
@@ -124,10 +125,10 @@ Emits a one-time side effect to the UI layer. Collected by the `onEvent` lambda 
 ### `unicast(unicast)`
 
 ```kotlin
-fun unicast(unicast: PulseUnicast)
+fun unicast(unicast: Unicast)
 ```
 
-Emits a child-to-parent message. The parent `PulseContainer` collects the Store's `unicast` flow and receives it through `onUnicast()`.
+Emits a child-to-parent message. The parent `PulseContainer` collects the Store's `unicast` flow and receives it through `onReceived()`.
 
 ---
 
@@ -142,9 +143,13 @@ Cancels the current `coroutineScope` and prepares the Store for reuse. Called au
 ## Example
 
 ```kotlin
+sealed interface CounterUnicast : PulseUnicast {
+    data object ResetRequested : CounterUnicast
+}
+
 class CounterStore(
     private val repository: CounterRepository,
-) : PulseStore<CounterState, CounterAction, CounterEvent, CounterBroadcast>(
+) : PulseStore<CounterState, CounterAction, CounterEvent, CounterBroadcast, CounterUnicast>(
     initialUiState = CounterState(),
 ) {
     override fun onSetup() {
@@ -179,7 +184,7 @@ sealed interface CounterUnicast : PulseUnicast {
 
 class CounterStore(
     private val repository: CounterRepository,
-) : PulseStore<CounterState, CounterAction, CounterEvent, CounterBroadcast>(
+) : PulseStore<CounterState, CounterAction, CounterEvent, CounterBroadcast, CounterUnicast>(
     initialUiState = CounterState(),
 ) {
     override fun onAction(uiAction: CounterAction) {
