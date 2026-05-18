@@ -16,13 +16,16 @@ hero:
 features:
   - icon: 🏗️
     title: MVI Architecture
-    details: Clear separation of State, Action, Event, and Broadcast keeps your code organized and testable.
+    details: Clear separation of State, Action, Event, Broadcast, and Unicast keeps your code organized and testable.
   - icon: 🔄
     title: Store & Container
     details: PulseStore manages state autonomously. PulseContainer coordinates multiple Stores across your app.
   - icon: 📡
     title: Broadcast
     details: Type-safe messages delivered from Container to all registered Stores simultaneously.
+  - icon: ⬆️
+    title: Unicast
+    details: Type-safe messages emitted from Stores to their parent Container for coordination.
   - icon: 🖥️
     title: View Refresh
     details: Forces the entire view tree to reconstruct on demand while preserving Store state.

@@ -37,6 +37,7 @@ export default defineConfig({
             { text: 'Store', link: '/guide/store' },
             { text: 'Container', link: '/guide/container' },
             { text: 'Broadcast', link: '/guide/broadcast' },
+            { text: 'Unicast', link: '/guide/unicast' },
           ],
         },
       ],
