@@ -3,19 +3,29 @@
   overflow: hidden;
 }
 
-.VPHomeHero::before {
+.VPHomeHero::before,
+.VPHomeHero::after {
   position: absolute;
   inset: 0;
   z-index: 0;
   content: '';
+  pointer-events: none;
+}
+
+.VPHomeHero::before {
   background:
-    linear-gradient(90deg, rgba(11, 18, 32, 0.82) 0%, rgba(11, 18, 32, 0.64) 46%, rgba(11, 18, 32, 0.32) 100%),
-    linear-gradient(180deg, rgba(11, 18, 32, 0.16) 0%, rgba(11, 18, 32, 0.86) 100%),
+    linear-gradient(90deg, rgba(7, 13, 24, 0.74) 0%, rgba(7, 13, 24, 0.5) 46%, rgba(7, 13, 24, 0.1) 100%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.04) 0%, rgba(255, 255, 255, 0.52) 100%),
     url('../../public/images/pulse-hero.png');
   background-position: center;
   background-size: cover;
-  opacity: 0.94;
-  pointer-events: none;
+  opacity: 0.96;
+}
+
+.VPHomeHero::after {
+  background:
+    radial-gradient(ellipse at 24% 36%, rgba(2, 6, 23, 0.5) 0%, rgba(2, 6, 23, 0.22) 34%, rgba(2, 6, 23, 0) 66%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0) 64%, var(--vp-c-bg) 100%);
 }
 
 .VPHomeHero > .container {
@@ -23,14 +33,43 @@
   z-index: 1;
 }
 
+.VPHomeHero .name {
+  background: linear-gradient(120deg, #7dd3fc 0%, #38bdf8 35%, #c084fc 100%);
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.VPHomeHero .text {
+  color: rgba(248, 250, 252, 0.97);
+}
+
+.VPHomeHero .tagline {
+  color: rgba(226, 232, 240, 0.9);
+}
+
 .VPHomeHero .name,
 .VPHomeHero .text,
 .VPHomeHero .tagline {
-  text-shadow: 0 2px 28px rgba(0, 0, 0, 0.48);
+  text-shadow: 0 2px 28px rgba(0, 0, 0, 0.58);
 }
 
 .VPHomeHero .image {
   opacity: 0;
+}
+
+.dark .VPHomeHero::before {
+  background:
+    linear-gradient(90deg, rgba(2, 6, 23, 0.7) 0%, rgba(2, 6, 23, 0.52) 46%, rgba(2, 6, 23, 0.2) 100%),
+    linear-gradient(180deg, rgba(2, 6, 23, 0.06) 0%, rgba(2, 6, 23, 0.74) 100%),
+    url('../../public/images/pulse-hero.png');
+  opacity: 0.98;
+}
+
+.dark .VPHomeHero::after {
+  background:
+    radial-gradient(ellipse at 24% 36%, rgba(2, 6, 23, 0.56) 0%, rgba(2, 6, 23, 0.28) 34%, rgba(2, 6, 23, 0) 66%),
+    linear-gradient(180deg, rgba(15, 23, 42, 0) 64%, var(--vp-c-bg) 100%);
 }
 
 @media (max-width: 640px) {
