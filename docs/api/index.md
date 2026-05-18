@@ -24,3 +24,4 @@ PulseMVI exposes a small, focused API surface. Everything you need is in the `jp
 | [`PulseAction`](/api/interfaces#pulseaction) | Marks a class as a user action |
 | [`PulseEvent`](/api/interfaces#pulseevent) | Marks a class as a one-time side effect |
 | [`PulseBroadcast`](/api/interfaces#pulsebroadcast) | Marks a class as a Container broadcast message |
+| [`PulseUnicast`](/api/interfaces#pulseunicast) | Marks a class as a child-to-parent unicast message |

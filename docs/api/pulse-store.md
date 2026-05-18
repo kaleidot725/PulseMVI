@@ -13,6 +13,8 @@ abstract class PulseStore<
 
 Abstract base class for managing the UI state of a single screen or section.
 
+Use `unicast()` when the Store needs to send messages up to its parent Container.
+
 ## Properties
 
 ### `state`
@@ -42,6 +44,16 @@ val event: Flow<Event>
 ```
 
 A cold `Flow` of one-time side effects emitted via `event()`. Collected by `PulseContent`.
+
+---
+
+### `unicast`
+
+```kotlin
+val unicast: SharedFlow<PulseUnicast>
+```
+
+A hot stream of child-to-parent unicasts emitted via `unicast()`.
 
 ---
 
@@ -109,6 +121,16 @@ Emits a one-time side effect to the UI layer. Collected by the `onEvent` lambda 
 
 ---
 
+### `unicast(unicast)`
+
+```kotlin
+fun unicast(unicast: PulseUnicast)
+```
+
+Emits a child-to-parent message. The parent `PulseContainer` collects the Store's `unicast` flow and receives it through `onUnicast()`.
+
+---
+
 ### `cancel()`
 
 ```kotlin
@@ -145,6 +167,29 @@ class CounterStore(
     override fun onReceive(broadcast: CounterBroadcast) {
         when (broadcast) {
             CounterBroadcast.Reset -> update { CounterState() }
+        }
+    }
+}
+```
+
+```kotlin
+sealed interface CounterUnicast : PulseUnicast {
+    data object ResetRequested : CounterUnicast
+}
+
+class CounterStore(
+    private val repository: CounterRepository,
+) : PulseStore<CounterState, CounterAction, CounterEvent, CounterBroadcast>(
+    initialUiState = CounterState(),
+) {
+    override fun onAction(uiAction: CounterAction) {
+        when (uiAction) {
+            CounterAction.Reset -> {
+                repository.reset()
+                unicast(CounterUnicast.ResetRequested)
+            }
+            CounterAction.Increment -> repository.increment()
+            CounterAction.Decrement -> repository.decrement()
         }
     }
 }

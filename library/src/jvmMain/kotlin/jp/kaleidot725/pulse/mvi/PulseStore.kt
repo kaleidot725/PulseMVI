@@ -6,9 +6,12 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.onSubscription
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.stateIn
@@ -41,6 +44,10 @@ public abstract class PulseStore<UiState : PulseState, UiAction : PulseAction, E
     public var event: Flow<Event> = _event.receiveAsFlow()
         private set
 
+    private val _unicast: MutableSharedFlow<PulseUnicast> = MutableSharedFlow(extraBufferCapacity = 64)
+
+    public val unicast: SharedFlow<PulseUnicast> = _unicast.asSharedFlow()
+
     public open fun onSetup() {}
 
     public abstract fun onAction(uiAction: UiAction)
@@ -68,5 +75,9 @@ public abstract class PulseStore<UiState : PulseState, UiAction : PulseAction, E
 
     public fun event(effect: Event) {
         coroutineScope.launch { _event.send(effect) }
+    }
+
+    public fun unicast(unicast: PulseUnicast) {
+        _unicast.tryEmit(unicast)
     }
 }

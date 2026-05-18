@@ -1,6 +1,6 @@
 # Architecture
 
-PulseMVI follows the MVI (Model-View-Intent) pattern and adds two Desktop-specific primitives: **Broadcast** and **View Refresh**.
+PulseMVI follows the MVI (Model-View-Intent) pattern and adds three Desktop-specific primitives: **Broadcast**, **Unicast**, and **View Refresh**.
 
 ## Data Flow
 
@@ -41,6 +41,19 @@ Container.broadcast(MyBroadcast.Sync)
         └──▶ StoreB.onReceive(Sync)  ──▶ update { }  ──▶ UI re-renders
 ```
 
+## Unicast Flow
+
+When a child Store needs to notify its parent Container, use `PulseStore.unicast()`:
+
+```
+StoreA.unicast(MyUnicast.SaveRequested)
+        │
+        └──▶ Container.onUnicast(SaveRequested)
+                  │
+                  ├──▶ broadcast(...)
+                  └──▶ refresh()
+```
+
 ## View Refresh Flow
 
 `Container.refresh()` forces the Compose view tree to reconstruct. Store states are **preserved** — only the Composables are re-created:
@@ -65,8 +78,9 @@ Container.refresh()
 | `PulseAction` | User intent — what the user wants to do |
 | `PulseEvent` | One-time side effect — navigation, dialog, snackbar |
 | `PulseBroadcast` | Cross-Store notification from Container |
-| `PulseStore` | Owns state; handles actions and broadcasts |
-| `PulseContainer` | Coordinates Stores; enables broadcast and refresh |
+| `PulseUnicast` | Child-to-parent notification from Store |
+| `PulseStore` | Owns state; handles actions and broadcasts; can emit unicasts |
+| `PulseContainer` | Coordinates Stores; enables broadcast, unicast handling, and refresh |
 | `PulseApp` | Compose wrapper that propagates container key |
 | `PulseContent` | Compose wrapper that observes a Store |
 
