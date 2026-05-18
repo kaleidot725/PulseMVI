@@ -4,13 +4,14 @@ import jp.kaleidot725.pulse.demo.counter.app.content.state.CounterOperatorAction
 import jp.kaleidot725.pulse.demo.counter.app.content.state.CounterOperatorEvent
 import jp.kaleidot725.pulse.demo.counter.app.content.state.CounterOperatorState
 import jp.kaleidot725.pulse.demo.counter.app.state.CounterAppBroadcast
+import jp.kaleidot725.pulse.demo.counter.app.state.CounterAppUnicast
 import jp.kaleidot725.pulse.demo.counter.repository.CounterRepository
 import jp.kaleidot725.pulse.mvi.PulseStore
 import kotlinx.coroutines.launch
 
 class CounterOperatorStore(
     private val repository: CounterRepository,
-) : PulseStore<CounterOperatorState, CounterOperatorAction, CounterOperatorEvent, CounterAppBroadcast>(
+) : PulseStore<CounterOperatorState, CounterOperatorAction, CounterOperatorEvent, CounterAppBroadcast, CounterAppUnicast>(
         initialUiState = CounterOperatorState(),
     ) {
     override fun onSetup() {
@@ -35,6 +36,7 @@ class CounterOperatorStore(
 
                 CounterOperatorAction.Reset -> {
                     repository.reset()
+                    unicast(CounterAppUnicast.ResetRequested)
                 }
             }
         }
@@ -45,6 +47,10 @@ class CounterOperatorStore(
             when (broadcast) {
                 is CounterAppBroadcast.Refresh -> {
                     event(CounterOperatorEvent.ShowMessage("Restart"))
+                }
+
+                is CounterAppBroadcast.ResetNotified -> {
+                    event(CounterOperatorEvent.ShowMessage("Parent received reset"))
                 }
             }
         }

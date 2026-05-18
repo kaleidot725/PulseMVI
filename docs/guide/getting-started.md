@@ -2,9 +2,9 @@
 
 This guide walks you through building a simple counter app with PulseMVI.
 
-## 1. Define State, Action, Event, and Broadcast
+## 1. Define State, Action, Event, Broadcast, and Unicast
 
-Start by defining the four types that describe your feature:
+Start by defining the five types that describe your feature:
 
 ```kotlin
 // State: the UI data rendered by your Composable
@@ -26,6 +26,11 @@ sealed class CounterEvent : PulseEvent {
 sealed class CounterBroadcast : PulseBroadcast {
     data object Refresh : CounterBroadcast()
 }
+
+// Unicast: messages sent from Store to Container
+sealed interface CounterUnicast : PulseUnicast {
+    data object ResetRequested : CounterUnicast
+}
 ```
 
 ## 2. Create a Store
@@ -35,7 +40,7 @@ sealed class CounterBroadcast : PulseBroadcast {
 ```kotlin
 class CounterStore(
     private val repository: CounterRepository,
-) : PulseStore<CounterState, CounterAction, CounterEvent, CounterBroadcast>(
+) : PulseStore<CounterState, CounterAction, CounterEvent, CounterBroadcast, CounterUnicast>(
     initialUiState = CounterState(),
 ) {
     // Called once when the Store is first observed
@@ -77,8 +82,8 @@ class CounterStore(
 
 ```kotlin
 class CounterContainer(
-    stores: List<PulseStore<*, *, *, CounterBroadcast>>,
-) : PulseContainer<CounterBroadcast>(stores = stores)
+    stores: List<PulseStore<*, *, *, CounterBroadcast, CounterUnicast>>,
+) : PulseContainer<CounterBroadcast, CounterUnicast>(stores = stores)
 ```
 
 ## 4. Connect to Compose UI

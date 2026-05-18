@@ -1,6 +1,6 @@
 # Container
 
-`PulseContainer` sits above one or more Stores and provides two coordination capabilities: **broadcast** and **view refresh**.
+`PulseContainer` sits above one or more Stores and provides three coordination capabilities: **broadcast**, **unicast handling**, and **view refresh**.
 
 ## Creating a Container
 
@@ -8,8 +8,8 @@ Pass the list of Stores you want to coordinate:
 
 ```kotlin
 class AppContainer(
-    stores: List<PulseStore<*, *, *, AppBroadcast>>,
-) : PulseContainer<AppBroadcast>(stores = stores)
+    stores: List<PulseStore<*, *, *, AppBroadcast, AppUnicast>>,
+) : PulseContainer<AppBroadcast, AppUnicast>(stores = stores)
 ```
 
 Instantiate it at the same level as your Stores:

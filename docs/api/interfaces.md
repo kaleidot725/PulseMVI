@@ -68,3 +68,20 @@ sealed class AppBroadcast : PulseBroadcast {
     data class ThemeChanged(val isDark: Boolean) : AppBroadcast()
 }
 ```
+
+---
+
+## PulseUnicast
+
+```kotlin
+interface PulseUnicast
+```
+
+Marks a class as a message emitted from a child `PulseStore` to its parent `PulseContainer`. Implement with a `sealed interface` or `sealed class`.
+
+```kotlin
+sealed interface AppUnicast : PulseUnicast {
+    data object SaveRequested : AppUnicast
+    data class ItemSelected(val id: String) : AppUnicast
+}
+```

@@ -1,12 +1,12 @@
 # PulseContainer
 
 ```kotlin
-abstract class PulseContainer<Broadcast : PulseBroadcast>(
-    stores: List<PulseStore<*, *, *, Broadcast>>,
+abstract class PulseContainer<Broadcast : PulseBroadcast, Unicast : PulseUnicast>(
+    stores: List<PulseStore<*, *, *, Broadcast, Unicast>>,
 )
 ```
 
-Coordinates multiple `PulseStore` instances. Provides broadcast delivery and view refresh.
+Coordinates multiple `PulseStore` instances. Provides broadcast delivery, child unicast handling, and view refresh.
 
 ## Methods
 
@@ -20,6 +20,24 @@ Delivers `broadcast` to every `PulseStore` registered at construction time by ca
 
 ```kotlin
 container.broadcast(AppBroadcast.UserLoggedOut)
+```
+
+---
+
+### `onReceived(unicast)`
+
+```kotlin
+open fun onReceived(unicast: Unicast)
+```
+
+Called when a registered `PulseStore` emits an unicast. `PulseContainer` collects each Store's `unicast` flow internally and forwards each value to this hook.
+
+```kotlin
+override fun onReceived(unicast: AppUnicast) {
+    when (unicast) {
+        AppUnicast.SaveRequested -> broadcast(AppBroadcast.SaveStarted)
+    }
+}
 ```
 
 ---
@@ -40,8 +58,14 @@ container.refresh()
 
 ```kotlin
 class AppContainer(
-    stores: List<PulseStore<*, *, *, AppBroadcast>>,
-) : PulseContainer<AppBroadcast>(stores = stores)
+    stores: List<PulseStore<*, *, *, AppBroadcast, AppUnicast>>,
+) : PulseContainer<AppBroadcast, AppUnicast>(stores = stores) {
+    override fun onReceived(unicast: AppUnicast) {
+        when (unicast) {
+            AppUnicast.SaveRequested -> broadcast(AppBroadcast.SaveStarted)
+        }
+    }
+}
 
 // Usage
 val container = remember {

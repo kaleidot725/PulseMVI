@@ -6,15 +6,16 @@
 [![](https://jitpack.io/v/kaleidot725/PulseMVI.svg)](https://jitpack.io/#kaleidot725/PulseMVI)
 
 A lightweight MVI library for **Compose Desktop**.
-Designed for Desktop's multi-Composable layouts, PulseMVI adds **Broadcast** to notify all Stores simultaneously and **View Refresh** to reconstruct the view tree on demand.
+Designed for Desktop's multi-Composable layouts, PulseMVI adds **Broadcast** to notify all Stores simultaneously, **Unicast** to send child Store messages up to the Container, and **View Refresh** to reconstruct the view tree on demand.
 
 ![demo](docs/demo.png)
 
 ## Features
 
-- 🏗️ **MVI Architecture** - Clear separation of State, Action, Event, and Broadcast
+- 🏗️ **MVI Architecture** - Clear separation of State, Action, Event, Broadcast, and Unicast
 - 🔄 **Store & Container** - Store manages state autonomously; Container coordinates multiple Stores
 - 📡 **Broadcast** - Type-safe messages delivered from Container to all registered Stores simultaneously
+- ⬆️ **Unicast** - Optional messages emitted from child Stores to the Container
 - 🖥️ **View Refresh** - Forces the view tree to reconstruct on demand while preserving Store state
 - ⚡ **Coroutine-Based** - Built on Kotlin Coroutines and StateFlow
 - 🎨 **Compose Integration** - Ready-to-use Composable helpers with automatic lifecycle management
@@ -78,8 +79,8 @@ dependencies {
 
 PulseMVI provides two complementary components:
 
-- **PulseStore** — Manages UI state for a specific screen component. Handles user actions directly and reacts to broadcasts from the Container.
-- **PulseContainer** — Coordinates multiple Stores. Delivers typed `PulseBroadcast` messages to all registered Stores, and can trigger a view refresh.
+- **PulseStore** — Manages UI state for a specific screen component. Handles user actions directly, reacts to broadcasts from the Container, and can emit `PulseUnicast` messages up to the Container.
+- **PulseContainer** — Coordinates multiple Stores. Delivers typed `PulseBroadcast` messages to all registered Stores, receives child unicasts, and can trigger a view refresh.
 
 ```
 User Action
@@ -93,6 +94,10 @@ PulseContainer.broadcast(broadcast)      ← Notify all Stores simultaneously
     │
     └── PulseStore.onReceive(broadcast) ──▶ update { ... } ──▶ UI re-renders
 
+PulseStore.unicast(unicast)          ← Notify parent Container
+    │
+    └── PulseContainer.onReceived(unicast) ──▶ broadcast(...) / refresh(...) / app logic
+
 PulseContainer.refresh()                 ← Reconstruct the view tree
     │
     └── View reconstructs (Store state is preserved)
@@ -100,7 +105,7 @@ PulseContainer.refresh()                 ← Reconstruct the view tree
 
 ## Quick Start
 
-### 1. Define State, Action, Event, and Broadcast
+### 1. Define State, Action, Event, Broadcast, and Unicast
 
 ```kotlin
 // State: the UI state managed by Store
@@ -121,6 +126,12 @@ sealed class CounterEvent : PulseEvent {
 // Broadcast: messages delivered from Container to all Stores
 sealed class CounterBroadcast : PulseBroadcast {
     data object Refresh : CounterBroadcast()
+    data object ResetNotified : CounterBroadcast()
+}
+
+// Unicast: messages emitted from child Store to Container
+sealed interface CounterUnicast : PulseUnicast {
+    data object ResetRequested : CounterUnicast
 }
 ```
 
@@ -131,7 +142,7 @@ sealed class CounterBroadcast : PulseBroadcast {
 ```kotlin
 class CounterStore(
     private val repository: CounterRepository,
-) : PulseStore<CounterState, CounterAction, CounterEvent, CounterBroadcast>(
+) : PulseStore<CounterState, CounterAction, CounterEvent, CounterBroadcast, CounterUnicast>(
     initialUiState = CounterState(),
 ) {
     override fun onSetup() {
@@ -150,7 +161,10 @@ class CounterStore(
             when (uiAction) {
                 CounterAction.Increment -> repository.increment()
                 CounterAction.Decrement -> repository.decrement()
-                CounterAction.Reset -> repository.reset()
+                CounterAction.Reset -> {
+                    repository.reset()
+                    unicast(CounterUnicast.ResetRequested)
+                }
             }
         }
     }
@@ -158,6 +172,7 @@ class CounterStore(
     override fun onReceive(broadcast: CounterBroadcast) {
         when (broadcast) {
             is CounterBroadcast.Refresh -> event(CounterEvent.ShowMessage("Refreshed!"))
+            is CounterBroadcast.ResetNotified -> event(CounterEvent.ShowMessage("Parent received reset"))
         }
     }
 }
@@ -169,8 +184,14 @@ class CounterStore(
 
 ```kotlin
 class CounterContainer(
-    stores: List<PulseStore<*, *, *, CounterBroadcast>>,
-) : PulseContainer<CounterBroadcast>(stores = stores)
+    stores: List<PulseStore<*, *, *, CounterBroadcast, CounterUnicast>>,
+) : PulseContainer<CounterBroadcast, CounterUnicast>(stores = stores) {
+    override fun onReceived(unicast: CounterUnicast) {
+        when (unicast) {
+            CounterUnicast.ResetRequested -> broadcast(CounterBroadcast.ResetNotified)
+        }
+    }
+}
 ```
 
 ### 4. Connect to Compose UI
@@ -256,6 +277,7 @@ Base class for managing UI state within a specific screen component.
 | `onSetup()` | Called when the Store is first subscribed to |
 | `onAction(uiAction)` | Called when a user action is dispatched |
 | `onReceive(broadcast)` | Called when the Container broadcasts a message |
+| `unicast(unicast)` | Emits a child-to-parent message |
 | `update { }` | Updates the UI state |
 | `event(effect)` | Emits a one-time side effect |
 | `cancel()` | Cancels the coroutine scope and prepares the Store for reuse |
@@ -267,6 +289,7 @@ Base class for coordinating multiple Stores.
 | Member | Description |
 |---|---|
 | `broadcast(broadcast)` | Delivers a broadcast message to all registered Stores |
+| `onReceived(unicast)` | Called when a child Store emits an unicast |
 | `refresh()` | Reconstructs the view while preserving Store state |
 
 ### Composable Helpers
@@ -308,9 +331,19 @@ sealed class MyBroadcast : PulseBroadcast {
 }
 ```
 
+### PulseUnicast
+
+Marker interface for type-safe messages emitted from a child `PulseStore` to its parent `PulseContainer`.
+
+```kotlin
+sealed interface MyUnicast : PulseUnicast {
+    data object SaveRequested : MyUnicast
+}
+```
+
 ## Example Application
 
-See the [`demo`](demo/) module for a complete counter application demonstrating Store, Container, and Broadcast in action.
+See the [`demo`](demo/) module for a complete counter application demonstrating Store, Container, Broadcast, and Unicast in action.
 
 Run the demo:
 

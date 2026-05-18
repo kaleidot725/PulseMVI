@@ -4,10 +4,10 @@
 
 ## Creating a Store
 
-Extend `PulseStore` with your four type parameters:
+Extend `PulseStore` with your five type parameters:
 
 ```kotlin
-class MyStore : PulseStore<MyState, MyAction, MyEvent, MyBroadcast>(
+class MyStore : PulseStore<MyState, MyAction, MyEvent, MyBroadcast, MyUnicast>(
     initialUiState = MyState(),
 ) {
     override fun onSetup() { /* start coroutines here */ }
