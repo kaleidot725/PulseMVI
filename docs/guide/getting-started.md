@@ -2,6 +2,17 @@
 
 This guide walks you through building a simple counter app with PulseMVI.
 
+It uses `rememberPulseStore` to own the Store, which comes from the `pulsemvi-navigation3` artifact.
+Add it alongside the core one, or see [Store](/guide/store) for driving the lifecycle yourself with
+the core artifact alone.
+
+```kotlin
+dependencies {
+    implementation("com.github.kaleidot725:pulsemvi:<version>")
+    implementation("com.github.kaleidot725:pulsemvi-navigation3:<version>")
+}
+```
+
 ## 1. Define State, Action, Event, Broadcast, and Unicast
 
 Start by defining the five types that describe your feature:
@@ -43,7 +54,7 @@ class CounterStore(
 ) : PulseStore<CounterState, CounterAction, CounterEvent, CounterBroadcast, CounterUnicast>(
     initialUiState = CounterState(),
 ) {
-    // Called once when the Store is first observed
+    // Called once, by rememberPulseStore, when the Store is created
     override fun onSetup() {
         coroutineScope.launch {
             repository.count.collect { count ->
@@ -94,26 +105,25 @@ Create the Store and Container once at the top level:
 
 ```kotlin
 fun main() = application {
-    val repository = remember { CounterRepository() }
-    val store = remember { CounterStore(repository) }
-    val container = remember { CounterContainer(stores = listOf(store)) }
-
     Window(onCloseRequest = ::exitApplication, title = "Counter") {
         MaterialTheme {
-            CounterApp(container = container, store = store)
+            val store = rememberPulseStore { CounterStore(CounterRepository()) }
+            val container = rememberPulseContainer { CounterContainer(stores = listOf(store)) }
+
+            CounterScreen(container = container, store = store)
         }
     }
 }
 ```
 
-### App composable
+### Screen composable
 
-Wrap your layout with `PulseApp` to enable refresh and broadcast:
+Wrap your layout with `PulseHost` to enable refresh and broadcast:
 
 ```kotlin
 @Composable
-fun CounterApp(container: CounterContainer, store: CounterStore) {
-    PulseApp(container = container) { onRefresh, onBroadcast ->
+fun CounterScreen(container: CounterContainer, store: CounterStore) {
+    PulseHost(container = container) { onRefresh, onBroadcast ->
         Box(modifier = Modifier.fillMaxSize().padding(16.dp)) {
             Row(modifier = Modifier.align(Alignment.TopEnd)) {
                 Button(onClick = { onRefresh() }) {

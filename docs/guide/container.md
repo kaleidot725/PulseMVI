@@ -15,9 +15,9 @@ class AppContainer(
 Instantiate it at the same level as your Stores:
 
 ```kotlin
-val sidebarStore = remember { SidebarStore() }
-val contentStore = remember { ContentStore() }
-val container = remember {
+val sidebarStore = rememberPulseStore { SidebarStore() }
+val contentStore = rememberPulseStore { ContentStore() }
+val container = rememberPulseContainer {
     AppContainer(stores = listOf(sidebarStore, contentStore))
 }
 ```
@@ -40,7 +40,7 @@ Every Store in the list receives `onReceive(AppBroadcast.UserLoggedOut)` and can
 
 ## View Refresh
 
-Force the entire Compose view tree under `PulseApp` to reconstruct:
+Force the entire Compose view tree under `PulseHost` to reconstruct:
 
 ```kotlin
 container.refresh()
@@ -57,12 +57,12 @@ container.refresh()
 - Recovering from a corrupted Compose state
 - Forcing re-creation of composables that don't respond to state changes
 
-## Using inside PulseApp
+## Using inside PulseHost
 
-`PulseApp` reads the Container's internal key and wraps content in a `CompositionLocalProvider`. `PulseContent` composables inside `PulseApp` automatically respond to `refresh()`:
+`PulseHost` reads the Container's internal key and wraps content in a `CompositionLocalProvider`. `PulseContent` composables inside `PulseHost` automatically respond to `refresh()`:
 
 ```kotlin
-PulseApp(container = appContainer) { onRefresh, onBroadcast ->
+PulseHost(container = appContainer) { onRefresh, onBroadcast ->
     // onRefresh() calls container.refresh()
     // onBroadcast(b) calls container.broadcast(b)
 

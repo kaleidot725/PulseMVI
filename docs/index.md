@@ -3,8 +3,8 @@ layout: home
 
 hero:
   name: PulseMVI
-  text: MVI for Compose Desktop
-  tagline: A lightweight, coroutine-based MVI library designed for multi-Composable Compose Desktop layouts.
+  text: MVI for Compose Multiplatform
+  tagline: A lightweight, coroutine-based MVI library for Android, iOS, and Desktop.
   actions:
     - theme: brand
       text: Get Started
@@ -34,5 +34,5 @@ features:
     details: Built on Kotlin Coroutines and StateFlow for efficient, non-blocking reactive state management.
   - icon: 🎨
     title: Compose Integration
-    details: Ready-to-use PulseApp and PulseContent composables with automatic lifecycle management.
+    details: Ready-to-use PulseHost and PulseContent composables with automatic lifecycle management.
 ---

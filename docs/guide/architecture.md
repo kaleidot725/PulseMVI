@@ -1,6 +1,6 @@
 # Architecture
 
-PulseMVI follows the MVI (Model-View-Intent) pattern and adds three Desktop-specific primitives: **Broadcast**, **Unicast**, and **View Refresh**.
+PulseMVI follows the MVI (Model-View-Intent) pattern and adds three coordination primitives: **Broadcast**, **Unicast**, and **View Refresh**.
 
 ## Data Flow
 
@@ -61,13 +61,11 @@ StoreA.unicast(MyUnicast.SaveRequested)
 ```
 Container.refresh()
         │
-        └──▶ PulseApp detects new key
+        └──▶ PulseHost detects new key
                   │
-                  └──▶ PulseContent re-created (via `key()`)
+                  └──▶ PulseContent's rendered subtree re-created (via `key()`)
                             │
-                            └──▶ Store.cancel() then Store re-subscribes
-                                      │
-                                      └──▶ onSetup() called again
+                            └──▶ Store is untouched; onSetup() is not repeated
 ```
 
 ## Component Responsibilities
@@ -81,26 +79,30 @@ Container.refresh()
 | `PulseUnicast` | Child-to-parent notification from Store |
 | `PulseStore` | Owns state; handles actions and broadcasts; can emit unicasts |
 | `PulseContainer` | Coordinates Stores; enables broadcast, unicast handling, and refresh |
-| `PulseApp` | Compose wrapper that propagates container key |
+| `PulseHost` | Compose wrapper that propagates container key |
 | `PulseContent` | Compose wrapper that observes a Store |
 
 ## Lifecycle
 
 ```
-PulseContent appears
+rememberPulseStore creates the Store
         │
-        └──▶ Store.state subscribed  ──▶  onSetup() called
-                                               │
-                                        coroutineScope active
-
-PulseContent disappears
-        │
-        └──▶ Store.cancel() called
+        └──▶ Owned by a ViewModel scoped to the ViewModelStoreOwner
                   │
-                  └──▶ coroutineScope cancelled + recreated
-                            (Store is ready to be reused)
+                  └──▶ onSetup() called once
+                                │
+                                └──▶ coroutineScope active
+
+ViewModelStoreOwner cleared
+        │
+        └──▶ ViewModel.onCleared()
+                  │
+                  └──▶ coroutineScope cancelled
+                                (Store is discarded with its owner)
 ```
 
 ::: tip
-`onSetup()` is called every time the Store is first subscribed to — including after a `refresh()`. Use it to start your data-collection coroutines.
+`onSetup()` runs once when `rememberPulseStore` creates the Store, and the Store stays active for as long as its `ViewModelStoreOwner` lives. A configuration change never repeats setup, and neither does `refresh()`.
+
+Which owner that is decides the Store's lifetime. Creating the Store under the host owner keeps it alive for the whole screen. Creating it inside a Navigation 3 destination, with `rememberPulseNavEntryDecorators()` as the `NavDisplay` decorators, scopes it to that back stack entry: covering the route with another destination keeps the Store, popping the route cancels it. The demo builds every destination that way.
 :::

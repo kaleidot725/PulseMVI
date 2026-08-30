@@ -3,10 +3,13 @@
 ```kotlin
 abstract class PulseContainer<Broadcast : PulseBroadcast, Unicast : PulseUnicast>(
     stores: List<PulseStore<*, *, *, Broadcast, Unicast>>,
+    coroutineDispatcher: CoroutineDispatcher = Dispatchers.Default,
 )
 ```
 
 Coordinates multiple `PulseStore` instances. Provides broadcast delivery, child unicast handling, and view refresh.
+
+The internal unicast collector uses `Dispatchers.Default` unless another dispatcher is passed to the constructor.
 
 ## Methods
 
@@ -48,10 +51,24 @@ override fun onReceived(unicast: AppUnicast) {
 fun refresh()
 ```
 
-Assigns a new UUID to the container's internal key, causing `PulseApp` to trigger a recomposition of all `PulseContent` blocks inside it. Store state is preserved; only Compose state is discarded.
+Assigns a new UUID to the container's internal key, causing `PulseHost` to trigger a recomposition of all `PulseContent` blocks inside it. Store state is preserved; only Compose state is discarded.
 
 ```kotlin
 container.refresh()
+```
+
+---
+
+### `close()`
+
+```kotlin
+fun close()
+```
+
+Cancels the Container scope and stops collecting Unicast messages from the Stores. Call it when the Container is gone for good. `rememberPulseContainer` calls it for you when the owning `ViewModelStore` is cleared.
+
+```kotlin
+container.close()
 ```
 
 ## Example
@@ -68,7 +85,7 @@ class AppContainer(
 }
 
 // Usage
-val container = remember {
+val container = rememberPulseContainer {
     AppContainer(stores = listOf(sidebarStore, contentStore))
 }
 
