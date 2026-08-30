@@ -3,4 +3,4 @@ jdk:
 before_install:
   - ./gradlew clean
 install:
-  - ./gradlew :library:publishToMavenLocal
+  - ./gradlew :library:publishToMavenLocal :navigation3:publishToMavenLocal

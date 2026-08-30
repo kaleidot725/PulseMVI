@@ -1,6 +1,7 @@
 plugins {
     kotlin("multiplatform")
     kotlin("plugin.compose")
+    id("com.android.library")
     id("org.jetbrains.compose")
     `maven-publish`
 }
@@ -16,50 +17,67 @@ repositories {
 kotlin {
     explicitApi()
     jvm()
+    androidTarget {
+        publishLibraryVariants("release")
+    }
+    iosX64()
+    iosArm64()
+    iosSimulatorArm64()
     jvmToolchain(17)
 
     sourceSets {
-        val jvmMain by getting {
+        val commonMain by getting {
             dependencies {
-                implementation(compose.runtime)
-                implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.2")
+                api("org.jetbrains.compose.runtime:runtime:1.10.1")
+                api("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.2")
             }
         }
-        val jvmTest by getting {
+        val commonTest by getting {
             dependencies {
                 implementation(kotlin("test"))
+                implementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.10.2")
             }
         }
     }
 }
 
+android {
+    namespace = "jp.kaleidot725.pulse.mvi"
+    compileSdk = 35
+
+    defaultConfig {
+        minSdk = 21
+    }
+}
+
 publishing {
-    publications {
-        create<MavenPublication>("maven") {
-            from(components["kotlin"])
+    publications.withType<MavenPublication>().configureEach {
+        artifactId = artifactId.replace(project.name, "pulsemvi")
 
-            groupId = "com.github.kaleidot725"
-            artifactId = "pulsemvi"
+        pom {
+            name.set("PulseMVI")
+            description.set("A Kotlin MVI library for Compose Multiplatform")
+            url.set("https://github.com/kaleidot725/PulseMVI")
 
-            pom {
-                name.set("PulseMVI")
-                description.set("A Kotlin MVI library for Compose Multiplatform")
-                url.set("https://github.com/kaleidot725/PulseMVI")
-
-                licenses {
-                    license {
-                        name.set("Apache License, Version 2.0")
-                        url.set("https://www.apache.org/licenses/LICENSE-2.0")
-                    }
+            licenses {
+                license {
+                    name.set("Apache License, Version 2.0")
+                    url.set("https://www.apache.org/licenses/LICENSE-2.0")
                 }
+            }
 
-                developers {
-                    developer {
-                        id.set("kaleidot725")
-                        name.set("kaleidot725")
-                    }
+            developers {
+                developer {
+                    id.set("kaleidot725")
+                    name.set("kaleidot725")
                 }
             }
         }
+    }
+}
+
+afterEvaluate {
+    publishing.publications.named<MavenPublication>("androidRelease") {
+        artifactId = "pulsemvi-android"
     }
 }

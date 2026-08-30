@@ -1,3 +1,11 @@
+pluginManagement {
+    repositories {
+        google()
+        mavenCentral()
+        gradlePluginPortal()
+    }
+}
+
 plugins {
     id("org.gradle.toolchains.foojay-resolver-convention") version "0.8.0"
 }
@@ -5,4 +13,5 @@ plugins {
 rootProject.name = "PulseMVI"
 
 include(":library")
+include(":navigation3")
 include(":demo")

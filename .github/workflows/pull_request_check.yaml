@@ -3,6 +3,10 @@ name: Pull request check
 on:
   pull_request
 
+permissions:
+  contents: read
+  pull-requests: write
+
 jobs:
   check:
     name: Check pull request
