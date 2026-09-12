@@ -54,7 +54,7 @@ class CounterViewModel(
 ) : PulseViewModel<CounterState, CounterAction, CounterEvent, CounterBroadcast, CounterUnicast>(
     initialUiState = CounterState(),
 ) {
-    // Called once, by rememberPulseViewModel, when the ViewModel is created
+    // Called once, by PulseContent, the first time it observes the ViewModel
     override fun onSetup() {
         coroutineScope.launch {
             repository.count.collect { count ->

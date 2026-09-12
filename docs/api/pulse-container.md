@@ -51,7 +51,7 @@ override fun onReceived(unicast: AppUnicast) {
 fun refresh()
 ```
 
-Assigns a new UUID to the container's internal key, causing `PulseHost` to trigger a recomposition of all `PulseContent` blocks inside it. ViewModel state is preserved; only Compose state is discarded.
+Bumps the container's internal key, causing `PulseHost` to re-create every `PulseContent` block inside it. ViewModel state is preserved; only Compose state is discarded.
 
 ```kotlin
 container.refresh()

@@ -20,7 +20,7 @@ class MyViewModel : PulseViewModel<MyState, MyAction, MyEvent, MyBroadcast, MyUn
 
 ### `onSetup()`
 
-Called once by whoever owns the ViewModel's lifetime. `PulseContent` never calls it — see [Driving the lifecycle yourself](#driving-the-lifecycle-yourself) for the core artifact. Use this to start long-running coroutines such as repository flows:
+Called once, by `PulseContent`, the first time it observes the ViewModel. Use this to start long-running coroutines such as repository flows:
 
 ```kotlin
 override fun onSetup() {
