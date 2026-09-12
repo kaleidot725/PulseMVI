@@ -1,4 +1,4 @@
-package jp.kaleidot725.pulse.demo.grid.area
+package jp.kaleidot725.pulse.demo.count.content.area
 
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.LinearOutSlowInEasing
@@ -24,40 +24,36 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import jp.kaleidot725.pulse.demo.grid.area.state.AreaAction
-import jp.kaleidot725.pulse.demo.grid.area.state.AreaEvent
-import jp.kaleidot725.pulse.demo.grid.area.state.AreaState
+import jp.kaleidot725.pulse.demo.count.content.area.state.PulseAreaAction
+import jp.kaleidot725.pulse.demo.count.content.area.state.PulseAreaEvent
+import jp.kaleidot725.pulse.demo.count.content.area.state.PulseAreaState
 import jp.kaleidot725.pulse.mvi.PulseContent
 
-/**
- * Observes one [AreaViewModel]. The four cells on a screen are the same composable four times over,
- * told apart only by the ViewModel handed to them.
- */
 @Composable
-fun AreaContent(
-    viewModel: AreaViewModel,
-    onCharged: (AreaEvent.Charged) -> Unit,
+fun PulseAreaContent(
+    viewModel: PulseAreaViewModel,
+    onCharged: (PulseAreaEvent.Charged) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     PulseContent(
         viewModel = viewModel,
         onEvent = { event ->
             when (event) {
-                is AreaEvent.Charged -> onCharged(event)
+                is PulseAreaEvent.Charged -> onCharged(event)
             }
         },
     ) { state, onAction ->
-        AreaCell(
+        PulseAreaCell(
             state = state,
-            onPulse = { onAction(AreaAction.Pulse) },
+            onPulse = { onAction(PulseAreaAction.Pulse) },
             modifier = modifier,
         )
     }
 }
 
 @Composable
-private fun AreaCell(
-    state: AreaState,
+private fun PulseAreaCell(
+    state: PulseAreaState,
     onPulse: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -116,19 +112,19 @@ private fun AreaCell(
     }
 }
 
-private val AreaState.caption: String
+private val PulseAreaState.caption: String
     get() {
         val origin = lastOrigin ?: return "out of reach"
         return if (origin == position) "tapped" else "${origin.label.lowercase()} reached here"
     }
 
-private val AreaPosition.hue: Float
+private val PulseAreaPosition.hue: Float
     get() =
         when (this) {
-            AreaPosition.TopLeft -> 196f
-            AreaPosition.TopRight -> 274f
-            AreaPosition.BottomLeft -> 158f
-            AreaPosition.BottomRight -> 336f
+            PulseAreaPosition.TopLeft -> 196f
+            PulseAreaPosition.TopRight -> 274f
+            PulseAreaPosition.BottomLeft -> 158f
+            PulseAreaPosition.BottomRight -> 336f
         }
 
 private const val FLASH_MILLIS = 520

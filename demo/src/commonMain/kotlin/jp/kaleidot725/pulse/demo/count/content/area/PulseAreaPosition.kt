@@ -1,12 +1,6 @@
-package jp.kaleidot725.pulse.demo.grid.area
+package jp.kaleidot725.pulse.demo.count.content.area
 
-/**
- * One quadrant of the 2x2 grid.
- *
- * [neighbors] is what makes a pulse spread rather than fill the screen: quadrants that share an edge
- * are neighbors, the diagonal one is not. A pulse therefore reaches three of the four areas.
- */
-enum class AreaPosition(
+enum class PulseAreaPosition(
     val label: String,
 ) {
     TopLeft("Top Left"),
@@ -15,7 +9,7 @@ enum class AreaPosition(
     BottomRight("Bottom Right"),
     ;
 
-    val neighbors: Set<AreaPosition>
+    val neighbors: Set<PulseAreaPosition>
         get() =
             when (this) {
                 TopLeft -> setOf(TopRight, BottomLeft)

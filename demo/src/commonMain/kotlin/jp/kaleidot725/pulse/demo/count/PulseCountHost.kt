@@ -1,4 +1,4 @@
-package jp.kaleidot725.pulse.demo.grid.screen
+package jp.kaleidot725.pulse.demo.count
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -27,34 +27,26 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import jp.kaleidot725.pulse.demo.grid.area.AreaContent
-import jp.kaleidot725.pulse.demo.grid.area.AreaPosition
-import jp.kaleidot725.pulse.demo.grid.area.AreaViewModel
-import jp.kaleidot725.pulse.demo.grid.screen.state.GridBroadcast
+import jp.kaleidot725.pulse.demo.count.content.area.PulseAreaContent
+import jp.kaleidot725.pulse.demo.count.content.area.PulseAreaPosition
+import jp.kaleidot725.pulse.demo.count.content.area.PulseAreaViewModel
+import jp.kaleidot725.pulse.demo.count.state.PulseCountBroadcaset
 import jp.kaleidot725.pulse.mvi.PulseHost
 import jp.kaleidot725.pulse.mvi.navigation3.rememberPulseContainer
 import jp.kaleidot725.pulse.mvi.navigation3.rememberPulseViewModel
 import kotlinx.coroutines.launch
 
-/**
- * One 2x2 grid, owning the four area ViewModels and the Container that connects them.
- *
- * All four are the same class, so each needs its own `key` — the default key is the class name, and
- * four of those under one owner would collide. The Navigation 3 entry decorator gives every grid on
- * the back stack its own owner, so "New Area" really does start from zero while the grid underneath
- * keeps its counts.
- */
 @Composable
-fun GridScreen(
+fun CountHost(
     depth: Int,
     onNewArea: () -> Unit,
     onBack: (() -> Unit)?,
 ) {
     val areas =
-        AreaPosition.entries.map { position ->
-            rememberPulseViewModel(key = position.name) { AreaViewModel(position) }
+        PulseAreaPosition.entries.map { position ->
+            rememberPulseViewModel(key = position.name) { PulseAreaViewModel(position) }
         }
-    val container = rememberPulseContainer { GridContainer(viewModels = areas) }
+    val container = rememberPulseContainer { PulseCountContainer(viewModels = areas) }
 
     val snackbarHostState = remember { SnackbarHostState() }
     val coroutineScope = rememberCoroutineScope()
@@ -74,7 +66,7 @@ fun GridScreen(
                     depth = depth,
                     onNewArea = onNewArea,
                     onBack = onBack,
-                    onReset = { onBroadcast(GridBroadcast.Reset) },
+                    onReset = { onBroadcast(PulseCountBroadcaset.Reset) },
                     onRefresh = onRefresh,
                 )
 
@@ -82,7 +74,7 @@ fun GridScreen(
                     areas.chunked(2).forEach { row ->
                         Row(modifier = Modifier.fillMaxWidth().weight(1f)) {
                             row.forEach { area ->
-                                AreaContent(
+                                PulseAreaContent(
                                     viewModel = area,
                                     onCharged = { charged ->
                                         coroutineScope.launch {
