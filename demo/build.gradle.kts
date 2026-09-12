@@ -16,6 +16,7 @@ kotlin {
                 implementation("org.jetbrains.compose.foundation:foundation:1.10.1")
                 implementation("org.jetbrains.compose.material3:material3:1.9.0")
                 implementation("org.jetbrains.compose.runtime:runtime:1.10.1")
+                implementation("org.jetbrains.compose.ui:ui-tooling-preview:1.10.1")
                 implementation("org.jetbrains.androidx.navigation3:navigation3-ui:1.1.1")
                 implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.2")
             }
