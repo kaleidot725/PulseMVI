@@ -6,15 +6,13 @@ Unicast は、`PulseViewModel` から親の `PulseContainer` へ型付きメッ�
 
 ## Unicast を定義する
 
-sealed interface または sealed class で `PulseUnicast` を実装します。
+sealed interface または sealed class で `PulseUnicast` を実装します。Unicast の型は、Container と、その Container に登録されるすべての ViewModel で共有されます。このジェネリクスの組み合わせにより、Container が理解できない Unicast 型を ViewModel が発行することはできません。
 
 ```kotlin
 sealed interface CounterUnicast : PulseUnicast {
     data class CounterUpdated(val count: Int) : CounterUnicast
 }
 ```
-
-Unicast の型は、Container と、その Container に登録されるすべての ViewModel で共有されます。
 
 ```kotlin
 class CounterViewModel : PulseViewModel<
@@ -32,11 +30,9 @@ class CounterContainer(
 ) : PulseContainer<CounterBroadcast, CounterUnicast>(viewModels = viewModels)
 ```
 
-このジェネリクスの組み合わせにより、Container が理解できない Unicast 型を ViewModel が発行することはできません。
-
 ## Unicast を送る
 
-ViewModel の中から `unicast()` を呼びます。
+ViewModel の中から `unicast()` を呼びます。`PulseContainer` は登録済みの各 ViewModel の `unicast` Flow を内部で収集します。
 
 ```kotlin
 override fun onAction(uiAction: CounterAction) {
@@ -57,11 +53,9 @@ override fun onAction(uiAction: CounterAction) {
 }
 ```
 
-`PulseContainer` は登録済みの各 ViewModel の `unicast` Flow を内部で収集します。
-
 ## Unicast を受け取る
 
-Container で `onReceived()` をオーバーライドします。
+Container で `onReceived()` をオーバーライドします。次の例では、Container が ViewModel → Container の Unicast を、Container → ViewModel 群の Broadcast に変換しています。
 
 ```kotlin
 override fun onReceived(unicast: CounterUnicast) {
@@ -71,8 +65,6 @@ override fun onReceived(unicast: CounterUnicast) {
     }
 }
 ```
-
-この例では、Container が ViewModel → Container の Unicast を、Container → ViewModel 群の Broadcast に変換しています。
 
 ## Unicast・Broadcast・Event の違い
 
@@ -141,7 +133,7 @@ class CounterViewModel(
 }
 ```
 
-データの流れは次のとおりです。
+### データの流れ
 
 ```text
 Counter A の操作

@@ -4,15 +4,13 @@
 
 ## Container を作る
 
-調整したい ViewModel のリストを渡します。
+調整したい ViewModel のリストを受け取るクラスを定義し、ViewModel と同じ階層で生成します。
 
 ```kotlin
 class AppContainer(
     viewModels: List<PulseViewModel<*, *, *, AppBroadcast, AppUnicast>>,
 ) : PulseContainer<AppBroadcast, AppUnicast>(viewModels = viewModels)
 ```
-
-ViewModel と同じ階層で生成します。
 
 ```kotlin
 val sidebarViewModel = rememberPulseViewModel { SidebarViewModel() }
@@ -24,13 +22,11 @@ val container = rememberPulseContainer {
 
 ## Broadcast
 
-登録済みの**すべての** ViewModel へ、型付きメッセージを同時に送ります。
+登録済みの**すべての** ViewModel へ、型付きメッセージを同時に送ります。リスト内のすべての ViewModel が `onReceive(AppBroadcast.UserLoggedOut)` を受け取り、それぞれ独立して反応できます。
 
 ```kotlin
 container.broadcast(AppBroadcast.UserLoggedOut)
 ```
-
-リスト内のすべての ViewModel が `onReceive(AppBroadcast.UserLoggedOut)` を受け取り、それぞれ独立して反応できます。
 
 ### Broadcast を使う場面
 
@@ -42,14 +38,14 @@ container.broadcast(AppBroadcast.UserLoggedOut)
 
 `PulseHost` 配下の Compose ビューツリー全体を強制的に再構築します。
 
-```kotlin
-container.refresh()
-```
-
 ::: tip 何がリセットされるか
 - **Compose の状態**（Composable 内の `remember { }` など）は**リセットされる**
 - **ViewModel の状態**（`PulseViewModel.state` の値）は**保持される**
 :::
+
+```kotlin
+container.refresh()
+```
 
 ### Refresh を使う場面
 

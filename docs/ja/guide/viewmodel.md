@@ -22,6 +22,14 @@ class MyViewModel : PulseViewModel<MyState, MyAction, MyEvent, MyBroadcast, MyUn
 
 `PulseContent` が ViewModel を最初に観測したときに一度だけ呼ばれます。リポジトリの Flow のような長時間動くコルーチンの開始に使います。
 
+::: tip
+`pulsemvi-navigation3` を使う場合は `rememberPulseViewModel` で ViewModel を生成してください。`PulseContent` が `onSetup()` を一度だけ実行し、所有する `ViewModelStoreOwner` が破棄されるとスコープがキャンセルされます。コンポジションの再起動では状態が保持され、`onSetup()` は繰り返されません。
+
+ライフサイクルがコンポジションではなくオーナーに従うため、別の Navigation 3 destination でルートが覆われても、サブツリーが Refresh されても、セットアップは繰り返されません。
+
+ViewModel を画面全体ではなく 1 つの destination に紐づけたい場合は、`NavDisplay` の `entryDecorators` に `rememberPulseNavEntryDecorators()` を渡し、destination の中で `rememberPulseViewModel` を呼びます。エントリが ViewModel を所有し、ルートが pop されるとキャンセルされます。
+:::
+
 ```kotlin
 override fun onSetup() {
     coroutineScope.launch {
@@ -31,14 +39,6 @@ override fun onSetup() {
     }
 }
 ```
-
-::: tip
-`pulsemvi-navigation3` を使う場合は `rememberPulseViewModel` で ViewModel を生成してください。`PulseContent` が `onSetup()` を一度だけ実行し、所有する `ViewModelStoreOwner` が破棄されるとスコープがキャンセルされます。コンポジションの再起動では状態が保持され、`onSetup()` は繰り返されません。
-
-ライフサイクルがコンポジションではなくオーナーに従うため、別の Navigation 3 destination でルートが覆われても、サブツリーが Refresh されても、セットアップは繰り返されません。
-
-ViewModel を画面全体ではなく 1 つの destination に紐づけたい場合は、`NavDisplay` の `entryDecorators` に `rememberPulseNavEntryDecorators()` を渡し、destination の中で `rememberPulseViewModel` を呼びます。エントリが ViewModel を所有し、ルートが pop されるとキャンセルされます。
-:::
 
 ### `onAction(uiAction)`
 
@@ -98,7 +98,11 @@ override fun onAction(uiAction: MyAction) {
 
 ## ライフサイクルを自前で扱う
 
-`PulseContent` は ViewModel がどう作られたかに関係なく、常に `onSetup()` を実行します。オーナーによって変わるのは後始末の方です。`close()` は `onCleared()` から呼ばれますが、それを呼ぶのは `ViewModelStore` だけです。ViewModel を素の `remember` で持つと誰も破棄しないので、自分でキャンセルしてください。
+`PulseContent` は ViewModel がどう作られたかに関係なく、常に `onSetup()` を実行します。オーナーによって変わるのは後始末の方です。`close()` は `onCleared()` から呼ばれますが、それを呼ぶのは `ViewModelStore` だけです。ViewModel を素の `remember` で持つと誰も破棄しないので、自分でキャンセルしてください。Container も同様です。
+
+::: warning
+この場合、ViewModel はこのコンポジションとまったく同じ長さだけ生きます。離れて戻ってくると新しいインスタンスが作られるため、状態は失われます。それが問題になるなら `pulsemvi-navigation3` を追加してください。
+:::
 
 ```kotlin
 val viewModel = remember { CounterViewModel(repository) }
@@ -111,15 +115,9 @@ PulseContent(viewModel = viewModel) { state, onAction ->
 }
 ```
 
-Container も同様です。
-
 ```kotlin
 val container = remember { CounterContainer(viewModels = listOf(viewModel)) }
 DisposableEffect(container) {
     onDispose { container.close() }
 }
 ```
-
-::: warning
-この場合、ViewModel はこのコンポジションとまったく同じ長さだけ生きます。離れて戻ってくると新しいインスタンスが作られるため、状態は失われます。それが問題になるなら `pulsemvi-navigation3` を追加してください。
-:::

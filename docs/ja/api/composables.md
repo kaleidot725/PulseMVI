@@ -41,7 +41,7 @@ inline fun <reified ViewModel : PulseViewModel<*, *, *, *, *>> rememberPulseView
 | `CompositionLocalProvider(LocalViewModelStoreOwner provides ...)` で自分で与えたもの | そのオーナーを保持している間 |
 | ホストが何も提供しない | `rememberPulseViewModel` はメッセージ付きで失敗する。寿命を所有するものが無いので、オーナーを与えるかコアのみで使う |
 
-計画しておくべき帰結が 2 つあります。
+#### 計画しておくべき 2 つの帰結
 
 - **`key` はグローバルではなくオーナー単位で一意です。** 同じオーナーの下に同じ型の ViewModel を 2 つ置くと衝突します。既定のキーはクラス名です。明示的なキーを与えるか、別のオーナーの下に置いてください
 - **オーナーが破棄されるまで、ViewModel がオーナーから取り除かれることはありません。** 長生きするオーナーの下で ViewModel を生成し続けると、オーナーの寿命の間ずっと溜まっていきます。画面が二度と使わない ViewModel を作るなら、より狭いオーナーにスコープしてください

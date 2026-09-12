@@ -84,6 +84,12 @@ Container.refresh()
 
 ## ライフサイクル
 
+::: tip
+`onSetup()` は `PulseContent` が ViewModel を最初に観測したときに一度だけ実行され、ViewModel は `ViewModelStoreOwner` が生きている間ずっと有効です。コンポジションの再起動でも `refresh()` でもセットアップは繰り返されません。
+
+どのオーナーかによって ViewModel のライフタイムが決まります。ホストのオーナー配下で生成すれば画面全体の間生き続けます。Navigation 3 の destination の中で、`NavDisplay` のデコレータとして `rememberPulseNavEntryDecorators()` を渡して生成すれば、そのバックスタックエントリにスコープされます。別の destination で覆われても ViewModel は保持され、ルートが pop されるとキャンセルされます。デモはすべての destination をこの方法で構築しています。
+:::
+
 ```
 rememberPulseViewModel が ViewModel を生成
         │
@@ -100,9 +106,3 @@ ViewModelStoreOwner が破棄される
                   └──▶ coroutineScope がキャンセルされる
                                 (ViewModel はオーナーと共に破棄される)
 ```
-
-::: tip
-`onSetup()` は `PulseContent` が ViewModel を最初に観測したときに一度だけ実行され、ViewModel は `ViewModelStoreOwner` が生きている間ずっと有効です。コンポジションの再起動でも `refresh()` でもセットアップは繰り返されません。
-
-どのオーナーかによって ViewModel のライフタイムが決まります。ホストのオーナー配下で生成すれば画面全体の間生き続けます。Navigation 3 の destination の中で、`NavDisplay` のデコレータとして `rememberPulseNavEntryDecorators()` を渡して生成すれば、そのバックスタックエントリにスコープされます。別の destination で覆われても ViewModel は保持され、ルートが pop されるとキャンセルされます。デモはすべての destination をこの方法で構築しています。
-:::
