@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -22,6 +23,7 @@ import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -87,6 +89,17 @@ fun PulseAreaCell(
             modifier = Modifier.testTag("caption-${state.position.name}"),
         )
     }
+}
+
+@Preview
+@Composable
+private fun PulseAreaCellPreview() {
+    PulseAreaCell(
+        state = PulseAreaState(position = PulseAreaPosition.TopRight, count = 7),
+        onPulse = {},
+        onFlashFinished = {},
+        modifier = Modifier.size(width = 320.dp, height = 220.dp),
+    )
 }
 
 private val PulseAreaPosition.hue: Float
