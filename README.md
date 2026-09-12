@@ -46,7 +46,7 @@ dependencies {
 ```
 
 Replace `<version>` with a tag from [Releases](https://github.com/kaleidot725/PulseMVI/releases).
-Groovy and Maven snippets are in the [installation guide](https://kaleidot725.github.io/PulseMVI/guide/#installation).
+A Maven snippet is in the [installation guide](https://kaleidot725.github.io/PulseMVI/guide/#installation).
 
 ## Quick Start
 

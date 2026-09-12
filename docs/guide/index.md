@@ -53,19 +53,6 @@ dependencies {
 
 Replace `<version>` with the latest tag from [GitHub Releases](https://github.com/kaleidot725/PulseMVI/releases).
 
-::: details Groovy
-```groovy
-repositories {
-    maven { url 'https://jitpack.io' }
-}
-
-dependencies {
-    implementation 'com.github.kaleidot725:pulsemvi:<version>'
-    implementation 'com.github.kaleidot725:pulsemvi-navigation3:<version>'
-}
-```
-:::
-
 ::: details Maven
 ```xml
 <repositories>
