@@ -5,7 +5,6 @@ import jp.kaleidot725.pulse.mvi.PulseState
 
 data class PulseAreaState(
     val count: Int = 0,
-    val lastOrigin: PulseAreaPosition? = null,
     val position: PulseAreaPosition = PulseAreaPosition.TopLeft,
     val setupCount: Int = 0,
 ) : PulseState

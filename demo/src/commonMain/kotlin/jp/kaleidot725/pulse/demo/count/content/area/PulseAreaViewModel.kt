@@ -44,13 +44,13 @@ class PulseAreaViewModel(
     }
 
     private fun reset() {
-        update { copy(count = 0, lastOrigin = null) }
+        update { copy(count = 0) }
     }
 
     private fun count(firedAt: PulseAreaPosition) {
         val before = currentState.count
-        update { copy(count = count + 1, lastOrigin = firedAt) }
-        event(PulseAreaEvent.Pulsed)
+        update { copy(count = count + 1) }
+        event(PulseAreaEvent.Pulsed(origin = firedAt))
 
         if (before < CHARGED_AT && currentState.count >= CHARGED_AT) {
             event(PulseAreaEvent.Charged(currentState.position, currentState.count))

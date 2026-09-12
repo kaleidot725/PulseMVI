@@ -44,7 +44,10 @@ fun PulseAreaContent(
         viewModel = viewModel,
         onEvent = { event ->
             when (event) {
-                PulseAreaEvent.Pulsed -> coroutineScope.launch { flash.flash() }
+                is PulseAreaEvent.Pulsed -> {
+                    val strength = if (event.origin == viewModel.currentState.position) 1f else 0.55f
+                    coroutineScope.launch { flash.flash(strength) }
+                }
                 is PulseAreaEvent.Charged -> onCharged(event)
             }
         },
@@ -58,8 +61,8 @@ fun PulseAreaContent(
     }
 }
 
-private suspend fun Animatable<Float, AnimationVector1D>.flash() {
-    snapTo(1f)
+private suspend fun Animatable<Float, AnimationVector1D>.flash(strength: Float) {
+    snapTo(strength)
     animateTo(targetValue = 0f, animationSpec = tween(FLASH_MILLIS, easing = LinearOutSlowInEasing))
 }
 
@@ -73,8 +76,7 @@ private fun PulseAreaCell(
     val hue = state.position.hue
     val charge = (state.count.toFloat() / CHARGE_FULL).coerceIn(0f, 1f)
     val resting = Color.hsl(hue, 0.30f + 0.45f * charge, 0.90f - 0.45f * charge)
-    val flashStrength = if (state.lastOrigin == state.position) 1f else 0.55f
-    val fill = lerp(resting, Color.hsl(hue, 1f, 0.96f), flash * flashStrength)
+    val fill = lerp(resting, Color.hsl(hue, 1f, 0.96f), flash)
     val ink = if (charge > 0.55f) Color.White else Color.hsl(hue, 0.85f, 0.18f)
 
     Column(
@@ -84,7 +86,7 @@ private fun PulseAreaCell(
                 .clip(RoundedCornerShape(20.dp))
                 .background(fill)
                 .border(
-                    width = (1 + 5 * flash * flashStrength).dp,
+                    width = (1 + 5 * flash).dp,
                     color = Color.hsl(hue, 0.80f, 0.45f).copy(alpha = 0.25f + 0.75f * flash),
                     shape = RoundedCornerShape(20.dp),
                 ).clickable(onClick = onPulse)
@@ -110,19 +112,13 @@ private fun PulseAreaCell(
                     .testTag("count-${state.position.name}"),
         )
         Text(
-            text = "${state.caption} · setup ${state.setupCount}",
+            text = "setup ${state.setupCount}",
             fontSize = 11.sp,
             color = ink.copy(alpha = 0.65f),
             modifier = Modifier.testTag("caption-${state.position.name}"),
         )
     }
 }
-
-private val PulseAreaState.caption: String
-    get() {
-        val origin = lastOrigin ?: return "out of reach"
-        return if (origin == position) "tapped" else "${origin.label.lowercase()} reached here"
-    }
 
 private val PulseAreaPosition.hue: Float
     get() =
