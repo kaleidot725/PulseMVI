@@ -85,6 +85,20 @@ class PulseViewModelTest {
         }
 
     @Test
+    fun setupOnceRunsAgainAfterCancel() {
+        val viewModel = TestViewModel()
+
+        viewModel.setupOnce()
+        viewModel.setupOnce()
+        assertEquals(1, viewModel.setupCount)
+
+        viewModel.cancel()
+        viewModel.setupOnce()
+
+        assertEquals(2, viewModel.setupCount)
+    }
+
+    @Test
     fun stateIsPreservedAcrossSetups() {
         val viewModel = TestViewModel()
 
