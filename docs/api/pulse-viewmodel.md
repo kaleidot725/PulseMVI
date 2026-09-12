@@ -76,7 +76,9 @@ A `CoroutineScope` backed by `SupervisorJob` and the dispatcher passed to the co
 open fun onSetup()
 ```
 
-Called once, by `PulseContent`, the first time it observes the ViewModel. `setupOnce()` guards it, so a second `PulseContent` observing the same instance does not repeat it. Override it to start data-collection coroutines; they run in `coroutineScope` and stop when it is cancelled.
+Called once, by `PulseContent`, the first time it observes the ViewModel. Leaving and re-entering the composition does not repeat it, because the instance outlives the composition. Override it to start data-collection coroutines; they run in `coroutineScope` and stop when it is cancelled.
+
+Observe an instance from one `PulseContent` at a time. `event` is a single-consumer channel: a second observer would take events the first never sees.
 
 ---
 
@@ -144,7 +146,7 @@ Emits a child-to-parent message. The parent `PulseContainer` collects the ViewMo
 fun cancel()
 ```
 
-Cancels the work started in `onSetup()` and replaces the scope with a fresh one, so calling `onSetup()` again runs normally with the state preserved. Use it when the ViewModel may become active again.
+Cancels the work started in `onSetup()` and replaces the scope with a fresh one, with the state preserved. The next `PulseContent` to observe the instance runs `onSetup()` again. Use it when the ViewModel may become active again.
 
 ---
 

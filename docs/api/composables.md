@@ -195,7 +195,7 @@ PulseContent(
 )
 ```
 
-Observes a `PulseViewModel` and provides state and an action dispatcher to the content block. Automatically cancels the ViewModel when removed from the composition.
+Observes a `PulseViewModel` and provides state and an action dispatcher to the content block. Runs `onSetup()` the first time it observes an instance; it never cancels one. Observe each instance from one `PulseContent` at a time, since `event` is a single-consumer channel.
 
 ### Parameters
 
@@ -207,9 +207,9 @@ Observes a `PulseViewModel` and provides state and an action dispatcher to the c
 
 ### Lifecycle behavior
 
-- `PulseContent` only observes: it never starts or cancels the ViewModel lifecycle
-- `LaunchedEffect(viewModel)` collects `event`
-- `onSetup()` runs once when `rememberPulseViewModel` creates the ViewModel, and the scope is cancelled when the owning `ViewModelStoreOwner` is cleared
+- `PulseContent` never cancels the ViewModel; teardown belongs to whoever owns it
+- `LaunchedEffect(viewModel)` collects `event`, always through the latest `onEvent` passed in
+- `onSetup()` runs once, the first time a `PulseContent` observes the ViewModel; the scope is cancelled when the owning `ViewModelStoreOwner` is cleared
 - Leaving and re-entering composition — a navigation destination covering the route, for example — never repeats `onSetup()`
 - When inside `PulseHost`, the composable is wrapped in `key(containerKey)` and re-creates on `refresh()`
 
