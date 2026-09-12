@@ -3,9 +3,7 @@ package jp.kaleidot725.pulse.demo.count.content.area.state
 import jp.kaleidot725.pulse.mvi.PulseEvent
 
 sealed interface PulseAreaEvent : PulseEvent {
-    data class Pulsed(
-        val origin: PulseAreaPosition,
-    ) : PulseAreaEvent
+    data object Pulsed : PulseAreaEvent
 
     data class Charged(
         val position: PulseAreaPosition,

@@ -32,7 +32,7 @@ class PulseAreaViewModel(
 
     private fun sendPulse() {
         val position = currentState.position
-        count(firedAt = position)
+        count()
         unicast(PulseCountUnicast.Pulsed(position))
     }
 
@@ -41,17 +41,17 @@ class PulseAreaViewModel(
         if (origin == position) return
         if (origin !in position.neighbors) return
 
-        count(firedAt = origin)
+        count()
     }
 
     private fun reset() {
         update { copy(count = 0) }
     }
 
-    private fun count(firedAt: PulseAreaPosition) {
+    private fun count() {
         val before = currentState.count
         update { copy(count = count + 1) }
-        event(PulseAreaEvent.Pulsed(origin = firedAt))
+        event(PulseAreaEvent.Pulsed)
 
         if (before < CHARGED_AT && currentState.count >= CHARGED_AT) {
             event(PulseAreaEvent.Charged(currentState.position, currentState.count))
