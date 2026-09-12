@@ -53,29 +53,6 @@ dependencies {
 
 Replace `<version>` with the latest tag from [GitHub Releases](https://github.com/kaleidot725/PulseMVI/releases).
 
-::: details Maven
-```xml
-<repositories>
-    <repository>
-        <id>jitpack.io</id>
-        <url>https://jitpack.io</url>
-    </repository>
-</repositories>
-
-<dependency>
-    <groupId>com.github.kaleidot725</groupId>
-    <artifactId>pulsemvi</artifactId>
-    <version>Tag</version>
-</dependency>
-
-<dependency>
-    <groupId>com.github.kaleidot725</groupId>
-    <artifactId>pulsemvi-navigation3</artifactId>
-    <version>Tag</version>
-</dependency>
-```
-:::
-
 ## Artifacts
 
 | Artifact | Contents |
