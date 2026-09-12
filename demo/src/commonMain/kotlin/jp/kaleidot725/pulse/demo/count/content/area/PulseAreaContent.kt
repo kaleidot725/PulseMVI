@@ -1,10 +1,6 @@
 package jp.kaleidot725.pulse.demo.count.content.area
 
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import jp.kaleidot725.pulse.demo.count.content.area.component.PulseAreaCell
@@ -20,21 +16,16 @@ fun PulseAreaContent(
     onCharged: (PulseAreaEvent.Charged) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    var isFlashing by remember { mutableStateOf(false) }
-
     PulseContent(
         viewModel = viewModel,
         onEvent = { event ->
             when (event) {
-                PulseAreaEvent.Pulsed -> isFlashing = true
                 is PulseAreaEvent.Charged -> onCharged(event)
             }
         },
     ) { state, onAction ->
         PulseAreaContent(
             state = state,
-            isFlashing = isFlashing,
-            onFlashFinished = { isFlashing = false },
             onAction = onAction,
             modifier = modifier,
         )
@@ -44,16 +35,13 @@ fun PulseAreaContent(
 @Composable
 fun PulseAreaContent(
     state: PulseAreaState,
-    isFlashing: Boolean,
-    onFlashFinished: () -> Unit,
     onAction: (PulseAreaAction) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     PulseAreaCell(
         state = state,
-        isFlashing = isFlashing,
-        onFlashFinished = onFlashFinished,
         onPulse = { onAction(PulseAreaAction.Pulse) },
+        onFlashFinished = { onAction(PulseAreaAction.FlashFinished) },
         modifier = modifier,
     )
 }
@@ -63,8 +51,6 @@ fun PulseAreaContent(
 private fun PulseAreaContentPreview() {
     PulseAreaContent(
         state = PulseAreaState(position = PulseAreaPosition.TopLeft, count = 7),
-        isFlashing = false,
-        onFlashFinished = {},
         onAction = {},
     )
 }

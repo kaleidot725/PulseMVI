@@ -20,6 +20,7 @@ class PulseAreaViewModel(
     override fun onAction(uiAction: PulseAreaAction) {
         when (uiAction) {
             PulseAreaAction.Pulse -> sendPulse()
+            PulseAreaAction.FlashFinished -> finishFlash()
         }
     }
 
@@ -48,10 +49,13 @@ class PulseAreaViewModel(
         update { copy(count = 0) }
     }
 
+    private fun finishFlash() {
+        update { copy(isFlashing = false) }
+    }
+
     private fun count() {
         val before = currentState.count
-        update { copy(count = count + 1) }
-        event(PulseAreaEvent.Pulsed)
+        update { copy(count = count + 1, isFlashing = true) }
 
         if (before < CHARGED_AT && currentState.count >= CHARGED_AT) {
             event(PulseAreaEvent.Charged(currentState.position, currentState.count))

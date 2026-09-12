@@ -31,14 +31,13 @@ import jp.kaleidot725.pulse.demo.count.content.area.state.PulseAreaState
 @Composable
 fun PulseAreaCell(
     state: PulseAreaState,
-    isFlashing: Boolean,
-    onFlashFinished: () -> Unit,
     onPulse: () -> Unit,
+    onFlashFinished: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val flash = remember { Animatable(0f) }
-    LaunchedEffect(isFlashing) {
-        if (!isFlashing) return@LaunchedEffect
+    LaunchedEffect(state.isFlashing) {
+        if (!state.isFlashing) return@LaunchedEffect
         flash.snapTo(1f)
         flash.animateTo(targetValue = 0f, animationSpec = tween(FLASH_MILLIS, easing = LinearOutSlowInEasing))
         onFlashFinished()
