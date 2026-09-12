@@ -22,6 +22,7 @@ import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import jp.kaleidot725.pulse.demo.count.content.area.state.PulseAreaPosition
@@ -44,10 +45,9 @@ fun PulseAreaCell(
     }
 
     val hue = state.position.hue
-    val charge = (state.count.toFloat() / CHARGE_FULL).coerceIn(0f, 1f)
-    val resting = Color.hsl(hue, 0.30f + 0.45f * charge, 0.90f - 0.45f * charge)
-    val fill = lerp(resting, Color.hsl(hue, 1f, 0.96f), flash.value)
-    val ink = if (charge > 0.55f) Color.White else Color.hsl(hue, 0.85f, 0.18f)
+    val charge = chargeOf(state.count)
+    val fill = fillColor(hue = hue, charge = charge, flash = flash.value)
+    val ink = inkColor(hue = hue, charge = charge)
 
     Column(
         modifier =
@@ -56,8 +56,8 @@ fun PulseAreaCell(
                 .clip(RoundedCornerShape(20.dp))
                 .background(fill)
                 .border(
-                    width = (1 + 5 * flash.value).dp,
-                    color = Color.hsl(hue, 0.80f, 0.45f).copy(alpha = 0.25f + 0.75f * flash.value),
+                    width = borderWidth(flash = flash.value),
+                    color = borderColor(hue = hue, flash = flash.value),
                     shape = RoundedCornerShape(20.dp),
                 ).clickable(onClick = onPulse)
                 .testTag("area-${state.position.name}")
@@ -98,6 +98,33 @@ private val PulseAreaPosition.hue: Float
             PulseAreaPosition.BottomLeft -> 158f
             PulseAreaPosition.BottomRight -> 336f
         }
+
+private fun chargeOf(count: Int): Float = (count.toFloat() / CHARGE_FULL).coerceIn(0f, 1f)
+
+private fun restingColor(
+    hue: Float,
+    charge: Float,
+): Color = Color.hsl(hue = hue, saturation = 0.30f + 0.45f * charge, lightness = 0.90f - 0.45f * charge)
+
+private fun flashColor(hue: Float): Color = Color.hsl(hue = hue, saturation = 1f, lightness = 0.96f)
+
+private fun fillColor(
+    hue: Float,
+    charge: Float,
+    flash: Float,
+): Color = lerp(restingColor(hue, charge), flashColor(hue), flash)
+
+private fun inkColor(
+    hue: Float,
+    charge: Float,
+): Color = if (charge > 0.55f) Color.White else Color.hsl(hue = hue, saturation = 0.85f, lightness = 0.18f)
+
+private fun borderColor(
+    hue: Float,
+    flash: Float,
+): Color = Color.hsl(hue = hue, saturation = 0.80f, lightness = 0.45f).copy(alpha = 0.25f + 0.75f * flash)
+
+private fun borderWidth(flash: Float): Dp = (1 + 5 * flash).dp
 
 private const val FLASH_MILLIS = 520
 private const val CHARGE_FULL = 16f
