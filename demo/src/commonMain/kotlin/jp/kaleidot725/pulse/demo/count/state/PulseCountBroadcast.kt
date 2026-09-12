@@ -3,10 +3,10 @@ package jp.kaleidot725.pulse.demo.count.state
 import jp.kaleidot725.pulse.demo.count.content.area.PulseAreaPosition
 import jp.kaleidot725.pulse.mvi.PulseBroadcast
 
-sealed interface PulseCountBroadcaset : PulseBroadcast {
+sealed interface PulseCountBroadcast : PulseBroadcast {
     data class Pulse(
         val origin: PulseAreaPosition,
-    ) : PulseCountBroadcaset
+    ) : PulseCountBroadcast
 
-    data object Reset : PulseCountBroadcaset
+    data object Reset : PulseCountBroadcast
 }

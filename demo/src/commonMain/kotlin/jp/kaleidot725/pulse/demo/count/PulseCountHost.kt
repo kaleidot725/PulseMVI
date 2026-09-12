@@ -30,14 +30,14 @@ import androidx.compose.ui.unit.sp
 import jp.kaleidot725.pulse.demo.count.content.area.PulseAreaContent
 import jp.kaleidot725.pulse.demo.count.content.area.PulseAreaPosition
 import jp.kaleidot725.pulse.demo.count.content.area.PulseAreaViewModel
-import jp.kaleidot725.pulse.demo.count.state.PulseCountBroadcaset
+import jp.kaleidot725.pulse.demo.count.state.PulseCountBroadcast
 import jp.kaleidot725.pulse.mvi.PulseHost
 import jp.kaleidot725.pulse.mvi.navigation3.rememberPulseContainer
 import jp.kaleidot725.pulse.mvi.navigation3.rememberPulseViewModel
 import kotlinx.coroutines.launch
 
 @Composable
-fun CountHost(
+fun PulseCountHost(
     depth: Int,
     onNewArea: () -> Unit,
     onBack: (() -> Unit)?,
@@ -62,11 +62,11 @@ fun CountHost(
                         .padding(24.dp),
                 verticalArrangement = Arrangement.spacedBy(16.dp),
             ) {
-                GridHeader(
+                PulseCountHeader(
                     depth = depth,
                     onNewArea = onNewArea,
                     onBack = onBack,
-                    onReset = { onBroadcast(PulseCountBroadcaset.Reset) },
+                    onReset = { onBroadcast(PulseCountBroadcast.Reset) },
                     onRefresh = onRefresh,
                 )
 
@@ -100,7 +100,7 @@ fun CountHost(
 }
 
 @Composable
-private fun GridHeader(
+private fun PulseCountHeader(
     depth: Int,
     onNewArea: () -> Unit,
     onBack: (() -> Unit)?,

@@ -10,24 +10,24 @@ import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.ui.NavDisplay
-import jp.kaleidot725.pulse.demo.count.CountHost
+import jp.kaleidot725.pulse.demo.count.PulseCountHost
 import jp.kaleidot725.pulse.mvi.navigation3.rememberPulseNavEntryDecorators
 
-private data class GridRoute(
+private data class PulseCountRoute(
     val depth: Int,
 ) : NavKey
 
-private val GridBackStackSaver: Saver<SnapshotStateList<GridRoute>, Any> =
+private val PulseCountBackStackSaver: Saver<SnapshotStateList<PulseCountRoute>, Any> =
     listSaver(
         save = { backStack -> backStack.map { it.depth } },
         restore = { saved ->
-            mutableStateListOf(*saved.map { GridRoute(it) }.toTypedArray())
+            mutableStateListOf(*saved.map { PulseCountRoute(it) }.toTypedArray())
         },
     )
 
 @Composable
 fun DemoApp() {
-    val backStack = rememberSaveable(saver = GridBackStackSaver) { mutableStateListOf(GridRoute(depth = 1)) }
+    val backStack = rememberSaveable(saver = PulseCountBackStackSaver) { mutableStateListOf(PulseCountRoute(depth = 1)) }
     val popLast: () -> Unit = {
         if (backStack.size > 1) backStack.removeAt(backStack.lastIndex)
     }
@@ -39,10 +39,10 @@ fun DemoApp() {
             entryDecorators = rememberPulseNavEntryDecorators(),
             entryProvider =
                 entryProvider {
-                    entry<GridRoute> { route ->
-                        CountHost(
+                    entry<PulseCountRoute> { route ->
+                        PulseCountHost(
                             depth = route.depth,
-                            onNewArea = { backStack.add(GridRoute(route.depth + 1)) },
+                            onNewArea = { backStack.add(PulseCountRoute(route.depth + 1)) },
                             onBack = popLast.takeIf { route.depth > 1 },
                         )
                     }

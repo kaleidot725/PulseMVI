@@ -3,13 +3,13 @@ package jp.kaleidot725.pulse.demo.count.content.area
 import jp.kaleidot725.pulse.demo.count.content.area.state.PulseAreaAction
 import jp.kaleidot725.pulse.demo.count.content.area.state.PulseAreaEvent
 import jp.kaleidot725.pulse.demo.count.content.area.state.PulseAreaState
-import jp.kaleidot725.pulse.demo.count.state.PulseCountBroadcaset
+import jp.kaleidot725.pulse.demo.count.state.PulseCountBroadcast
 import jp.kaleidot725.pulse.demo.count.state.PulseCountUnicast
 import jp.kaleidot725.pulse.mvi.PulseViewModel
 
 class PulseAreaViewModel(
     position: PulseAreaPosition,
-) : PulseViewModel<PulseAreaState, PulseAreaAction, PulseAreaEvent, PulseCountBroadcaset, PulseCountUnicast>(
+) : PulseViewModel<PulseAreaState, PulseAreaAction, PulseAreaEvent, PulseCountBroadcast, PulseCountUnicast>(
         initialUiState = PulseAreaState(position = position),
     ) {
     override fun onSetup() {
@@ -22,10 +22,10 @@ class PulseAreaViewModel(
         }
     }
 
-    override fun onReceive(broadcast: PulseCountBroadcaset) {
+    override fun onReceive(broadcast: PulseCountBroadcast) {
         when (broadcast) {
-            is PulseCountBroadcaset.Pulse -> receivePulse(broadcast.origin)
-            PulseCountBroadcaset.Reset -> reset()
+            is PulseCountBroadcast.Pulse -> receivePulse(broadcast.origin)
+            PulseCountBroadcast.Reset -> reset()
         }
     }
 

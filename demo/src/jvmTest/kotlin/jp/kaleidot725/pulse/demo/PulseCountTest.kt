@@ -16,12 +16,8 @@ import androidx.lifecycle.viewmodel.compose.LocalViewModelStoreOwner
 import org.junit.Rule
 import org.junit.Test
 
-/**
- * Covers the pulse itself: an area counts its own tap, announces it as a Unicast, the Container
- * broadcasts it back to all four, and each one works out from the origin what to do with it.
- */
 @OptIn(ExperimentalTestApi::class)
-class PulseGridTest {
+class PulseCountTest {
     @get:Rule
     val composeRule = createComposeRule()
 
@@ -31,7 +27,6 @@ class PulseGridTest {
 
         composeRule.onNodeWithTag("area-TopLeft").performClick()
 
-        // One, not two: the origin counts its own tap and then drops the broadcast copy of it.
         assertCount("TopLeft", 1)
         assertCount("TopRight", 1)
         assertCount("BottomLeft", 1)
@@ -58,11 +53,9 @@ class PulseGridTest {
         assertCount("TopLeft", 1)
         composeRule.onNodeWithTag("area-TopRight").performClick()
 
-        // TopLeft is a neighbour of TopRight, so the second pulse reaches it too.
         assertCount("TopRight", 2)
         assertCount("TopLeft", 2)
         assertCount("BottomRight", 1)
-        // BottomLeft is the diagonal of TopRight, so only the first pulse ever reached it.
         assertCount("BottomLeft", 1)
     }
 
@@ -124,7 +117,6 @@ class PulseGridTest {
         composeRule.onNodeWithTag("area-TopLeft").performClick()
         assertCount("TopLeft", 1)
 
-        // Throw the whole tree away and rebuild it, the way a host driven restart would.
         composeRule.runOnUiThread { generation.value += 1 }
         composeRule.waitForIdle()
 
@@ -168,10 +160,6 @@ class PulseGridTest {
 
     private fun assertTitle(title: String) = awaitSingleNode(hasTestTag("grid-title") and hasText(title))
 
-    /**
-     * The cells are clickable, which merges their semantics, so the tagged Text nodes inside them
-     * only exist in the unmerged tree.
-     */
     private fun awaitSingleNode(matcher: SemanticsMatcher) =
         composeRule.waitUntil(timeoutMillis = TIMEOUT_MILLIS) {
             composeRule.onAllNodes(matcher, useUnmergedTree = true).fetchSemanticsNodes().size == 1
