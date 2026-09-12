@@ -1,6 +1,7 @@
 package jp.kaleidot725.pulse.demo.count.content.area
 
 import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.AnimationVector1D
 import androidx.compose.animation.core.LinearOutSlowInEasing
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
@@ -13,8 +14,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
@@ -28,6 +29,7 @@ import jp.kaleidot725.pulse.demo.count.content.area.state.PulseAreaAction
 import jp.kaleidot725.pulse.demo.count.content.area.state.PulseAreaEvent
 import jp.kaleidot725.pulse.demo.count.content.area.state.PulseAreaState
 import jp.kaleidot725.pulse.mvi.PulseContent
+import kotlinx.coroutines.launch
 
 @Composable
 fun PulseAreaContent(
@@ -35,40 +37,44 @@ fun PulseAreaContent(
     onCharged: (PulseAreaEvent.Charged) -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    val flash = remember { Animatable(0f) }
+    val coroutineScope = rememberCoroutineScope()
+
     PulseContent(
         viewModel = viewModel,
         onEvent = { event ->
             when (event) {
+                PulseAreaEvent.Pulsed -> coroutineScope.launch { flash.flash() }
                 is PulseAreaEvent.Charged -> onCharged(event)
             }
         },
     ) { state, onAction ->
         PulseAreaCell(
             state = state,
+            flash = flash.value,
             onPulse = { onAction(PulseAreaAction.Pulse) },
             modifier = modifier,
         )
     }
 }
 
+private suspend fun Animatable<Float, AnimationVector1D>.flash() {
+    snapTo(1f)
+    animateTo(targetValue = 0f, animationSpec = tween(FLASH_MILLIS, easing = LinearOutSlowInEasing))
+}
+
 @Composable
 private fun PulseAreaCell(
     state: PulseAreaState,
+    flash: Float,
     onPulse: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val flash = remember { Animatable(0f) }
-    LaunchedEffect(state.pulseId) {
-        if (state.pulseId == 0L) return@LaunchedEffect
-        flash.snapTo(1f)
-        flash.animateTo(targetValue = 0f, animationSpec = tween(FLASH_MILLIS, easing = LinearOutSlowInEasing))
-    }
-
     val hue = state.position.hue
     val charge = (state.count.toFloat() / CHARGE_FULL).coerceIn(0f, 1f)
     val resting = Color.hsl(hue, 0.30f + 0.45f * charge, 0.90f - 0.45f * charge)
     val flashStrength = if (state.lastOrigin == state.position) 1f else 0.55f
-    val fill = lerp(resting, Color.hsl(hue, 1f, 0.96f), flash.value * flashStrength)
+    val fill = lerp(resting, Color.hsl(hue, 1f, 0.96f), flash * flashStrength)
     val ink = if (charge > 0.55f) Color.White else Color.hsl(hue, 0.85f, 0.18f)
 
     Column(
@@ -78,8 +84,8 @@ private fun PulseAreaCell(
                 .clip(RoundedCornerShape(20.dp))
                 .background(fill)
                 .border(
-                    width = (1 + 5 * flash.value * flashStrength).dp,
-                    color = Color.hsl(hue, 0.80f, 0.45f).copy(alpha = 0.25f + 0.75f * flash.value),
+                    width = (1 + 5 * flash * flashStrength).dp,
+                    color = Color.hsl(hue, 0.80f, 0.45f).copy(alpha = 0.25f + 0.75f * flash),
                     shape = RoundedCornerShape(20.dp),
                 ).clickable(onClick = onPulse)
                 .testTag("area-${state.position.name}")

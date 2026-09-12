@@ -7,6 +7,5 @@ data class PulseAreaState(
     val count: Int = 0,
     val lastOrigin: PulseAreaPosition? = null,
     val position: PulseAreaPosition = PulseAreaPosition.TopLeft,
-    val pulseId: Long = 0,
     val setupCount: Int = 0,
 ) : PulseState
