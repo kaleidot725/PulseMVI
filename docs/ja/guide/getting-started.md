@@ -1,10 +1,9 @@
-# Getting Started
+# はじめかた
 
-This guide walks you through building a simple counter app with PulseMVI.
+このガイドでは、PulseMVI でシンプルなカウンターアプリを作る手順を追います。
 
-It uses `rememberPulseViewModel` to own the ViewModel, which comes from the `pulsemvi-navigation3` artifact.
-Add it alongside the core one, or see [ViewModel](/guide/viewmodel) for driving the lifecycle yourself with
-the core artifact alone.
+ViewModel の所有には `pulsemvi-navigation3` アーティファクトの `rememberPulseViewModel` を使います。
+コアと一緒に追加してください。コアのみでライフサイクルを自前で扱う場合は [ViewModel](/ja/guide/viewmodel) を参照してください。
 
 ```kotlin
 dependencies {
@@ -13,40 +12,40 @@ dependencies {
 }
 ```
 
-## 1. Define State, Action, Event, Broadcast, and Unicast
+## 1. State・Action・Event・Broadcast・Unicast を定義する
 
-Start by defining the five types that describe your feature:
+まず、機能を表す 5 つの型を定義します。
 
 ```kotlin
-// State: the UI data rendered by your Composable
+// State: Composable が描画する UI データ
 data class CounterState(val count: Int = 0) : PulseState
 
-// Action: intents dispatched by the user
+// Action: ユーザーが発行する意図
 sealed class CounterAction : PulseAction {
     data object Increment : CounterAction()
     data object Decrement : CounterAction()
     data object Reset : CounterAction()
 }
 
-// Event: one-time side effects (navigation, snackbar, etc.)
+// Event: 一度きりの副作用（ナビゲーション、スナックバーなど）
 sealed class CounterEvent : PulseEvent {
     data class ShowMessage(val message: String) : CounterEvent()
 }
 
-// Broadcast: messages sent from Container to all ViewModels
+// Broadcast: Container からすべての ViewModel へ送るメッセージ
 sealed class CounterBroadcast : PulseBroadcast {
     data object Refresh : CounterBroadcast()
 }
 
-// Unicast: messages sent from ViewModel to Container
+// Unicast: ViewModel から Container へ送るメッセージ
 sealed interface CounterUnicast : PulseUnicast {
     data object ResetRequested : CounterUnicast
 }
 ```
 
-## 2. Create a ViewModel
+## 2. ViewModel を作る
 
-`PulseViewModel` manages its own UI state. Override the lifecycle hooks to handle actions and broadcasts:
+`PulseViewModel` は自身の UI 状態を管理します。ライフサイクルフックをオーバーライドして、Action と Broadcast を処理します。
 
 ```kotlin
 class CounterViewModel(
@@ -54,7 +53,7 @@ class CounterViewModel(
 ) : PulseViewModel<CounterState, CounterAction, CounterEvent, CounterBroadcast, CounterUnicast>(
     initialUiState = CounterState(),
 ) {
-    // Called once, by PulseContent, the first time it observes the ViewModel
+    // PulseContent がこの ViewModel を最初に観測したときに一度だけ呼ばれる
     override fun onSetup() {
         coroutineScope.launch {
             repository.count.collect { count ->
@@ -66,7 +65,7 @@ class CounterViewModel(
         }
     }
 
-    // Called when the user dispatches an action
+    // ユーザーが Action を発行したときに呼ばれる
     override fun onAction(uiAction: CounterAction) {
         coroutineScope.launch {
             when (uiAction) {
@@ -77,7 +76,7 @@ class CounterViewModel(
         }
     }
 
-    // Called when the Container broadcasts a message
+    // Container がメッセージを Broadcast したときに呼ばれる
     override fun onReceive(broadcast: CounterBroadcast) {
         when (broadcast) {
             CounterBroadcast.Refresh ->
@@ -87,9 +86,9 @@ class CounterViewModel(
 }
 ```
 
-## 3. Create a Container
+## 3. Container を作る
 
-`PulseContainer` takes a list of ViewModels and lets you broadcast to all of them or refresh the view:
+`PulseContainer` は ViewModel のリストを受け取り、全員への Broadcast やビューの Refresh を可能にします。
 
 ```kotlin
 class CounterContainer(
@@ -97,11 +96,11 @@ class CounterContainer(
 ) : PulseContainer<CounterBroadcast, CounterUnicast>(viewModels = viewModels)
 ```
 
-## 4. Connect to Compose UI
+## 4. Compose UI に接続する
 
-### Entry point
+### エントリポイント
 
-Create the ViewModel and Container once at the top level:
+ViewModel と Container をトップレベルで一度だけ生成します。
 
 ```kotlin
 fun main() = application {
@@ -116,9 +115,9 @@ fun main() = application {
 }
 ```
 
-### Screen composable
+### 画面の Composable
 
-Wrap your layout with `PulseHost` to enable refresh and broadcast:
+レイアウトを `PulseHost` で包むと、Refresh と Broadcast が使えるようになります。
 
 ```kotlin
 @Composable
@@ -142,9 +141,9 @@ fun CounterScreen(container: CounterContainer, viewModel: CounterViewModel) {
 }
 ```
 
-### Content composable
+### コンテンツの Composable
 
-Use `PulseContent` to observe a ViewModel and handle events:
+`PulseContent` で ViewModel を観測し、Event を処理します。
 
 ```kotlin
 @Composable
@@ -179,17 +178,16 @@ fun CounterContent(viewModel: CounterViewModel, modifier: Modifier = Modifier) {
 }
 ```
 
-## Running the Demo
+## デモを動かす
 
-The repository includes a pulse grid demo: four areas sharing one Container, where a tap on one
-spreads to the two it shares an edge with. Clone the repo and run:
+リポジトリにはパルスグリッドのデモが含まれています。4 つのエリアが 1 つの Container を共有し、1 つをタップすると辺を共有する 2 つに波及します。リポジトリをクローンして実行してください。
 
 ```bash
 ./gradlew :demo:run
 ```
 
-## Next Steps
+## 次のステップ
 
-- [Architecture](/guide/architecture) — understand the data flow in depth
-- [ViewModel](/guide/viewmodel) — advanced ViewModel patterns
-- [Container](/guide/container) — coordinating multiple ViewModels
+- [アーキテクチャ](/ja/guide/architecture) — データフローを深く理解する
+- [ViewModel](/ja/guide/viewmodel) — ViewModel の応用パターン
+- [Container](/ja/guide/container) — 複数の ViewModel を調整する

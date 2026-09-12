@@ -7,11 +7,11 @@ abstract class PulseContainer<Broadcast : PulseBroadcast, Unicast : PulseUnicast
 )
 ```
 
-Coordinates multiple `PulseViewModel` instances. Provides broadcast delivery, child unicast handling, and view refresh.
+複数の `PulseViewModel` インスタンスを調整します。Broadcast の配信、子からの Unicast の処理、View Refresh を提供します。
 
-The internal unicast collector uses `Dispatchers.Default` unless another dispatcher is passed to the constructor.
+内部の Unicast 収集には、コンストラクタで別のディスパッチャが渡されない限り `Dispatchers.Default` を使います。
 
-## Methods
+## メソッド
 
 ### `broadcast(broadcast)`
 
@@ -19,7 +19,7 @@ The internal unicast collector uses `Dispatchers.Default` unless another dispatc
 fun broadcast(broadcast: Broadcast)
 ```
 
-Delivers `broadcast` to every `PulseViewModel` registered at construction time by calling each ViewModel's `onReceive()`.
+生成時に登録されたすべての `PulseViewModel` の `onReceive()` を呼び、`broadcast` を届けます。
 
 ```kotlin
 container.broadcast(AppBroadcast.UserLoggedOut)
@@ -33,7 +33,7 @@ container.broadcast(AppBroadcast.UserLoggedOut)
 open fun onReceived(unicast: Unicast)
 ```
 
-Called when a registered `PulseViewModel` emits an unicast. `PulseContainer` collects each ViewModel's `unicast` flow internally and forwards each value to this hook.
+登録済みの `PulseViewModel` が Unicast を発行したときに呼ばれます。`PulseContainer` は各 ViewModel の `unicast` Flow を内部で収集し、値をこのフックに転送します。
 
 ```kotlin
 override fun onReceived(unicast: AppUnicast) {
@@ -51,7 +51,7 @@ override fun onReceived(unicast: AppUnicast) {
 fun refresh()
 ```
 
-Bumps the container's internal key, causing `PulseHost` to re-create every `PulseContent` block inside it. ViewModel state is preserved; only Compose state is discarded.
+Container の内部キーを進め、`PulseHost` 内のすべての `PulseContent` ブロックを作り直させます。ViewModel の状態は保持され、Compose の状態だけが破棄されます。
 
 ```kotlin
 container.refresh()
@@ -65,13 +65,13 @@ container.refresh()
 fun close()
 ```
 
-Cancels the Container scope and stops collecting Unicast messages from the ViewModels. Call it when the Container is gone for good. `rememberPulseContainer` calls it for you when the owning `ViewModelStore` is cleared.
+Container のスコープをキャンセルし、ViewModel からの Unicast の収集を止めます。Container が完全に不要になったときに呼んでください。`rememberPulseContainer` を使っていれば、所有する `ViewModelStore` が破棄されるときに自動で呼ばれます。
 
 ```kotlin
 container.close()
 ```
 
-## Example
+## 例
 
 ```kotlin
 class AppContainer(
@@ -84,14 +84,14 @@ class AppContainer(
     }
 }
 
-// Usage
+// 使い方
 val container = rememberPulseContainer {
     AppContainer(viewModels = listOf(sidebarViewModel, contentViewModel))
 }
 
-// Send to all ViewModels
+// すべての ViewModel へ送る
 container.broadcast(AppBroadcast.Sync)
 
-// Reconstruct view tree
+// ビューツリーを再構築する
 container.refresh()
 ```

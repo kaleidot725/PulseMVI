@@ -29,7 +29,7 @@ composition restart reuses the instance rather than rebuilding it.
 ### Lifecycle behavior
 
 - The ViewModel is created on first composition and reused for every later composition under the same owner
-- `onSetup()` runs once, when the ViewModel is created, so rebuilding the composition does not repeat it
+- `onSetup()` runs once, the first time a `PulseContent` observes the ViewModel, so rebuilding the composition does not repeat it
 - The ViewModel scope is cancelled when the owner's `ViewModelStore` is cleared
 - State is kept in memory only; it is not restored after process death
 
