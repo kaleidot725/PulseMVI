@@ -41,7 +41,6 @@ fun PulseAreaContent(
     PulseAreaCell(
         state = state,
         onPulse = { onAction(PulseAreaAction.Pulse) },
-        onFlashFinished = { onAction(PulseAreaAction.FlashFinished) },
         modifier = modifier,
     )
 }

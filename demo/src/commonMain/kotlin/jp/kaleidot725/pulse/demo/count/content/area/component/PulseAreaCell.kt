@@ -1,8 +1,5 @@
 package jp.kaleidot725.pulse.demo.count.content.area.component
 
-import androidx.compose.animation.core.Animatable
-import androidx.compose.animation.core.LinearOutSlowInEasing
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -14,17 +11,13 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import jp.kaleidot725.pulse.demo.count.content.area.state.PulseAreaPosition
@@ -34,20 +27,11 @@ import jp.kaleidot725.pulse.demo.count.content.area.state.PulseAreaState
 fun PulseAreaCell(
     state: PulseAreaState,
     onPulse: () -> Unit,
-    onFlashFinished: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val flash = remember { Animatable(0f) }
-    LaunchedEffect(state.isFlashing) {
-        if (!state.isFlashing) return@LaunchedEffect
-        flash.snapTo(1f)
-        flash.animateTo(targetValue = 0f, animationSpec = tween(FLASH_MILLIS, easing = LinearOutSlowInEasing))
-        onFlashFinished()
-    }
-
     val hue = state.position.hue
     val charge = chargeOf(state.count)
-    val fill = fillColor(hue = hue, charge = charge, flash = flash.value)
+    val fill = fillColor(hue = hue, charge = charge)
     val ink = inkColor(hue = hue, charge = charge)
 
     Column(
@@ -57,8 +41,8 @@ fun PulseAreaCell(
                 .clip(RoundedCornerShape(20.dp))
                 .background(fill)
                 .border(
-                    width = borderWidth(flash = flash.value),
-                    color = borderColor(hue = hue, flash = flash.value),
+                    width = 1.dp,
+                    color = borderColor(hue = hue),
                     shape = RoundedCornerShape(20.dp),
                 ).clickable(onClick = onPulse)
                 .testTag("area-${state.position.name}")
@@ -97,7 +81,6 @@ private fun PulseAreaCellPreview() {
     PulseAreaCell(
         state = PulseAreaState(position = PulseAreaPosition.TopRight, count = 7),
         onPulse = {},
-        onFlashFinished = {},
         modifier = Modifier.size(width = 320.dp, height = 220.dp),
     )
 }
@@ -113,30 +96,16 @@ private val PulseAreaPosition.hue: Float
 
 private fun chargeOf(count: Int): Float = (count.toFloat() / CHARGE_FULL).coerceIn(0f, 1f)
 
-private fun restingColor(
-    hue: Float,
-    charge: Float,
-): Color = Color.hsl(hue = hue, saturation = 0.30f + 0.45f * charge, lightness = 0.90f - 0.45f * charge)
-
-private fun flashColor(hue: Float): Color = Color.hsl(hue = hue, saturation = 1f, lightness = 0.96f)
-
 private fun fillColor(
     hue: Float,
     charge: Float,
-    flash: Float,
-): Color = lerp(restingColor(hue, charge), flashColor(hue), flash)
+): Color = Color.hsl(hue = hue, saturation = 0.30f + 0.45f * charge, lightness = 0.90f - 0.45f * charge)
 
 private fun inkColor(
     hue: Float,
     charge: Float,
 ): Color = if (charge > 0.55f) Color.White else Color.hsl(hue = hue, saturation = 0.85f, lightness = 0.18f)
 
-private fun borderColor(
-    hue: Float,
-    flash: Float,
-): Color = Color.hsl(hue = hue, saturation = 0.80f, lightness = 0.45f).copy(alpha = 0.25f + 0.75f * flash)
+private fun borderColor(hue: Float): Color = Color.hsl(hue = hue, saturation = 0.80f, lightness = 0.45f).copy(alpha = 0.25f)
 
-private fun borderWidth(flash: Float): Dp = (1 + 5 * flash).dp
-
-private const val FLASH_MILLIS = 520
 private const val CHARGE_FULL = 16f
