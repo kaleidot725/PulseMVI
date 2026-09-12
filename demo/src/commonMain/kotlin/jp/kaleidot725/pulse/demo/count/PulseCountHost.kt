@@ -28,8 +28,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import jp.kaleidot725.pulse.demo.count.content.area.PulseAreaContent
-import jp.kaleidot725.pulse.demo.count.content.area.PulseAreaPosition
 import jp.kaleidot725.pulse.demo.count.content.area.PulseAreaViewModel
+import jp.kaleidot725.pulse.demo.count.content.area.state.PulseAreaPosition
 import jp.kaleidot725.pulse.demo.count.state.PulseCountBroadcast
 import jp.kaleidot725.pulse.mvi.PulseHost
 import jp.kaleidot725.pulse.mvi.navigation3.rememberPulseContainer

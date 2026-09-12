@@ -2,6 +2,7 @@ package jp.kaleidot725.pulse.demo.count.content.area
 
 import jp.kaleidot725.pulse.demo.count.content.area.state.PulseAreaAction
 import jp.kaleidot725.pulse.demo.count.content.area.state.PulseAreaEvent
+import jp.kaleidot725.pulse.demo.count.content.area.state.PulseAreaPosition
 import jp.kaleidot725.pulse.demo.count.content.area.state.PulseAreaState
 import jp.kaleidot725.pulse.demo.count.state.PulseCountBroadcast
 import jp.kaleidot725.pulse.demo.count.state.PulseCountUnicast

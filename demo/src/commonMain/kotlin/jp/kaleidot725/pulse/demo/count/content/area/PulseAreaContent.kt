@@ -27,6 +27,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import jp.kaleidot725.pulse.demo.count.content.area.state.PulseAreaAction
 import jp.kaleidot725.pulse.demo.count.content.area.state.PulseAreaEvent
+import jp.kaleidot725.pulse.demo.count.content.area.state.PulseAreaPosition
 import jp.kaleidot725.pulse.demo.count.content.area.state.PulseAreaState
 import jp.kaleidot725.pulse.mvi.PulseContent
 import kotlinx.coroutines.launch

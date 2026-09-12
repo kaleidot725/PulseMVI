@@ -1,6 +1,6 @@
 package jp.kaleidot725.pulse.demo.count
 
-import jp.kaleidot725.pulse.demo.count.content.area.PulseAreaPosition
+import jp.kaleidot725.pulse.demo.count.content.area.state.PulseAreaPosition
 import jp.kaleidot725.pulse.demo.count.state.PulseCountBroadcast
 import jp.kaleidot725.pulse.demo.count.state.PulseCountUnicast
 import jp.kaleidot725.pulse.mvi.PulseContainer
