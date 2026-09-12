@@ -78,12 +78,14 @@ public abstract class PulseViewModel<
     /**
      * Cancels the work started in [onSetup] and prepares the ViewModel to be set up again.
      *
-     * The scope is replaced with a fresh one, so a later [onSetup] runs normally and the state is
-     * kept. Use this when the ViewModel may become active again; use [close] when it will not.
+     * The scope is replaced with a fresh one and [setupOnce] is re-armed, so the next
+     * [PulseContent] to observe this instance runs [onSetup] again with the state kept. Use this
+     * when the ViewModel may become active again; use [close] when it will not.
      */
     public fun cancel() {
         coroutineScope.cancel()
         coroutineScope = createCoroutineScope(coroutineDispatcher)
+        isSetUp = false
     }
 
     /**

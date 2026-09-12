@@ -29,8 +29,6 @@ artifact adds `rememberPulseViewModel` / `rememberPulseContainer`, and
 - **Publish to local Maven**: `./gradlew :library:publishToMavenLocal :navigation3:publishToMavenLocal`
 - **Run the demo**: `./gradlew :demo:run`
 
-UI tests live in `demo/src/jvmTest`.
-
 ## Project Structure
 
 ```
@@ -51,8 +49,11 @@ PulseMVI/
 │   └── src/commonMain/kotlin/jp/kaleidot725/pulse/mvi/navigation3/
 │       └── PulseNavigation.kt        # rememberPulseViewModel / rememberPulseContainer /
 │                                     # rememberPulseNavEntryDecorators
-├── demo/                             # Compose Desktop demo app (Navigation 3)
-│   └── src/{commonMain,jvmMain,jvmTest}/
+├── demo/                             # Pulse grid demo app (Navigation 3)
+│   └── src/{commonMain,jvmMain}/
+│       # Four areas share a Container: an area counts its own tap and announces
+│       # it as a Unicast, the Container broadcasts it back to all four, and each
+│       # decides what to do — the origin ignores the copy of its own tap
 ├── docs/                             # VitePress documentation site
 ├── build.gradle.kts                  # Root build file
 ├── settings.gradle.kts               # Project settings

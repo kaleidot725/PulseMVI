@@ -7,6 +7,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
+import androidx.compose.runtime.rememberUpdatedState
 
 internal val LocalPulseContainerKey = compositionLocalOf { 0L }
 
@@ -44,9 +45,10 @@ public fun <
     val containerKey = LocalPulseContainerKey.current
     val state by viewModel.state.collectAsState()
     val onAction = viewModel::onAction
+    val currentOnEvent by rememberUpdatedState(onEvent)
     LaunchedEffect(viewModel) {
         viewModel.setupOnce()
-        viewModel.event.collect { onEvent(it) }
+        viewModel.event.collect { currentOnEvent(it) }
     }
 
     key(containerKey) {

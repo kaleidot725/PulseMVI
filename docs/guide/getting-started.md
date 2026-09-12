@@ -181,7 +181,8 @@ fun CounterContent(viewModel: CounterViewModel, modifier: Modifier = Modifier) {
 
 ## Running the Demo
 
-The repository includes a complete counter demo. Clone the repo and run:
+The repository includes a pulse grid demo: four areas sharing one Container, where a tap on one
+spreads to the two it shares an edge with. Clone the repo and run:
 
 ```bash
 ./gradlew :demo:run

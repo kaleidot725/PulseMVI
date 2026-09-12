@@ -49,9 +49,16 @@ dependencies {
 ```
 
 `pulsemvi` alone leaves the ViewModel lifetime to you — see [ViewModel](/guide/viewmodel). Add
-`pulsemvi-navigation3` for `rememberPulseViewModel`, which hands that lifetime to a `ViewModel`.
+`pulsemvi-navigation3` to scope it to a back stack entry instead — see [Navigation 3](/guide/navigation3).
 
 Replace `<version>` with the latest tag from [GitHub Releases](https://github.com/kaleidot725/PulseMVI/releases).
+
+## Artifacts
+
+| Artifact | Contents |
+|---|---|
+| `pulsemvi` | `PulseState`, `PulseAction`, `PulseEvent`, `PulseBroadcast`, `PulseUnicast`, `PulseViewModel`, `PulseContainer`, `PulseHost`, `PulseContent` |
+| `pulsemvi-navigation3` | `rememberPulseViewModel`, `rememberPulseContainer`, `rememberPulseNavEntryDecorators` |
 
 ## Requirements
 
@@ -65,4 +72,5 @@ Replace `<version>` with the latest tag from [GitHub Releases](https://github.co
 
 - [Getting Started](/guide/getting-started) — build your first counter app
 - [Architecture](/guide/architecture) — understand how all the pieces fit together
+- [Navigation 3](/guide/navigation3) — scope ViewModels to a back stack entry
 - [Unicast](/guide/unicast) — send child ViewModel messages up to a Container

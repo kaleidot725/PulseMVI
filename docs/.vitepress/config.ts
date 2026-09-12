@@ -36,6 +36,7 @@ export default defineConfig({
             { text: 'Architecture', link: '/guide/architecture' },
             { text: 'ViewModel', link: '/guide/viewmodel' },
             { text: 'Container', link: '/guide/container' },
+            { text: 'Navigation 3', link: '/guide/navigation3' },
             { text: 'Broadcast', link: '/guide/broadcast' },
             { text: 'Unicast', link: '/guide/unicast' },
           ],
