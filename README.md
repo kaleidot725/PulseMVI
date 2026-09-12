@@ -151,7 +151,7 @@ to decide — the origin drops the copy of its own tap, an area sharing an edge 
 diagonal does nothing. One tap therefore moves three of the four counts.
 
 "New Area" pushes another grid that starts at zero, and the one underneath is still there, untouched,
-when you come back. `demo/src/jvmTest` asserts all of it.
+when you come back.
 
 ## Building
 

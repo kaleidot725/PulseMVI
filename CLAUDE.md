@@ -29,8 +29,6 @@ artifact adds `rememberPulseViewModel` / `rememberPulseContainer`, and
 - **Publish to local Maven**: `./gradlew :library:publishToMavenLocal :navigation3:publishToMavenLocal`
 - **Run the demo**: `./gradlew :demo:run`
 
-UI tests live in `demo/src/jvmTest`.
-
 ## Project Structure
 
 ```
@@ -52,7 +50,7 @@ PulseMVI/
 │       └── PulseNavigation.kt        # rememberPulseViewModel / rememberPulseContainer /
 │                                     # rememberPulseNavEntryDecorators
 ├── demo/                             # Pulse grid demo app (Navigation 3)
-│   └── src/{commonMain,jvmMain,jvmTest}/
+│   └── src/{commonMain,jvmMain}/
 │       # Four areas share a Container: an area counts its own tap and announces
 │       # it as a Unicast, the Container broadcasts it back to all four, and each
 │       # decides what to do — the origin ignores the copy of its own tap
