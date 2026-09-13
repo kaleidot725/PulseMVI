@@ -1,6 +1,6 @@
 # Architecture
 
-PulseMVI follows the MVI (Model-View-Intent) pattern and adds three coordination primitives: **Broadcast**, **Unicast**, and **View Refresh**.
+PulseMVI follows the MVI (Model-View-Intent) pattern. It adds three coordination primitives: **Broadcast**, **Unicast**, and **View Refresh**.
 
 ## Data Flow
 
@@ -48,7 +48,7 @@ flowchart LR
 
 ## View Refresh Flow
 
-`Container.refresh()` forces the Compose view tree to reconstruct. ViewModel states are **preserved** — only the Composables are re-created:
+`Container.refresh()` forces the Compose view tree to reconstruct. ViewModel states are **preserved**. Only the Composables are re-created:
 
 ```mermaid
 flowchart TB
@@ -74,9 +74,9 @@ flowchart TB
 ## Lifecycle
 
 ::: tip
-`onSetup()` runs once when `PulseContent` first observes the ViewModel, and the ViewModel stays active for as long as its `ViewModelStoreOwner` lives. A composition restart never repeats setup, and neither does `refresh()`.
+`onSetup()` runs once, when `PulseContent` first observes the ViewModel. The ViewModel stays active for as long as its `ViewModelStoreOwner` lives. A composition restart never repeats setup. Neither does `refresh()`.
 
-Which owner that is decides the ViewModel's lifetime. Creating the ViewModel under the host owner keeps it alive for the whole screen. Creating it inside a Navigation 3 destination, with `rememberPulseNavEntryDecorators()` as the `NavDisplay` decorators, scopes it to that back stack entry: covering the route with another destination keeps the ViewModel, popping the route cancels it. The demo builds every destination that way.
+Which owner that is decides the ViewModel's lifetime. Creating the ViewModel under the host owner keeps it alive for the whole screen. Creating it inside a Navigation 3 destination scopes it to that back stack entry, with `rememberPulseNavEntryDecorators()` as the `NavDisplay` decorators. Covering the route with another destination keeps the ViewModel. Popping the route cancels it. The demo builds every destination that way.
 :::
 
 ```mermaid

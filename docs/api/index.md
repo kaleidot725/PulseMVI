@@ -1,6 +1,6 @@
 # API Overview
 
-PulseMVI exposes a small, focused API surface. The core artifact lives in `jp.kaleidot725.pulse.mvi`. The optional `pulsemvi-navigation3` artifact adds three composables in `jp.kaleidot725.pulse.mvi.navigation3`, listed under [Extensions](#extensions).
+PulseMVI exposes a small, focused API surface. The core artifact lives in `jp.kaleidot725.pulse.mvi`. The optional `pulsemvi-navigation3` artifact adds three composables. They live in `jp.kaleidot725.pulse.mvi.navigation3` and are listed under [Extensions](#extensions).
 
 ## Classes
 

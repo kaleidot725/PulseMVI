@@ -1,6 +1,6 @@
 # Marker Interfaces
 
-PulseMVI uses marker interfaces to enforce type safety at the generic level. Each interface has no members — they exist solely to constrain type parameters.
+PulseMVI uses marker interfaces. They enforce type safety at the generic level. Each interface has no members. They exist solely to constrain type parameters.
 
 ## PulseState
 
@@ -8,7 +8,7 @@ PulseMVI uses marker interfaces to enforce type safety at the generic level. Eac
 interface PulseState
 ```
 
-Marks a class as the UI state managed by a `PulseViewModel`. Implement with a `data class` so `copy()` is available for immutable updates.
+Marks a class as the UI state managed by a `PulseViewModel`. Implement with a `data class`. That makes `copy()` available for immutable updates.
 
 ```kotlin
 data class CounterState(
@@ -25,7 +25,7 @@ data class CounterState(
 interface PulseAction
 ```
 
-Marks a class as a user intent dispatched to a `PulseViewModel`. Implement with a `sealed class` to enumerate all possible actions exhaustively.
+Marks a class as a user intent dispatched to a `PulseViewModel`. Implement with a `sealed class`. That lets you enumerate all possible actions exhaustively.
 
 ```kotlin
 sealed class CounterAction : PulseAction {
@@ -60,7 +60,7 @@ sealed class CounterEvent : PulseEvent {
 interface PulseBroadcast
 ```
 
-Marks a class as a broadcast message delivered by `PulseContainer` to all registered `PulseViewModel` instances. Implement with a `sealed class`.
+Marks a class as a broadcast message. `PulseContainer` delivers it to all registered `PulseViewModel` instances. Implement with a `sealed class`.
 
 ```kotlin
 sealed class AppBroadcast : PulseBroadcast {
@@ -77,7 +77,7 @@ sealed class AppBroadcast : PulseBroadcast {
 interface PulseUnicast
 ```
 
-Marks a class as a message emitted from a child `PulseViewModel` to its parent `PulseContainer`. Implement with a `sealed interface` or `sealed class`.
+Marks a class as a unicast message. A child `PulseViewModel` emits it to its parent `PulseContainer`. Implement with a `sealed interface` or `sealed class`.
 
 ```kotlin
 sealed interface AppUnicast : PulseUnicast {

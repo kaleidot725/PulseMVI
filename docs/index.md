@@ -16,7 +16,7 @@ hero:
 features:
   - icon: 🏗️
     title: MVI Architecture
-    details: Clear separation of State, Action, Event, Broadcast, and Unicast keeps your code organized and testable.
+    details: Clear separation of State, Action, Event, Broadcast, and Unicast. Keeps your code organized and testable.
   - icon: 🔄
     title: ViewModel & Container
     details: PulseViewModel manages state autonomously. PulseContainer coordinates multiple ViewModels across your app.
@@ -31,7 +31,7 @@ features:
     details: Forces the entire view tree to reconstruct on demand while preserving ViewModel state.
   - icon: ⚡
     title: Coroutine-Based
-    details: Built on Kotlin Coroutines and StateFlow for efficient, non-blocking reactive state management.
+    details: Built on Kotlin Coroutines and StateFlow. Efficient, non-blocking reactive state management.
   - icon: 🎨
     title: Compose Integration
     details: Ready-to-use PulseHost and PulseContent composables with automatic lifecycle management.

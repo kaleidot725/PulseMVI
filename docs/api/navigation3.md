@@ -1,8 +1,8 @@
 # Navigation 3
 
-Everything on this page lives in the optional `pulsemvi-navigation3` artifact, package
+Everything on this page lives in the optional `pulsemvi-navigation3` artifact. The package is
 `jp.kaleidot725.pulse.mvi.navigation3`. The core artifact leaves the ViewModel lifetime to the
-caller — see [ViewModel](/guide/viewmodel). For how the pieces fit together, see the
+caller (see [ViewModel](/guide/viewmodel)). For how the pieces fit together, see the
 [Navigation 3 guide](/guide/navigation3).
 
 ## rememberPulseViewModel
@@ -15,7 +15,7 @@ inline fun <reified ViewModel : PulseViewModel<*, *, *, *, *>> rememberPulseView
 ): ViewModel
 ```
 
-Creates a ViewModel held in the `ViewModelStore` of the current `ViewModelStoreOwner`, so a
+Creates a ViewModel held in the `ViewModelStore` of the current `ViewModelStoreOwner`. A
 composition restart reuses the instance rather than rebuilding it.
 
 ### Parameters
@@ -28,15 +28,16 @@ composition restart reuses the instance rather than rebuilding it.
 ### Lifecycle behavior
 
 - The ViewModel is created on first composition and reused for every later composition under the same owner
-- `onSetup()` runs once, the first time a `PulseContent` observes the ViewModel, so rebuilding the composition does not repeat it
+- `onSetup()` runs once, the first time a `PulseContent` observes the ViewModel
+- Rebuilding the composition does not repeat `onSetup()`
 - The ViewModel scope is cancelled when the owner's `ViewModelStore` is cleared
 - State is kept in memory only; it is not restored after process death
 
 ### Owner resolution
 
-Internally this reads `LocalViewModelStoreOwner.current` and keeps the instance in that owner's
+Internally this reads `LocalViewModelStoreOwner.current`. It keeps the instance in that owner's
 `ViewModelStore`, keyed by `key`. Whatever owner is in scope at the call site therefore decides how
-long the ViewModel lives, and anything that changes that owner changes the ViewModel's lifetime.
+long the ViewModel lives. Anything that changes that owner changes the ViewModel's lifetime too.
 
 | Owner in scope | ViewModel lives |
 |---|---|
@@ -54,8 +55,8 @@ long the ViewModel lives, and anything that changes that owner changes the ViewM
   a screen creates ViewModels it will not need again
 
 ::: tip
-Tests can exercise both sides of this by providing their own owner: keep it across a composition
-rebuild to reproduce a composition restart, or clear it to reproduce the screen going away.
+Tests can exercise both sides of this by providing their own owner. Keep it across a composition
+rebuild to reproduce a composition restart. Clear it to reproduce the screen going away.
 :::
 
 ### Example
@@ -90,7 +91,7 @@ inline fun <reified Container : PulseContainer<*, *>> rememberPulseContainer(
 ): Container
 ```
 
-Creates a Container that survives a composition restart, keeping its Unicast subscriptions alive.
+Creates a Container that survives a composition restart. Its Unicast subscriptions stay alive.
 `PulseContainer.close()` is called when the owner's `ViewModelStore` is cleared.
 
 ### Parameters
@@ -114,10 +115,10 @@ val container = rememberPulseContainer { CounterContainer(viewModels = listOf(vi
 fun <T : Any> rememberPulseNavEntryDecorators(): List<NavEntryDecorator<T>>
 ```
 
-The `NavEntryDecorator` list `NavDisplay` needs for ViewModels to be scoped to a back stack entry: the
-saveable state holder decorator plus the ViewModel one.
+The `NavEntryDecorator` list to pass to `NavDisplay`. It is what scopes ViewModels to a back stack
+entry. It holds two decorators: the saveable state holder one, and the ViewModel one.
 
-`NavDisplay` defaults `entryDecorators` to the saveable state holder alone, so passing the ViewModel
+`NavDisplay` defaults `entryDecorators` to the saveable state holder alone. Passing the ViewModel
 decorator on its own would silently drop saveable state. This returns both.
 
 ```kotlin
