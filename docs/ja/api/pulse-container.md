@@ -9,7 +9,7 @@ abstract class PulseContainer<Broadcast : PulseBroadcast, Unicast : PulseUnicast
 
 複数の `PulseViewModel` インスタンスを調整します。Broadcast の配信、子からの Unicast の処理、View Refresh を提供します。
 
-内部の Unicast 収集には、コンストラクタで別のディスパッチャが渡されない限り `Dispatchers.Default` を使います。
+内部の Unicast 収集には `Dispatchers.Default` を使います。コンストラクタで別のディスパッチャを渡すこともできます。
 
 ## メソッド
 
@@ -19,7 +19,7 @@ abstract class PulseContainer<Broadcast : PulseBroadcast, Unicast : PulseUnicast
 fun broadcast(broadcast: Broadcast)
 ```
 
-生成時に登録されたすべての `PulseViewModel` の `onReceive()` を呼び、`broadcast` を届けます。
+生成時に登録されたすべての `PulseViewModel` に `broadcast` を届けます。各 ViewModel の `onReceive()` を呼びます。
 
 ```kotlin
 container.broadcast(AppBroadcast.UserLoggedOut)
@@ -33,7 +33,7 @@ container.broadcast(AppBroadcast.UserLoggedOut)
 open fun onReceived(unicast: Unicast)
 ```
 
-登録済みの `PulseViewModel` が Unicast を発行したときに呼ばれます。`PulseContainer` は各 ViewModel の `unicast` Flow を内部で収集し、値をこのフックに転送します。
+登録済みの `PulseViewModel` が Unicast を発行したときに呼ばれます。`PulseContainer` は各 ViewModel の `unicast` Flow を内部で収集します。値をこのフックに転送します。
 
 ```kotlin
 override fun onReceived(unicast: AppUnicast) {
@@ -51,7 +51,7 @@ override fun onReceived(unicast: AppUnicast) {
 fun refresh()
 ```
 
-Container の内部キーを進め、`PulseHost` 内のすべての `PulseContent` ブロックを作り直させます。ViewModel の状態は保持され、Compose の状態だけが破棄されます。
+Container の内部キーを進めます。`PulseHost` 内のすべての `PulseContent` ブロックが作り直されます。ViewModel の状態は保持されます。Compose の状態だけが破棄されます。
 
 ```kotlin
 container.refresh()
@@ -65,7 +65,7 @@ container.refresh()
 fun close()
 ```
 
-Container のスコープをキャンセルし、ViewModel からの Unicast の収集を止めます。Container が完全に不要になったときに呼んでください。`rememberPulseContainer` を使っていれば、所有する `ViewModelStore` が破棄されるときに自動で呼ばれます。
+Container のスコープをキャンセルします。ViewModel からの Unicast の収集を止めます。Container が完全に不要になったときに呼んでください。`rememberPulseContainer` を使っていれば、所有する `ViewModelStore` が破棄されるときに自動で呼ばれます。
 
 ```kotlin
 container.close()

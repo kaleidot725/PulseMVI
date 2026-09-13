@@ -1,6 +1,6 @@
 # マーカーインターフェース
 
-PulseMVI はジェネリクスのレベルで型安全性を保証するためにマーカーインターフェースを使います。どのインターフェースもメンバーを持たず、型パラメータを制約するためだけに存在します。
+PulseMVI はマーカーインターフェースを使います。ジェネリクスのレベルで型安全性を保証するためです。どのインターフェースもメンバーを持ちません。型パラメータを制約するためだけに存在します。
 
 ## PulseState
 
@@ -8,7 +8,7 @@ PulseMVI はジェネリクスのレベルで型安全性を保証するため�
 interface PulseState
 ```
 
-クラスを `PulseViewModel` が管理する UI 状態として印付けます。不変な更新のために `copy()` が使えるよう、`data class` で実装してください。
+クラスを `PulseViewModel` が管理する UI 状態として印付けます。`data class` で実装してください。不変な更新のために `copy()` が使えます。
 
 ```kotlin
 data class CounterState(
@@ -25,7 +25,7 @@ data class CounterState(
 interface PulseAction
 ```
 
-クラスを `PulseViewModel` に発行されるユーザーの意図として印付けます。取りうる Action をすべて列挙できるよう、`sealed class` で実装してください。
+クラスを `PulseViewModel` に発行されるユーザーの意図として印付けます。`sealed class` で実装してください。取りうる Action をすべて列挙できます。
 
 ```kotlin
 sealed class CounterAction : PulseAction {
@@ -60,7 +60,7 @@ sealed class CounterEvent : PulseEvent {
 interface PulseBroadcast
 ```
 
-クラスを `PulseContainer` から登録済みのすべての `PulseViewModel` インスタンスへ届けられる Broadcast メッセージとして印付けます。`sealed class` で実装してください。
+クラスを Broadcast メッセージとして印付けます。`PulseContainer` から、登録済みのすべての `PulseViewModel` インスタンスへ届けられます。`sealed class` で実装してください。
 
 ```kotlin
 sealed class AppBroadcast : PulseBroadcast {
@@ -77,7 +77,7 @@ sealed class AppBroadcast : PulseBroadcast {
 interface PulseUnicast
 ```
 
-クラスを子の `PulseViewModel` から親の `PulseContainer` へ発行されるメッセージとして印付けます。`sealed interface` または `sealed class` で実装してください。
+クラスを Unicast メッセージとして印付けます。子の `PulseViewModel` から親の `PulseContainer` へ発行されます。`sealed interface` または `sealed class` で実装してください。
 
 ```kotlin
 sealed interface AppUnicast : PulseUnicast {
