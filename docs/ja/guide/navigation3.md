@@ -6,6 +6,8 @@
 
 ## 1. 依存を追加する
 
+コアと `pulsemvi-navigation3` を追加します。Navigation 3 と lifecycle のアーティファクトも一緒に入るため、`navigation3-ui`、`lifecycle-viewmodel-compose`、`lifecycle-viewmodel-navigation3` を自分で宣言する必要はありません。
+
 ```kotlin
 // build.gradle.kts
 dependencies {
@@ -13,8 +15,6 @@ dependencies {
     implementation("com.github.kaleidot725:pulsemvi-navigation3:<version>")
 }
 ```
-
-Navigation 3 と lifecycle のアーティファクトも一緒に入るため、`navigation3-ui`、`lifecycle-viewmodel-compose`、`lifecycle-viewmodel-navigation3` を自分で宣言する必要はありません。
 
 ## 2. ルートを定義する
 
@@ -41,6 +41,10 @@ fun App() {
 
 ViewModel をバックスタックにスコープするのはこのステップです。
 
+::: warning
+`NavDisplay` の `entryDecorators` の既定値は saveable state holder のみです。ViewModel のデコレータだけを渡すと saveable state が失われるため、[`rememberPulseNavEntryDecorators`](/ja/api/composables#rememberpulsenaventrydecorators) は両方を返します。リストを自分で組み立てるのではなく、こちらを使ってください。
+:::
+
 ```kotlin
 NavDisplay(
     backStack = backStack,
@@ -57,10 +61,6 @@ NavDisplay(
         },
 )
 ```
-
-::: warning
-`NavDisplay` の `entryDecorators` の既定値は saveable state holder のみです。ViewModel のデコレータだけを渡すと saveable state が失われるため、[`rememberPulseNavEntryDecorators`](/ja/api/composables#rememberpulsenaventrydecorators) は両方を返します。リストを自分で組み立てるのではなく、こちらを使ってください。
-:::
 
 ## 4. destination の中で ViewModel を生成する
 
@@ -92,14 +92,12 @@ fun CounterScreen(onShowDetails: (Int) -> Unit) {
 
 ## 同じ型の ViewModel を 2 つ置く
 
-`rememberPulseViewModel` の key の既定値は ViewModel の完全修飾クラス名で、key はグローバルではなくオーナー単位で一意です。同じオーナーの下に同じ型のインスタンスを 2 つ置くと衝突します。明示的な key を与えてください。
+`rememberPulseViewModel` の key の既定値は ViewModel の完全修飾クラス名で、key はグローバルではなくオーナー単位で一意です。同じオーナーの下に同じ型のインスタンスを 2 つ置くと衝突します。明示的な key を与えてください。デモは 4 つのエリアがすべて同じクラスなので、4 つすべてでこれを行っています。
 
 ```kotlin
 val left = rememberPulseViewModel(key = "left") { CounterViewModel(leftRepository) }
 val right = rememberPulseViewModel(key = "right") { CounterViewModel(rightRepository) }
 ```
-
-デモは 4 つのエリアすべてでこれを行っています。4 つとも同じクラスだからです。
 
 ## Navigation 3 を使わない場合
 
