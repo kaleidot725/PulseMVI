@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="docs/public/logo.svg" width="96" alt="PulseMVI" />
+</p>
+
 # PulseMVI
 
 [![Kotlin](https://img.shields.io/badge/kotlin-2.3.10-blue.svg?logo=kotlin)](http://kotlinlang.org)

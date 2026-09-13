@@ -8,7 +8,7 @@ export default withMermaid(defineConfig({
   base: '/PulseMVI/',
 
   head: [
-    ['link', { rel: 'icon', href: '/PulseMVI/favicon.ico' }],
+    ['link', { rel: 'icon', type: 'image/svg+xml', href: '/PulseMVI/favicon.svg' }],
   ],
 
   locales: {
@@ -161,7 +161,7 @@ export default withMermaid(defineConfig({
   },
 
   themeConfig: {
-    logo: null,
+    logo: '/logo.svg',
 
     socialLinks: [
       { icon: 'github', link: github },
