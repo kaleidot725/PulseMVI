@@ -89,6 +89,10 @@ flowchart TB
         C --> D["onSetup() runs once"]
         D --> E["coroutineScope active"]
     end
+```
+
+```mermaid
+flowchart TB
     subgraph clear["Teardown"]
         direction TB
         F["ViewModelStoreOwner cleared"]

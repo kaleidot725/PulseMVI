@@ -92,3 +92,19 @@
   fill: var(--vp-c-brand-1) !important;
   stroke: var(--vp-c-brand-1) !important;
 }
+
+/* VitePress paragraph rules would inflate Mermaid's html labels after it has measured them */
+.vp-doc .mermaid p {
+  margin: 0;
+  line-height: 1.5;
+}
+
+.vp-doc .mermaid .nodeLabel,
+.vp-doc .mermaid .edgeLabel,
+.vp-doc .mermaid .cluster-label {
+  line-height: 1.5;
+}
+
+.mermaid foreignObject {
+  overflow: visible;
+}
