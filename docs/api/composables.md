@@ -46,7 +46,7 @@ long the ViewModel lives, and anything that changes that owner changes the ViewM
 | One you provide with `CompositionLocalProvider(LocalViewModelStoreOwner provides ...)` | As long as you keep that owner |
 | None provided by the host | `rememberPulseViewModel` fails with a message: nothing owns a lifetime, so provide an owner or use the core artifact alone |
 
-Two consequences worth planning for:
+#### Two consequences worth planning for
 
 - **`key` is unique per owner, not globally.** Two ViewModels of the same type under one owner collide,
   and the default key is the class name. Give them explicit keys, or put them under different owners
