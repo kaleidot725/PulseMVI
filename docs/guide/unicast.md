@@ -135,10 +135,11 @@ class CounterViewModel(
 
 ### Data flow
 
-```text
-Counter A action
-    -> CounterViewModel.unicast(CounterUpdated(count))
-    -> CounterContainer.onReceived(CounterUpdated(count))
-    -> CounterContainer.broadcast(CounterBroadcast.CounterUpdated(count))
-    -> Counter A and Counter B receive the same count
+```mermaid
+flowchart TB
+    A["Counter A action"]
+    A --> B["CounterViewModel.unicast(CounterUpdated(count))"]
+    B --> C["CounterContainer.onReceived(CounterUpdated(count))"]
+    C --> D["CounterContainer.broadcast(CounterBroadcast.CounterUpdated(count))"]
+    D --> E["Counter A and Counter B receive the same count"]
 ```

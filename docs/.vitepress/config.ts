@@ -1,8 +1,9 @@
 import { defineConfig } from 'vitepress'
+import { withMermaid } from 'vitepress-plugin-mermaid'
 
 const github = 'https://github.com/kaleidot725/PulseMVI'
 
-export default defineConfig({
+export default withMermaid(defineConfig({
   title: 'PulseMVI',
   base: '/PulseMVI/',
 
@@ -151,6 +152,14 @@ export default defineConfig({
     },
   },
 
+  mermaid: {
+    theme: 'base',
+    themeVariables: {
+      fontFamily: 'Inter, ui-sans-serif, system-ui, sans-serif',
+      fontSize: '14px',
+    },
+  },
+
   themeConfig: {
     logo: null,
 
@@ -176,4 +185,4 @@ export default defineConfig({
       },
     },
   },
-})
+}))

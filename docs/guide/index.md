@@ -10,15 +10,16 @@ PulseMVI is a lightweight MVI (Model-View-Intent) library for **Compose Desktop*
 
 Compose apps often contain multiple independent Composable sections, each with its own state. PulseMVI makes it easy to coordinate these sections without tightly coupling them. In the layout below, `PulseContainer` sits above both ViewModels: when you call `container.broadcast(MyBroadcast.Sync)`, both ViewModel A and ViewModel B receive the message and can react independently.
 
-```
-┌─────────────────────────────────────┐
-│           Window                    │
-│  ┌──────────┐  ┌──────────────────┐ │
-│  │ SideBar  │  │   Main Content   │ │
-│  │ (ViewModel A)│  │   (ViewModel B)      │ │
-│  └──────────┘  └──────────────────┘ │
-│         PulseContainer              │
-└─────────────────────────────────────┘
+```mermaid
+flowchart TB
+    PC["PulseContainer"]
+    subgraph W["Window"]
+        direction LR
+        SB["SideBar<br/><i>ViewModel A</i>"]
+        MC["Main Content<br/><i>ViewModel B</i>"]
+    end
+    PC -- "broadcast(Sync)" --> SB
+    PC -- "broadcast(Sync)" --> MC
 ```
 
 ## Installation

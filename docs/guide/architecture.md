@@ -4,68 +4,57 @@ PulseMVI follows the MVI (Model-View-Intent) pattern and adds three coordination
 
 ## Data Flow
 
-```
-┌─────────────────────────────────────────────────────┐
-│                   Compose UI                        │
-│                                                     │
-│   User Interaction                                  │
-│        │                                            │
-│        ▼                                            │
-│   onAction(action)  ──────────▶  PulseViewModel         │
-│                                      │              │
-│                               onAction()            │
-│                                      │              │
-│                               update { }            │
-│                                      │              │
-│                            StateFlow<State>         │
-│                                      │              │
-│        ◀──────────────────────────── │              │
-│   PulseContent re-renders            │              │
-│                                      │              │
-│                               event(effect)         │
-│                                      │              │
-│        ◀──────────── onEvent ──────── │              │
-│   Handle side effect                                │
-└─────────────────────────────────────────────────────┘
+```mermaid
+flowchart TB
+    subgraph UI["Compose UI"]
+        A["User interaction"]
+    end
+    subgraph VM["PulseViewModel"]
+        OA["onAction()"]
+        U["update { }"]
+        S["StateFlow&lt;State&gt;"]
+        EV["event(effect)"]
+    end
+    subgraph OUT["Compose UI"]
+        R["PulseContent re-renders"]
+        E["Side effect handled"]
+    end
+    A -- "onAction(action)" --> OA
+    OA --> U --> S --> R
+    OA --> EV -- "onEvent" --> E
 ```
 
 ## Broadcast Flow
 
 When multiple ViewModels need to react to the same event, use `PulseContainer.broadcast()`:
 
-```
-Container.broadcast(MyBroadcast.Sync)
-        │
-        ├──▶ ViewModelA.onReceive(Sync)  ──▶ update { }  ──▶ UI re-renders
-        │
-        └──▶ ViewModelB.onReceive(Sync)  ──▶ update { }  ──▶ UI re-renders
+```mermaid
+flowchart LR
+    C["Container.broadcast(Sync)"]
+    C --> A["ViewModelA.onReceive(Sync)"] --> AU["update { }"] --> AR["UI re-renders"]
+    C --> B["ViewModelB.onReceive(Sync)"] --> BU["update { }"] --> BR["UI re-renders"]
 ```
 
 ## Unicast Flow
 
 When a child ViewModel needs to notify its parent Container, use `PulseViewModel.unicast()`:
 
-```
-ViewModelA.unicast(MyUnicast.SaveRequested)
-        │
-        └──▶ Container.onReceived(SaveRequested)
-                  │
-                  ├──▶ broadcast(...)
-                  └──▶ refresh()
+```mermaid
+flowchart LR
+    A["ViewModelA.unicast(SaveRequested)"] --> C["Container.onReceived(SaveRequested)"]
+    C --> B["broadcast(...)"]
+    C --> R["refresh()"]
 ```
 
 ## View Refresh Flow
 
 `Container.refresh()` forces the Compose view tree to reconstruct. ViewModel states are **preserved** — only the Composables are re-created:
 
-```
-Container.refresh()
-        │
-        └──▶ PulseHost detects new key
-                  │
-                  └──▶ PulseContent's rendered subtree re-created (via `key()`)
-                            │
-                            └──▶ ViewModel is untouched; onSetup() is not repeated
+```mermaid
+flowchart TB
+    R["Container.refresh()"] --> H["PulseHost sees a new key"]
+    H --> P["PulseContent subtree re-created via key()"]
+    P --> V["ViewModel untouched<br/>onSetup() is not repeated"]
 ```
 
 ## Component Responsibilities
@@ -90,19 +79,20 @@ Container.refresh()
 Which owner that is decides the ViewModel's lifetime. Creating the ViewModel under the host owner keeps it alive for the whole screen. Creating it inside a Navigation 3 destination, with `rememberPulseNavEntryDecorators()` as the `NavDisplay` decorators, scopes it to that back stack entry: covering the route with another destination keeps the ViewModel, popping the route cancels it. The demo builds every destination that way.
 :::
 
-```
-rememberPulseViewModel creates the ViewModel
-        │
-        └──▶ Kept in the ViewModelStore of the ViewModelStoreOwner
-                  │
-                  └──▶ PulseContent observes it ──▶ onSetup() called once
-                                │
-                                └──▶ coroutineScope active
-
-ViewModelStoreOwner cleared
-        │
-        └──▶ ViewModel.onCleared()
-                  │
-                  └──▶ coroutineScope cancelled
-                                (ViewModel is discarded with its owner)
+```mermaid
+flowchart TB
+    subgraph create["Creation"]
+        direction TB
+        A["rememberPulseViewModel creates the ViewModel"]
+        A --> B["Kept in the owner's ViewModelStore"]
+        B --> C["PulseContent observes it"]
+        C --> D["onSetup() runs once"]
+        D --> E["coroutineScope active"]
+    end
+    subgraph clear["Teardown"]
+        direction TB
+        F["ViewModelStoreOwner cleared"]
+        F --> G["ViewModel.onCleared()"]
+        G --> H["coroutineScope cancelled"]
+    end
 ```
