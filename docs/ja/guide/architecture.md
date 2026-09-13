@@ -89,6 +89,10 @@ flowchart TB
         C --> D["onSetup() が一度だけ実行"]
         D --> E["coroutineScope が有効"]
     end
+```
+
+```mermaid
+flowchart TB
     subgraph clear["破棄"]
         direction TB
         F["ViewModelStoreOwner が破棄される"]
