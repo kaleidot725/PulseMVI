@@ -78,7 +78,7 @@ re-adding a target a build-file change rather than a file move.
 
 ## Key Configuration
 
-- Group ID: `com.github.kaleidot725`
+- Group ID: `com.github.kaleidot725.PulseMVI` (what JitPack serves for a multi-module repo)
 - Artifact IDs: `pulsemvi`, `pulsemvi-navigation3`
 - Packages: `jp.kaleidot725.pulse.mvi`, `jp.kaleidot725.pulse.mvi.navigation3`
-- JitPack dependency: `implementation("com.github.kaleidot725:pulsemvi:<version>")`
+- JitPack dependency: `implementation("com.github.kaleidot725.PulseMVI:pulsemvi:<version>")`
