@@ -5,8 +5,10 @@ plugins {
     `maven-publish`
 }
 
-group = "com.github.kaleidot725"
-version = "1.0.0"
+// JitPack publishes multi-module builds under com.github.<user>.<repo> and versions them by tag.
+// Matching both here keeps the inter-module dependency in the navigation3 POM resolvable.
+group = "com.github.kaleidot725.PulseMVI"
+version = System.getenv("VERSION") ?: "1.0.0"
 
 repositories {
     google()
