@@ -38,3 +38,57 @@
   position: relative;
   z-index: 1;
 }
+
+/* Mermaid diagrams: take colours from the theme so light and dark both read */
+.mermaid {
+  display: flex;
+  justify-content: center;
+  margin: 24px 0;
+}
+
+.mermaid svg {
+  max-width: 100%;
+  height: auto;
+}
+
+.mermaid .node rect,
+.mermaid .node polygon,
+.mermaid .node circle {
+  fill: var(--vp-c-brand-soft) !important;
+  stroke: var(--vp-c-brand-1) !important;
+  stroke-width: 1px !important;
+}
+
+.mermaid .cluster rect {
+  fill: var(--vp-c-bg-soft) !important;
+  stroke: var(--vp-c-divider) !important;
+  stroke-width: 1px !important;
+}
+
+.mermaid .nodeLabel,
+.mermaid .cluster-label,
+.mermaid .cluster-label span,
+.mermaid .edgeLabel,
+.mermaid .edgeLabel p,
+.mermaid .label text,
+.mermaid text {
+  color: var(--vp-c-text-1) !important;
+  fill: var(--vp-c-text-1) !important;
+}
+
+.mermaid .edgeLabel,
+.mermaid .edgeLabel p,
+.mermaid .labelBkg {
+  background-color: var(--vp-c-bg) !important;
+}
+
+.mermaid .edgePath path,
+.mermaid .flowchart-link {
+  stroke: var(--vp-c-brand-1) !important;
+}
+
+.mermaid .marker,
+.mermaid marker path {
+  fill: var(--vp-c-brand-1) !important;
+  stroke: var(--vp-c-brand-1) !important;
+}

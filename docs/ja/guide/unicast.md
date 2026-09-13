@@ -135,10 +135,11 @@ class CounterViewModel(
 
 ### データの流れ
 
-```text
-Counter A の操作
-    -> CounterViewModel.unicast(CounterUpdated(count))
-    -> CounterContainer.onReceived(CounterUpdated(count))
-    -> CounterContainer.broadcast(CounterBroadcast.CounterUpdated(count))
-    -> Counter A と Counter B が同じ count を受け取る
+```mermaid
+flowchart TB
+    A["Counter A の操作"]
+    A --> B["CounterViewModel.unicast(CounterUpdated(count))"]
+    B --> C["CounterContainer.onReceived(CounterUpdated(count))"]
+    C --> D["CounterContainer.broadcast(CounterBroadcast.CounterUpdated(count))"]
+    D --> E["Counter A と Counter B が同じ count を受け取る"]
 ```

@@ -4,68 +4,57 @@ PulseMVI は MVI（Model-View-Intent）パターンに従い、**Broadcast**、*
 
 ## データフロー
 
-```
-┌─────────────────────────────────────────────────────┐
-│                   Compose UI                        │
-│                                                     │
-│   ユーザー操作                                        │
-│        │                                            │
-│        ▼                                            │
-│   onAction(action)  ──────────▶  PulseViewModel     │
-│                                      │              │
-│                               onAction()            │
-│                                      │              │
-│                               update { }            │
-│                                      │              │
-│                            StateFlow<State>         │
-│                                      │              │
-│        ◀──────────────────────────── │              │
-│   PulseContent が再描画               │              │
-│                                      │              │
-│                               event(effect)         │
-│                                      │              │
-│        ◀──────────── onEvent ──────── │              │
-│   副作用を処理                                        │
-└─────────────────────────────────────────────────────┘
+```mermaid
+flowchart TB
+    subgraph UI["Compose UI"]
+        A["ユーザー操作"]
+    end
+    subgraph VM["PulseViewModel"]
+        OA["onAction()"]
+        U["update { }"]
+        S["StateFlow&lt;State&gt;"]
+        EV["event(effect)"]
+    end
+    subgraph OUT["Compose UI"]
+        R["PulseContent が再描画"]
+        E["副作用を処理"]
+    end
+    A -- "onAction(action)" --> OA
+    OA --> U --> S --> R
+    OA --> EV -- "onEvent" --> E
 ```
 
 ## Broadcast のフロー
 
 複数の ViewModel が同じ出来事に反応する必要があるときは `PulseContainer.broadcast()` を使います。
 
-```
-Container.broadcast(MyBroadcast.Sync)
-        │
-        ├──▶ ViewModelA.onReceive(Sync)  ──▶ update { }  ──▶ UI が再描画
-        │
-        └──▶ ViewModelB.onReceive(Sync)  ──▶ update { }  ──▶ UI が再描画
+```mermaid
+flowchart LR
+    C["Container.broadcast(Sync)"]
+    C --> A["ViewModelA.onReceive(Sync)"] --> AU["update { }"] --> AR["UI が再描画"]
+    C --> B["ViewModelB.onReceive(Sync)"] --> BU["update { }"] --> BR["UI が再描画"]
 ```
 
 ## Unicast のフロー
 
 子の ViewModel が親の Container に知らせる必要があるときは `PulseViewModel.unicast()` を使います。
 
-```
-ViewModelA.unicast(MyUnicast.SaveRequested)
-        │
-        └──▶ Container.onReceived(SaveRequested)
-                  │
-                  ├──▶ broadcast(...)
-                  └──▶ refresh()
+```mermaid
+flowchart LR
+    A["ViewModelA.unicast(SaveRequested)"] --> C["Container.onReceived(SaveRequested)"]
+    C --> B["broadcast(...)"]
+    C --> R["refresh()"]
 ```
 
 ## View Refresh のフロー
 
 `Container.refresh()` は Compose のビューツリーを強制的に再構築します。ViewModel の状態は**保持**され、Composable だけが作り直されます。
 
-```
-Container.refresh()
-        │
-        └──▶ PulseHost が新しいキーを検知
-                  │
-                  └──▶ PulseContent が描画したサブツリーが再生成される（`key()` 経由）
-                            │
-                            └──▶ ViewModel は無傷。onSetup() は繰り返されない
+```mermaid
+flowchart TB
+    R["Container.refresh()"] --> H["PulseHost が新しいキーを検知"]
+    H --> P["PulseContent のサブツリーが key() 経由で再生成"]
+    P --> V["ViewModel は無傷<br/>onSetup() は繰り返されない"]
 ```
 
 ## 各コンポーネントの責務
@@ -90,19 +79,20 @@ Container.refresh()
 どのオーナーかによって ViewModel のライフタイムが決まります。ホストのオーナー配下で生成すれば画面全体の間生き続けます。Navigation 3 の destination の中で、`NavDisplay` のデコレータとして `rememberPulseNavEntryDecorators()` を渡して生成すれば、そのバックスタックエントリにスコープされます。別の destination で覆われても ViewModel は保持され、ルートが pop されるとキャンセルされます。デモはすべての destination をこの方法で構築しています。
 :::
 
-```
-rememberPulseViewModel が ViewModel を生成
-        │
-        └──▶ ViewModelStoreOwner の ViewModelStore に保持される
-                  │
-                  └──▶ PulseContent が観測 ──▶ onSetup() が一度だけ呼ばれる
-                                │
-                                └──▶ coroutineScope が有効
-
-ViewModelStoreOwner が破棄される
-        │
-        └──▶ ViewModel.onCleared()
-                  │
-                  └──▶ coroutineScope がキャンセルされる
-                                (ViewModel はオーナーと共に破棄される)
+```mermaid
+flowchart TB
+    subgraph create["生成"]
+        direction TB
+        A["rememberPulseViewModel が ViewModel を生成"]
+        A --> B["オーナーの ViewModelStore に保持"]
+        B --> C["PulseContent が観測"]
+        C --> D["onSetup() が一度だけ実行"]
+        D --> E["coroutineScope が有効"]
+    end
+    subgraph clear["破棄"]
+        direction TB
+        F["ViewModelStoreOwner が破棄される"]
+        F --> G["ViewModel.onCleared()"]
+        G --> H["coroutineScope がキャンセル"]
+    end
 ```
