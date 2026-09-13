@@ -2,9 +2,11 @@
 
 PulseMVI は **Compose Desktop** 向けの軽量な MVI（Model-View-Intent）ライブラリです。標準的な MVI パターンに、複数の Composable からなるレイアウトを調整するための 3 つの機能を加えています。
 
-- **Broadcast** — Container から登録済みのすべての ViewModel へ、型付きメッセージを一斉に届ける
-- **Unicast** — 子の ViewModel から親の Container へ、型付きメッセージを送る
-- **View Refresh** — ViewModel の状態を失わずに、Compose のビューツリー全体をオンデマンドで再構築する
+| 機能 | 説明 |
+|---|---|
+| **Broadcast** | Container から登録済みのすべての ViewModel へ、型付きメッセージを一斉に届ける |
+| **Unicast** | 子の ViewModel から親の Container へ、型付きメッセージを送る |
+| **View Refresh** | ViewModel の状態を失わずに、Compose のビューツリー全体をオンデマンドで再構築する |
 
 ## なぜ PulseMVI か
 
