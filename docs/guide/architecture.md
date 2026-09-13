@@ -84,6 +84,12 @@ Container.refresh()
 
 ## Lifecycle
 
+::: tip
+`onSetup()` runs once when `PulseContent` first observes the ViewModel, and the ViewModel stays active for as long as its `ViewModelStoreOwner` lives. A composition restart never repeats setup, and neither does `refresh()`.
+
+Which owner that is decides the ViewModel's lifetime. Creating the ViewModel under the host owner keeps it alive for the whole screen. Creating it inside a Navigation 3 destination, with `rememberPulseNavEntryDecorators()` as the `NavDisplay` decorators, scopes it to that back stack entry: covering the route with another destination keeps the ViewModel, popping the route cancels it. The demo builds every destination that way.
+:::
+
 ```
 rememberPulseViewModel creates the ViewModel
         │
@@ -100,9 +106,3 @@ ViewModelStoreOwner cleared
                   └──▶ coroutineScope cancelled
                                 (ViewModel is discarded with its owner)
 ```
-
-::: tip
-`onSetup()` runs once when `PulseContent` first observes the ViewModel, and the ViewModel stays active for as long as its `ViewModelStoreOwner` lives. A composition restart never repeats setup, and neither does `refresh()`.
-
-Which owner that is decides the ViewModel's lifetime. Creating the ViewModel under the host owner keeps it alive for the whole screen. Creating it inside a Navigation 3 destination, with `rememberPulseNavEntryDecorators()` as the `NavDisplay` decorators, scopes it to that back stack entry: covering the route with another destination keeps the ViewModel, popping the route cancels it. The demo builds every destination that way.
-:::

@@ -4,15 +4,14 @@
 
 ## Creating a Container
 
-Pass the list of ViewModels you want to coordinate:
+Define a class that takes the list of ViewModels you want to coordinate, and instantiate it at the
+same level as those ViewModels.
 
 ```kotlin
 class AppContainer(
     viewModels: List<PulseViewModel<*, *, *, AppBroadcast, AppUnicast>>,
 ) : PulseContainer<AppBroadcast, AppUnicast>(viewModels = viewModels)
 ```
-
-Instantiate it at the same level as your ViewModels:
 
 ```kotlin
 val sidebarViewModel = rememberPulseViewModel { SidebarViewModel() }
@@ -24,13 +23,12 @@ val container = rememberPulseContainer {
 
 ## Broadcast
 
-Send a typed message to **all** registered ViewModels simultaneously:
+Send a typed message to **all** registered ViewModels simultaneously. Every ViewModel in the list
+receives `onReceive(AppBroadcast.UserLoggedOut)` and can react independently.
 
 ```kotlin
 container.broadcast(AppBroadcast.UserLoggedOut)
 ```
-
-Every ViewModel in the list receives `onReceive(AppBroadcast.UserLoggedOut)` and can react independently.
 
 ### When to use Broadcast
 
@@ -40,16 +38,16 @@ Every ViewModel in the list receives `onReceive(AppBroadcast.UserLoggedOut)` and
 
 ## View Refresh
 
-Force the entire Compose view tree under `PulseHost` to reconstruct:
-
-```kotlin
-container.refresh()
-```
+Force the entire Compose view tree under `PulseHost` to reconstruct.
 
 ::: tip What gets reset?
 - **Compose state** (e.g., `remember { }` inside Composables) is **reset**
 - **ViewModel state** (values in `PulseViewModel.state`) is **preserved**
 :::
+
+```kotlin
+container.refresh()
+```
 
 ### When to use Refresh
 

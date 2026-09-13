@@ -9,6 +9,10 @@ The core artifact stays free of it, so `pulsemvi` on its own depends on the Comp
 
 ## 1. Add the dependency
 
+Add `pulsemvi-navigation3` next to the core artifact. It brings Navigation 3 and the lifecycle
+artifacts with it, so you do not need to declare `navigation3-ui`, `lifecycle-viewmodel-compose` or
+`lifecycle-viewmodel-navigation3` yourself.
+
 ```kotlin
 // build.gradle.kts
 dependencies {
@@ -16,9 +20,6 @@ dependencies {
     implementation("com.github.kaleidot725:pulsemvi-navigation3:<version>")
 }
 ```
-
-It brings Navigation 3 and the lifecycle artifacts with it, so you do not need to declare
-`navigation3-ui`, `lifecycle-viewmodel-compose` or `lifecycle-viewmodel-navigation3` yourself.
 
 ## 2. Define the routes
 
@@ -43,7 +44,13 @@ fun App() {
 
 ## 3. Pass the decorators to `NavDisplay`
 
-This is the step that scopes ViewModels to the back stack:
+This is the step that scopes ViewModels to the back stack.
+
+::: warning
+`NavDisplay` defaults `entryDecorators` to the saveable state holder alone. Passing the ViewModel
+decorator on its own would drop saveable state, so [`rememberPulseNavEntryDecorators`](/api/composables#rememberpulsenaventrydecorators)
+returns both. Use it rather than assembling the list yourself.
+:::
 
 ```kotlin
 NavDisplay(
@@ -61,12 +68,6 @@ NavDisplay(
         },
 )
 ```
-
-::: warning
-`NavDisplay` defaults `entryDecorators` to the saveable state holder alone. Passing the ViewModel
-decorator on its own would drop saveable state, so [`rememberPulseNavEntryDecorators`](/api/composables#rememberpulsenaventrydecorators)
-returns both. Use it rather than assembling the list yourself.
-:::
 
 ## 4. Create the ViewModels inside the destination
 
@@ -101,14 +102,13 @@ fun CounterScreen(onShowDetails: (Int) -> Unit) {
 
 `rememberPulseViewModel` defaults its key to the ViewModel's qualified class name, and a key is
 unique per owner, not globally. Two instances of one type under a single owner would therefore
-collide. Give them explicit keys:
+collide. Give them explicit keys. The demo does this for all four of its areas, which are the same
+class four times over.
 
 ```kotlin
 val left = rememberPulseViewModel(key = "left") { CounterViewModel(leftRepository) }
 val right = rememberPulseViewModel(key = "right") { CounterViewModel(rightRepository) }
 ```
-
-The demo does this for all four of its areas, which are the same class four times over.
 
 ## Without Navigation 3
 

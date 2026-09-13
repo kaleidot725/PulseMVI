@@ -8,7 +8,7 @@ PulseMVI is a lightweight MVI (Model-View-Intent) library for **Compose Desktop*
 
 ## Why PulseMVI?
 
-Compose apps often contain multiple independent Composable sections, each with its own state. PulseMVI makes it easy to coordinate these sections without tightly coupling them.
+Compose apps often contain multiple independent Composable sections, each with its own state. PulseMVI makes it easy to coordinate these sections without tightly coupling them. In the layout below, `PulseContainer` sits above both ViewModels: when you call `container.broadcast(MyBroadcast.Sync)`, both ViewModel A and ViewModel B receive the message and can react independently.
 
 ```
 ┌─────────────────────────────────────┐
@@ -21,11 +21,11 @@ Compose apps often contain multiple independent Composable sections, each with i
 └─────────────────────────────────────┘
 ```
 
-`PulseContainer` sits above both ViewModels. When you call `container.broadcast(MyBroadcast.Sync)`, both ViewModel A and ViewModel B receive the message and can react independently.
-
 ## Installation
 
-Add JitPack to your repositories:
+### Repository
+
+Add JitPack to `settings.gradle.kts`.
 
 ```kotlin
 // settings.gradle.kts
@@ -36,7 +36,12 @@ dependencyResolutionManagement {
 }
 ```
 
-Then add the dependency:
+### Dependencies
+
+Add the dependencies to `build.gradle.kts`, replacing `<version>` with the latest tag from
+[GitHub Releases](https://github.com/kaleidot725/PulseMVI/releases). `pulsemvi` alone leaves the
+ViewModel lifetime to you (see [ViewModel](/guide/viewmodel)); add `pulsemvi-navigation3` to scope it
+to a back stack entry instead (see [Navigation 3](/guide/navigation3)).
 
 ```kotlin
 // build.gradle.kts
@@ -47,11 +52,6 @@ dependencies {
     implementation("com.github.kaleidot725:pulsemvi-navigation3:<version>")
 }
 ```
-
-`pulsemvi` alone leaves the ViewModel lifetime to you — see [ViewModel](/guide/viewmodel). Add
-`pulsemvi-navigation3` to scope it to a back stack entry instead — see [Navigation 3](/guide/navigation3).
-
-Replace `<version>` with the latest tag from [GitHub Releases](https://github.com/kaleidot725/PulseMVI/releases).
 
 ## Artifacts
 

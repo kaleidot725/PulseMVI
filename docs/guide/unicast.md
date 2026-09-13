@@ -6,15 +6,13 @@ Use it when a child ViewModel owns the immediate user action, but the parent Con
 
 ## Defining a Unicast
 
-Implement `PulseUnicast` with a sealed interface or sealed class:
+Implement `PulseUnicast` with a sealed interface or sealed class. The same Unicast type is shared by the Container and every ViewModel registered in that Container, so a ViewModel cannot emit a Unicast type that the Container does not understand.
 
 ```kotlin
 sealed interface CounterUnicast : PulseUnicast {
     data class CounterUpdated(val count: Int) : CounterUnicast
 }
 ```
-
-The same Unicast type is shared by the Container and every ViewModel registered in that Container:
 
 ```kotlin
 class CounterViewModel : PulseViewModel<
@@ -32,11 +30,9 @@ class CounterContainer(
 ) : PulseContainer<CounterBroadcast, CounterUnicast>(viewModels = viewModels)
 ```
 
-This generic pairing means a ViewModel cannot emit a Unicast type that the Container does not understand.
-
 ## Sending a Unicast
 
-Call `unicast()` from inside a ViewModel:
+Call `unicast()` from inside a ViewModel. `PulseContainer` collects each registered ViewModel's `unicast` flow internally.
 
 ```kotlin
 override fun onAction(uiAction: CounterAction) {
@@ -57,11 +53,9 @@ override fun onAction(uiAction: CounterAction) {
 }
 ```
 
-`PulseContainer` collects each registered ViewModel's `unicast` flow internally.
-
 ## Receiving a Unicast
 
-Override `onReceived()` in the Container:
+Override `onReceived()` in the Container. In the example below, the Container converts a ViewModel-to-Container Unicast into a Container-to-ViewModels Broadcast.
 
 ```kotlin
 override fun onReceived(unicast: CounterUnicast) {
@@ -71,8 +65,6 @@ override fun onReceived(unicast: CounterUnicast) {
     }
 }
 ```
-
-In this example, the Container converts a ViewModel-to-Container Unicast into a Container-to-ViewModels Broadcast.
 
 ## Unicast vs Broadcast vs Event
 
@@ -141,7 +133,7 @@ class CounterViewModel(
 }
 ```
 
-The data flow is:
+### Data flow
 
 ```text
 Counter A action
