@@ -48,7 +48,7 @@ This is the step that scopes ViewModels to the back stack.
 
 ::: warning
 `NavDisplay` defaults `entryDecorators` to the saveable state holder alone. Passing the ViewModel
-decorator on its own would drop saveable state, so [`rememberPulseNavEntryDecorators`](/api/composables#rememberpulsenaventrydecorators)
+decorator on its own would drop saveable state, so [`rememberPulseNavEntryDecorators`](/api/navigation3#rememberpulsenaventrydecorators)
 returns both. Use it rather than assembling the list yourself.
 :::
 
@@ -119,6 +119,6 @@ whichever way it was built. What changes is teardown: `close()` runs from `onCle
 
 ## Next Steps
 
-- [Composables](/api/composables) — the full signatures and owner resolution rules
+- [Navigation 3 API](/api/navigation3) — the full signatures and owner resolution rules
 - [ViewModel](/guide/viewmodel) — lifecycle hooks and state updates
 - [Container](/guide/container) — broadcast and refresh
