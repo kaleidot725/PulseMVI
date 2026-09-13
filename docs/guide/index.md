@@ -2,9 +2,11 @@
 
 PulseMVI is a lightweight MVI (Model-View-Intent) library for **Compose Desktop**. It extends the standard MVI pattern with three coordination features for multi-Composable layouts:
 
-- **Broadcast** — deliver a typed message from a Container to all registered ViewModels at once
-- **Unicast** — send a typed message from a child ViewModel up to its Container
-- **View Refresh** — reconstruct the entire Compose view tree on demand without losing ViewModel state
+| Feature | Description |
+|---|---|
+| **Broadcast** | Deliver a typed message from a Container to all registered ViewModels at once |
+| **Unicast** | Send a typed message from a child ViewModel up to its Container |
+| **View Refresh** | Reconstruct the entire Compose view tree on demand without losing ViewModel state |
 
 ## Why PulseMVI?
 
