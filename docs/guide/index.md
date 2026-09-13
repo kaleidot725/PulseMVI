@@ -47,10 +47,10 @@ to a back stack entry instead (see [Navigation 3](/guide/navigation3)).
 ```kotlin
 // build.gradle.kts
 dependencies {
-    implementation("com.github.kaleidot725:pulsemvi:<version>")
+    implementation("com.github.kaleidot725.PulseMVI:pulsemvi:<version>")
 
     // Optional: owner scoped lifetimes and Navigation 3 back stack scoping
-    implementation("com.github.kaleidot725:pulsemvi-navigation3:<version>")
+    implementation("com.github.kaleidot725.PulseMVI:pulsemvi-navigation3:<version>")
 }
 ```
 

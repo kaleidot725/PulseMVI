@@ -8,8 +8,8 @@ the core artifact alone.
 
 ```kotlin
 dependencies {
-    implementation("com.github.kaleidot725:pulsemvi:<version>")
-    implementation("com.github.kaleidot725:pulsemvi-navigation3:<version>")
+    implementation("com.github.kaleidot725.PulseMVI:pulsemvi:<version>")
+    implementation("com.github.kaleidot725.PulseMVI:pulsemvi-navigation3:<version>")
 }
 ```
 
