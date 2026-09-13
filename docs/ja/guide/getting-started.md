@@ -178,6 +178,39 @@ fun CounterContent(viewModel: CounterViewModel, modifier: Modifier = Modifier) {
 }
 ```
 
+## 5. ViewModel を Navigation 3 の destination にスコープする
+
+手順 4 では ViewModel をトップレベルで生成したので、ウィンドウと同じ長さだけ生きます。Navigation 3 を使う場合は destination の中で生成すると、そのルートがバックスタックにある間だけ生きるようになります。必要なのは 2 つです。`NavDisplay` の `entryDecorators` に `rememberPulseNavEntryDecorators()` を渡してバックスタックの各エントリに独自の `ViewModelStoreOwner` を持たせること、そして ViewModel と Container を `NavDisplay` より上ではなく destination の中で生成することです。この仕組みは [Navigation 3](/ja/guide/navigation3) で解説しています。
+
+```kotlin
+sealed interface Route : NavKey {
+    data object Counter : Route
+}
+
+fun main() = application {
+    Window(onCloseRequest = ::exitApplication, title = "Counter") {
+        MaterialTheme {
+            val backStack = remember { mutableStateListOf<Route>(Route.Counter) }
+
+            NavDisplay(
+                backStack = backStack,
+                onBack = { if (backStack.size > 1) backStack.removeAt(backStack.lastIndex) },
+                entryDecorators = rememberPulseNavEntryDecorators(),
+                entryProvider =
+                    entryProvider {
+                        entry<Route.Counter> {
+                            val viewModel = rememberPulseViewModel { CounterViewModel(CounterRepository()) }
+                            val container = rememberPulseContainer { CounterContainer(viewModels = listOf(viewModel)) }
+
+                            CounterScreen(container = container, viewModel = viewModel)
+                        }
+                    },
+            )
+        }
+    }
+}
+```
+
 ## デモを動かす
 
 リポジトリにはパルスグリッドのデモが含まれています。4 つのエリアが 1 つの Container を共有し、1 つをタップすると辺を共有する 2 つに波及します。リポジトリをクローンして実行してください。
@@ -191,3 +224,4 @@ fun CounterContent(viewModel: CounterViewModel, modifier: Modifier = Modifier) {
 - [アーキテクチャ](/ja/guide/architecture) — データフローを深く理解する
 - [ViewModel](/ja/guide/viewmodel) — ViewModel の応用パターン
 - [Container](/ja/guide/container) — 複数の ViewModel を調整する
+- [Navigation 3](/ja/guide/navigation3) — バックスタックにスコープされたライフタイムの仕組み

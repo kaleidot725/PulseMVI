@@ -1,109 +1,83 @@
 # Navigation 3
 
-`pulsemvi-navigation3` is an optional artifact. It adds three composables and nothing else: two that
-create a `PulseViewModel` or a `PulseContainer` under the `ViewModelStoreOwner` in scope, and one
-that gives `NavDisplay` the decorators it needs for that owner to be the back stack entry.
+`pulsemvi-navigation3` is an optional artifact that ties a `PulseViewModel`'s lifetime to a
+Navigation 3 back stack entry. The core artifact has no opinion about lifetime: `PulseViewModel`
+extends `androidx.lifecycle.ViewModel`, so whichever `ViewModelStore` holds an instance decides how
+long it lives. This artifact supplies the store — one per back stack entry — and the composables
+that put a ViewModel into it. The wiring itself is in
+[Getting Started, step 5](/guide/getting-started#_5-scope-the-viewmodel-to-a-navigation-3-destination);
+this page explains what that wiring does.
 
-The core artifact stays free of it, so `pulsemvi` on its own depends on the Compose runtime,
-`androidx.lifecycle` and coroutines only.
+## What the artifact adds
 
-## 1. Add the dependency
+Three composables, and nothing else. The core artifact stays free of Navigation 3 and the lifecycle
+compose dependencies.
 
-Add `pulsemvi-navigation3` next to the core artifact. It brings Navigation 3 and the lifecycle
-artifacts with it, so you do not need to declare `navigation3-ui`, `lifecycle-viewmodel-compose` or
-`lifecycle-viewmodel-navigation3` yourself.
-
-```kotlin
-// build.gradle.kts
-dependencies {
-    implementation("com.github.kaleidot725:pulsemvi:<version>")
-    implementation("com.github.kaleidot725:pulsemvi-navigation3:<version>")
-}
-```
-
-## 2. Define the routes
-
-A route is any `NavKey`. Keep the back stack in a `SnapshotStateList`:
-
-```kotlin
-sealed interface Route : NavKey {
-    data object Counter : Route
-
-    data class CounterDetails(val count: Int) : Route
-}
-
-@Composable
-fun App() {
-    val backStack = remember { mutableStateListOf<Route>(Route.Counter) }
-    val popLast: () -> Unit = {
-        if (backStack.size > 1) backStack.removeAt(backStack.lastIndex)
-    }
-    // ...
-}
-```
-
-## 3. Pass the decorators to `NavDisplay`
-
-This is the step that scopes ViewModels to the back stack.
-
-::: warning
-`NavDisplay` defaults `entryDecorators` to the saveable state holder alone. Passing the ViewModel
-decorator on its own would drop saveable state, so [`rememberPulseNavEntryDecorators`](/api/navigation3#rememberpulsenaventrydecorators)
-returns both. Use it rather than assembling the list yourself.
-:::
-
-```kotlin
-NavDisplay(
-    backStack = backStack,
-    onBack = popLast,
-    entryDecorators = rememberPulseNavEntryDecorators(),
-    entryProvider =
-        entryProvider {
-            entry<Route.Counter> {
-                CounterScreen(onShowDetails = { backStack.add(Route.CounterDetails(it)) })
-            }
-            entry<Route.CounterDetails> { route ->
-                CounterDetailScreen(count = route.count, onBack = popLast)
-            }
-        },
-)
-```
-
-## 4. Create the ViewModels inside the destination
-
-Each destination builds what it needs. Nothing is created above `NavDisplay`, which is what keeps
-the lifetime tied to the route:
-
-```kotlin
-@Composable
-fun CounterScreen(onShowDetails: (Int) -> Unit) {
-    val viewModel = rememberPulseViewModel { CounterViewModel(CounterRepository()) }
-    val container = rememberPulseContainer { CounterContainer(viewModels = listOf(viewModel)) }
-
-    PulseHost(container = container) { onRefresh, onBroadcast ->
-        PulseContent(viewModel = viewModel) { state, onAction ->
-            // Compose UI
-        }
-    }
-}
-```
-
-## What you get
-
-| Event | What happens |
+| Composable | Role |
 |---|---|
-| The route is pushed | The ViewModel is created and `PulseContent` runs `onSetup()` once |
-| Another destination covers it | The ViewModel is kept; state and running coroutines are untouched |
-| You come back to it | The same instance is found; `onSetup()` is not repeated |
-| The route is popped | The entry's `ViewModelStore` is cleared, so `onCleared()` cancels the scope and closes the Container |
-| The composition restarts under a surviving owner | The ViewModel is reused, so state stands |
+| `rememberPulseViewModel` | Creates a `PulseViewModel` in the `ViewModelStore` of the owner in scope, or returns the one already there |
+| `rememberPulseContainer` | The same for a `PulseContainer` |
+| `rememberPulseNavEntryDecorators` | The `NavEntryDecorator` list that makes each `NavDisplay` entry an owner |
 
-## Two ViewModels of the same type
+## How an owner is found
 
-`rememberPulseViewModel` defaults its key to the ViewModel's qualified class name, and a key is
-unique per owner, not globally. Two instances of one type under a single owner would therefore
-collide. Give them explicit keys. The demo does this for all four of its areas, which are the same
-class four times over.
+`rememberPulseViewModel` reads `LocalViewModelStoreOwner.current` and keeps the instance in that
+owner's `ViewModelStore` under a key. It never creates an owner of its own, so whatever owner is in
+scope at the call site decides the lifetime. Under a plain Compose Desktop `Window` that owner is
+the window, and the ViewModel lives as long as the screen. Under a `NavDisplay` decorated with
+`rememberPulseNavEntryDecorators()`, each entry on the back stack carries its own owner, and a
+ViewModel created inside a destination goes into that entry's store. The consequence is that nothing may be created above `NavDisplay` if it is meant to belong to a
+route: a ViewModel created outside the destinations lands in the window's store and outlives every
+route.
+
+```mermaid
+flowchart TB
+    ND["NavDisplay<br/><i>entryDecorators = rememberPulseNavEntryDecorators()</i>"]
+    subgraph E1["Back stack entry: Counter"]
+        direction TB
+        O1["ViewModelStoreOwner"] --> S1["ViewModelStore"]
+        S1 --> V1["CounterViewModel"]
+        S1 --> C1["CounterContainer"]
+    end
+    subgraph E2["Back stack entry: CounterDetails"]
+        direction TB
+        O2["ViewModelStoreOwner"] --> S2["ViewModelStore"]
+        S2 --> V2["CounterDetailViewModel"]
+    end
+    ND --> E1
+    ND --> E2
+```
+
+## Why both decorators
+
+`NavDisplay` takes a list of `NavEntryDecorator`s and defaults it to the saveable state holder
+alone, which is what keeps `rememberSaveable` state across the back stack. Scoping ViewModels needs
+a second decorator, `rememberViewModelStoreNavEntryDecorator()` from
+`lifecycle-viewmodel-navigation3`, and passing only that one would silently drop saveable state.
+`rememberPulseNavEntryDecorators()` returns both, in the order `NavDisplay` expects, so the
+artifact exists partly to make that mistake hard to make.
+
+## Lifetime along the back stack
+
+Because the store belongs to the entry, the ViewModel follows the route rather than the
+composition. Covering the route with another destination removes its composable but not its entry,
+so the instance and its running coroutines are untouched; coming back finds the same instance and
+`PulseContent` does not repeat `onSetup()`. Popping the route clears the entry's store, which calls
+`onCleared()` on everything in it.
+
+| Route | ViewModel |
+|---|---|
+| Pushed | Created; `PulseContent` runs `onSetup()` once |
+| Covered by another destination | Kept, with its state and coroutines |
+| Returned to | The same instance; `onSetup()` is not repeated |
+| Popped | The entry's `ViewModelStore` is cleared: `onCleared()` cancels the scope and closes the Container |
+| Composition restarted under a surviving owner | Reused; state stands |
+
+## Keys
+
+The key defaults to the ViewModel's qualified class name, and a key is unique per owner, not
+globally. Two instances of one type under a single owner therefore collide, so give them explicit
+keys. The demo does this for its four areas, which are the same class four times over.
 
 ```kotlin
 val left = rememberPulseViewModel(key = "left") { CounterViewModel(leftRepository) }
@@ -119,6 +93,6 @@ whichever way it was built. What changes is teardown: `close()` runs from `onCle
 
 ## Next Steps
 
+- [Getting Started](/guide/getting-started#_5-scope-the-viewmodel-to-a-navigation-3-destination) — the wiring, step by step
 - [Navigation 3 API](/api/navigation3) — the full signatures and owner resolution rules
 - [ViewModel](/guide/viewmodel) — lifecycle hooks and state updates
-- [Container](/guide/container) — broadcast and refresh
