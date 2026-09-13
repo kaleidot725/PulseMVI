@@ -179,6 +179,44 @@ fun CounterContent(viewModel: CounterViewModel, modifier: Modifier = Modifier) {
 }
 ```
 
+## 5. Scope the ViewModel to a Navigation 3 destination
+
+Step 4 created the ViewModel at the top level, so it lives as long as the window. With Navigation 3,
+create it inside a destination instead and it lives exactly as long as that route is on the back
+stack. Two things make that happen: `NavDisplay` gets `rememberPulseNavEntryDecorators()` as its
+`entryDecorators`, which gives every back stack entry its own `ViewModelStoreOwner`, and the
+ViewModel and Container are created inside the destination rather than above `NavDisplay`. How this
+works is covered in [Navigation 3](/guide/navigation3).
+
+```kotlin
+sealed interface Route : NavKey {
+    data object Counter : Route
+}
+
+fun main() = application {
+    Window(onCloseRequest = ::exitApplication, title = "Counter") {
+        MaterialTheme {
+            val backStack = remember { mutableStateListOf<Route>(Route.Counter) }
+
+            NavDisplay(
+                backStack = backStack,
+                onBack = { if (backStack.size > 1) backStack.removeAt(backStack.lastIndex) },
+                entryDecorators = rememberPulseNavEntryDecorators(),
+                entryProvider =
+                    entryProvider {
+                        entry<Route.Counter> {
+                            val viewModel = rememberPulseViewModel { CounterViewModel(CounterRepository()) }
+                            val container = rememberPulseContainer { CounterContainer(viewModels = listOf(viewModel)) }
+
+                            CounterScreen(container = container, viewModel = viewModel)
+                        }
+                    },
+            )
+        }
+    }
+}
+```
+
 ## Running the Demo
 
 The repository includes a pulse grid demo: four areas sharing one Container, where a tap on one
@@ -193,3 +231,4 @@ spreads to the two it shares an edge with. Clone the repo and run:
 - [Architecture](/guide/architecture) — understand the data flow in depth
 - [ViewModel](/guide/viewmodel) — advanced ViewModel patterns
 - [Container](/guide/container) — coordinating multiple ViewModels
+- [Navigation 3](/guide/navigation3) — how back stack scoped lifetimes work
