@@ -36,9 +36,14 @@ export default defineConfig({
                 { text: 'Architecture', link: '/guide/architecture' },
                 { text: 'ViewModel', link: '/guide/viewmodel' },
                 { text: 'Container', link: '/guide/container' },
-                { text: 'Navigation 3', link: '/guide/navigation3' },
                 { text: 'Broadcast', link: '/guide/broadcast' },
                 { text: 'Unicast', link: '/guide/unicast' },
+              ],
+            },
+            {
+              text: 'Extensions',
+              items: [
+                { text: 'Navigation 3', link: '/guide/navigation3' },
               ],
             },
           ],
@@ -51,6 +56,12 @@ export default defineConfig({
                 { text: 'PulseContainer', link: '/api/pulse-container' },
                 { text: 'Composables', link: '/api/composables' },
                 { text: 'Marker Interfaces', link: '/api/interfaces' },
+              ],
+            },
+            {
+              text: 'Extensions',
+              items: [
+                { text: 'Navigation 3', link: '/api/navigation3' },
               ],
             },
           ],
@@ -91,9 +102,14 @@ export default defineConfig({
                 { text: 'アーキテクチャ', link: '/ja/guide/architecture' },
                 { text: 'ViewModel', link: '/ja/guide/viewmodel' },
                 { text: 'Container', link: '/ja/guide/container' },
-                { text: 'Navigation 3', link: '/ja/guide/navigation3' },
                 { text: 'Broadcast', link: '/ja/guide/broadcast' },
                 { text: 'Unicast', link: '/ja/guide/unicast' },
+              ],
+            },
+            {
+              text: '拡張',
+              items: [
+                { text: 'Navigation 3', link: '/ja/guide/navigation3' },
               ],
             },
           ],
@@ -106,6 +122,12 @@ export default defineConfig({
                 { text: 'PulseContainer', link: '/ja/api/pulse-container' },
                 { text: 'Composable', link: '/ja/api/composables' },
                 { text: 'マーカーインターフェース', link: '/ja/api/interfaces' },
+              ],
+            },
+            {
+              text: '拡張',
+              items: [
+                { text: 'Navigation 3', link: '/ja/api/navigation3' },
               ],
             },
           ],

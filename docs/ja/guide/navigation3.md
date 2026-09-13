@@ -42,7 +42,7 @@ fun App() {
 ViewModel をバックスタックにスコープするのはこのステップです。
 
 ::: warning
-`NavDisplay` の `entryDecorators` の既定値は saveable state holder のみです。ViewModel のデコレータだけを渡すと saveable state が失われるため、[`rememberPulseNavEntryDecorators`](/ja/api/composables#rememberpulsenaventrydecorators) は両方を返します。リストを自分で組み立てるのではなく、こちらを使ってください。
+`NavDisplay` の `entryDecorators` の既定値は saveable state holder のみです。ViewModel のデコレータだけを渡すと saveable state が失われるため、[`rememberPulseNavEntryDecorators`](/ja/api/navigation3#rememberpulsenaventrydecorators) は両方を返します。リストを自分で組み立てるのではなく、こちらを使ってください。
 :::
 
 ```kotlin
@@ -105,6 +105,6 @@ val right = rememberPulseViewModel(key = "right") { CounterViewModel(rightReposi
 
 ## 次のステップ
 
-- [Composable](/ja/api/composables) — 完全なシグネチャとオーナー解決のルール
+- [Navigation 3 API](/ja/api/navigation3) — 完全なシグネチャとオーナー解決のルール
 - [ViewModel](/ja/guide/viewmodel) — ライフサイクルフックと状態更新
 - [Container](/ja/guide/container) — Broadcast と Refresh

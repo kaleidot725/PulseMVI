@@ -1,6 +1,6 @@
 # API 概要
 
-PulseMVI の API は小さく、焦点が絞られています。コアのアーティファクトは `jp.kaleidot725.pulse.mvi` にあり、`rememberPulseViewModel`、`rememberPulseContainer`、`rememberPulseNavEntryDecorators` は `pulsemvi-navigation3` の `jp.kaleidot725.pulse.mvi.navigation3` にあります。
+PulseMVI の API は小さく、焦点が絞られています。コアのアーティファクトは `jp.kaleidot725.pulse.mvi` にあります。任意のアーティファクト `pulsemvi-navigation3` は `jp.kaleidot725.pulse.mvi.navigation3` に 3 つの Composable を追加します（[拡張](#拡張) を参照）。
 
 ## クラス
 
@@ -15,9 +15,6 @@ PulseMVI の API は小さく、焦点が絞られています。コアのアー
 |---|---|
 | [`PulseHost`](/ja/api/composables#pulsehost) | Container をサブツリーにスコープし、Refresh と Broadcast のコールバックを提供する |
 | [`PulseContent`](/ja/api/composables#pulsecontent) | ViewModel を観測し、状態と Action のディスパッチャを提供する |
-| [`rememberPulseViewModel`](/ja/api/composables#rememberpulseviewmodel) | `ViewModelStoreOwner` にスコープされた ViewModel — `pulsemvi-navigation3` |
-| [`rememberPulseContainer`](/ja/api/composables#rememberpulsecontainer) | `ViewModelStoreOwner` にスコープされた Container — `pulsemvi-navigation3` |
-| [`rememberPulseNavEntryDecorators`](/ja/api/composables#rememberpulsenaventrydecorators) | ViewModel をバックスタックエントリにスコープする `NavDisplay` のデコレータ — `pulsemvi-navigation3` |
 
 ## マーカーインターフェース
 
@@ -28,3 +25,13 @@ PulseMVI の API は小さく、焦点が絞られています。コアのアー
 | [`PulseEvent`](/ja/api/interfaces#pulseevent) | クラスを一度きりの副作用として印付ける |
 | [`PulseBroadcast`](/ja/api/interfaces#pulsebroadcast) | クラスを Container の Broadcast メッセージとして印付ける |
 | [`PulseUnicast`](/ja/api/interfaces#pulseunicast) | クラスを子から親への Unicast メッセージとして印付ける |
+
+## 拡張
+
+### Navigation 3
+
+| Composable | 説明 |
+|---|---|
+| [`rememberPulseViewModel`](/ja/api/navigation3#rememberpulseviewmodel) | `ViewModelStoreOwner` にスコープされた ViewModel |
+| [`rememberPulseContainer`](/ja/api/navigation3#rememberpulsecontainer) | `ViewModelStoreOwner` にスコープされた Container |
+| [`rememberPulseNavEntryDecorators`](/ja/api/navigation3#rememberpulsenaventrydecorators) | ViewModel をバックスタックエントリにスコープする `NavDisplay` のデコレータ |
