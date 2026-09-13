@@ -1,12 +1,12 @@
 # Unicast
 
-Unicast is PulseMVI's mechanism for sending a typed message from a `PulseViewModel` up to its parent `PulseContainer`.
+Unicast is one of PulseMVI's mechanisms. It sends a typed message from a `PulseViewModel` up to its parent `PulseContainer`.
 
-Use it when a child ViewModel owns the immediate user action, but the parent Container needs to coordinate a follow-up such as broadcasting the result to sibling ViewModels.
+Use it when handling an action and coordinating the follow-up are split. The child ViewModel owns the immediate user action. The parent Container handles the follow-up, such as broadcasting the result to sibling ViewModels.
 
 ## Defining a Unicast
 
-Implement `PulseUnicast` with a sealed interface or sealed class. The same Unicast type is shared by the Container and every ViewModel registered in that Container, so a ViewModel cannot emit a Unicast type that the Container does not understand.
+Implement `PulseUnicast` with a sealed interface or sealed class. The Unicast type is shared with the Container. Every ViewModel registered in that Container uses the same type. This generic pairing means a ViewModel cannot emit a Unicast type that the Container does not understand.
 
 ```kotlin
 sealed interface CounterUnicast : PulseUnicast {
@@ -55,7 +55,7 @@ override fun onAction(uiAction: CounterAction) {
 
 ## Receiving a Unicast
 
-Override `onReceived()` in the Container. In the example below, the Container converts a ViewModel-to-Container Unicast into a Container-to-ViewModels Broadcast.
+Override `onReceived()` in the Container. In the example below, the Container converts a Unicast into a Broadcast. It takes the Unicast it received from a ViewModel and sends it back out to all ViewModels.
 
 ```kotlin
 override fun onReceived(unicast: CounterUnicast) {
@@ -77,7 +77,7 @@ override fun onReceived(unicast: CounterUnicast) {
 
 ## Example: Sharing Counter Updates
 
-Two counter ViewModels can keep separate local repositories while sharing updates through their parent Container:
+Two counter ViewModels keep separate local repositories. They still share updates, through their parent Container:
 
 ```kotlin
 sealed class CounterBroadcast : PulseBroadcast {

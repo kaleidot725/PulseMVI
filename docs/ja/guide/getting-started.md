@@ -88,7 +88,7 @@ class CounterViewModel(
 
 ## 3. Container を作る
 
-`PulseContainer` は ViewModel のリストを受け取り、全員への Broadcast やビューの Refresh を可能にします。
+`PulseContainer` は ViewModel のリストを受け取ります。全員への Broadcast や、ビューの Refresh を可能にします。
 
 ```kotlin
 class CounterContainer(
@@ -180,7 +180,7 @@ fun CounterContent(viewModel: CounterViewModel, modifier: Modifier = Modifier) {
 
 ## 5. ViewModel を Navigation 3 の destination にスコープする
 
-手順 4 では ViewModel をトップレベルで生成したので、ウィンドウと同じ長さだけ生きます。Navigation 3 を使う場合は destination の中で生成すると、そのルートがバックスタックにある間だけ生きるようになります。必要なのは 2 つです。`NavDisplay` の `entryDecorators` に `rememberPulseNavEntryDecorators()` を渡してバックスタックの各エントリに独自の `ViewModelStoreOwner` を持たせること、そして ViewModel と Container を `NavDisplay` より上ではなく destination の中で生成することです。この仕組みは [Navigation 3](/ja/guide/navigation3) で解説しています。
+手順 4 では ViewModel をトップレベルで生成しました。この場合、ViewModel はウィンドウと同じ長さだけ生きます。Navigation 3 を使う場合は destination の中で生成します。すると、そのルートがバックスタックにある間だけ生きるようになります。必要なのは 2 つです。1 つは、`NavDisplay` の `entryDecorators` に `rememberPulseNavEntryDecorators()` を渡すことです。これでバックスタックの各エントリが独自の `ViewModelStoreOwner` を持ちます。もう 1 つは、ViewModel と Container を destination の中で生成することです。`NavDisplay` より上では生成しません。この仕組みは [Navigation 3](/ja/guide/navigation3) で解説しています。
 
 ```kotlin
 sealed interface Route : NavKey {
@@ -213,7 +213,7 @@ fun main() = application {
 
 ## デモを動かす
 
-リポジトリにはパルスグリッドのデモが含まれています。4 つのエリアが 1 つの Container を共有し、1 つをタップすると辺を共有する 2 つに波及します。リポジトリをクローンして実行してください。
+リポジトリにはパルスグリッドのデモが含まれています。4 つのエリアが 1 つの Container を共有しています。1 つをタップすると、辺を共有する 2 つに波及します。リポジトリをクローンして実行してください。
 
 ```bash
 ./gradlew :demo:run

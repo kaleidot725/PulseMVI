@@ -1,6 +1,6 @@
 # Broadcast
 
-Broadcast is PulseMVI's mechanism for delivering a typed message from a `PulseContainer` to all of its registered `PulseViewModel` instances simultaneously.
+Broadcast is one of PulseMVI's mechanisms. It delivers a typed message from a `PulseContainer` to all of its registered `PulseViewModel` instances, simultaneously.
 
 ## Defining a Broadcast
 

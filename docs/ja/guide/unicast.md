@@ -1,12 +1,12 @@
 # Unicast
 
-Unicast は、`PulseViewModel` から親の `PulseContainer` へ型付きメッセージを送るための PulseMVI の仕組みです。
+Unicast は PulseMVI の仕組みの 1 つです。`PulseViewModel` から親の `PulseContainer` へ、型付きメッセージを送ります。
 
-直近のユーザー操作は子の ViewModel が担当するが、その結果を兄弟の ViewModel に Broadcast するといった後続の調整を親の Container が行う必要がある、という場面で使います。
+使う場面は、操作の処理と後続の調整が分かれているときです。直近のユーザー操作は子の ViewModel が担当します。その結果を兄弟の ViewModel に Broadcast するといった調整は、親の Container が行います。
 
 ## Unicast を定義する
 
-sealed interface または sealed class で `PulseUnicast` を実装します。Unicast の型は、Container と、その Container に登録されるすべての ViewModel で共有されます。このジェネリクスの組み合わせにより、Container が理解できない Unicast 型を ViewModel が発行することはできません。
+sealed interface または sealed class で `PulseUnicast` を実装します。Unicast の型は Container と共有されます。その Container に登録されるすべての ViewModel も、同じ型を使います。このジェネリクスの組み合わせにより、Container が理解できない Unicast 型を ViewModel が発行することはできません。
 
 ```kotlin
 sealed interface CounterUnicast : PulseUnicast {
@@ -55,7 +55,7 @@ override fun onAction(uiAction: CounterAction) {
 
 ## Unicast を受け取る
 
-Container で `onReceived()` をオーバーライドします。次の例では、Container が ViewModel → Container の Unicast を、Container → ViewModel 群の Broadcast に変換しています。
+Container で `onReceived()` をオーバーライドします。次の例では、Container が Unicast を Broadcast に変換しています。ViewModel から受け取った Unicast を、ViewModel 群への Broadcast として送り直しています。
 
 ```kotlin
 override fun onReceived(unicast: CounterUnicast) {
@@ -77,7 +77,7 @@ override fun onReceived(unicast: CounterUnicast) {
 
 ## 例: カウンターの更新を共有する
 
-2 つのカウンター ViewModel がそれぞれ別のリポジトリを持ちながら、親の Container を通じて更新を共有できます。
+2 つのカウンター ViewModel は、それぞれ別のリポジトリを持ちます。それでも、親の Container を通じて更新を共有できます。
 
 ```kotlin
 sealed class CounterBroadcast : PulseBroadcast {

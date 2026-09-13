@@ -13,9 +13,9 @@ fun <Broadcast : PulseBroadcast, Unicast : PulseUnicast> PulseHost(
 )
 ```
 
-`PulseContainer` をこのサブツリーにスコープします。自身は UI を描画しません。`PulseContent` がコンテンツを作り直す基準となる Container のキーを公開し、コンテンツブロックに `onRefresh` と `onBroadcast` を渡します。内側に置かれたすべての `PulseContent` が `container.refresh()` に反応します。
+`PulseContainer` をこのサブツリーにスコープします。自身は UI を描画しません。Container のキーを公開します。`PulseContent` はこのキーを基準に、コンテンツを作り直します。コンテンツブロックには `onRefresh` と `onBroadcast` を渡します。内側に置かれたすべての `PulseContent` が、`container.refresh()` に反応します。
 
-アプリには複数置くことができます。Container を所有する各 destination がそれぞれ自分の `PulseHost` を持つ、というのがデモの各画面の作り方です。
+アプリには複数置くことができます。デモでは、Container を所有する各 destination がそれぞれ自分の `PulseHost` を持っています。
 
 ### パラメータ
 
@@ -60,7 +60,7 @@ PulseContent(
 )
 ```
 
-`PulseViewModel` を観測し、コンテンツブロックに状態と Action のディスパッチャを渡します。インスタンスを最初に観測したときに `onSetup()` を実行します。キャンセルは決して行いません。`event` は単一消費者のチャネルなので、1 つのインスタンスは同時に 1 つの `PulseContent` からだけ観測してください。
+`PulseViewModel` を観測します。コンテンツブロックに、状態と Action のディスパッチャを渡します。インスタンスを最初に観測したときに `onSetup()` を実行します。キャンセルは決して行いません。`event` は単一消費者のチャネルです。1 つのインスタンスは、同時に 1 つの `PulseContent` からだけ観測してください。
 
 ### パラメータ
 
@@ -73,10 +73,11 @@ PulseContent(
 ### ライフサイクルの挙動
 
 - `PulseContent` は ViewModel をキャンセルしない。後始末は所有者の責務
-- `LaunchedEffect(viewModel)` が `event` を収集し、常に最新の `onEvent` を経由して届ける
-- `onSetup()` は `PulseContent` が ViewModel を最初に観測したときに一度だけ実行され、所有する `ViewModelStoreOwner` が破棄されるとスコープがキャンセルされる
+- `LaunchedEffect(viewModel)` が `event` を収集する。届け先は常に最新の `onEvent`
+- `onSetup()` は、`PulseContent` が ViewModel を最初に観測したときに一度だけ実行される
+- 所有する `ViewModelStoreOwner` が破棄されると、スコープがキャンセルされる
 - コンポジションを離れて戻ってきても（別のナビゲーション destination がルートを覆う場合など）`onSetup()` は繰り返されない
-- `PulseHost` の内側では `key(containerKey)` で包まれ、`refresh()` で作り直される
+- `PulseHost` の内側では `key(containerKey)` で包まれる。`refresh()` で作り直される
 
 ### 例
 

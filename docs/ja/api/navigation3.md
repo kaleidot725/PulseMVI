@@ -1,6 +1,6 @@
 # Navigation 3
 
-このページの内容はすべて、任意のアーティファクト `pulsemvi-navigation3`（パッケージ `jp.kaleidot725.pulse.mvi.navigation3`）にあります。コアのアーティファクトでは ViewModel のライフタイムは呼び出し側に委ねられます — [ViewModel](/ja/guide/viewmodel) を参照してください。組み合わせ方は [Navigation 3 ガイド](/ja/guide/navigation3) を参照してください。
+このページの内容はすべて、任意のアーティファクト `pulsemvi-navigation3` にあります。パッケージは `jp.kaleidot725.pulse.mvi.navigation3` です。コアのアーティファクトでは、ViewModel のライフタイムは呼び出し側に委ねられます（[ViewModel](/ja/guide/viewmodel) を参照）。組み合わせ方は [Navigation 3 ガイド](/ja/guide/navigation3) を参照してください。
 
 ## rememberPulseViewModel
 
@@ -12,7 +12,7 @@ inline fun <reified ViewModel : PulseViewModel<*, *, *, *, *>> rememberPulseView
 ): ViewModel
 ```
 
-現在の `ViewModelStoreOwner` の `ViewModelStore` に保持される ViewModel を生成します。コンポジションが再起動しても作り直されず、同じインスタンスが再利用されます。
+現在の `ViewModelStoreOwner` の `ViewModelStore` に保持される ViewModel を生成します。コンポジションが再起動しても作り直されません。同じインスタンスが再利用されます。
 
 ### パラメータ
 
@@ -24,13 +24,14 @@ inline fun <reified ViewModel : PulseViewModel<*, *, *, *, *>> rememberPulseView
 ### ライフサイクルの挙動
 
 - ViewModel は最初のコンポジションで生成され、同じオーナー配下の以降のコンポジションでは再利用される
-- `onSetup()` は `PulseContent` が ViewModel を最初に観測したときに一度だけ実行され、コンポジションを作り直しても繰り返されない
+- `onSetup()` は、`PulseContent` が ViewModel を最初に観測したときに一度だけ実行される
+- コンポジションを作り直しても `onSetup()` は繰り返されない
 - オーナーの `ViewModelStore` が破棄されると ViewModel のスコープはキャンセルされる
 - 状態はメモリ上にのみ保持され、プロセス終了後には復元されない
 
 ### オーナーの解決
 
-内部では `LocalViewModelStoreOwner.current` を読み、そのオーナーの `ViewModelStore` に `key` でインスタンスを保持します。したがって呼び出し箇所でスコープにあるオーナーが ViewModel の寿命を決め、オーナーを変えるものはすべて ViewModel の寿命を変えます。
+内部では `LocalViewModelStoreOwner.current` を読みます。そのオーナーの `ViewModelStore` に、`key` でインスタンスを保持します。したがって、呼び出し箇所でスコープにあるオーナーが ViewModel の寿命を決めます。オーナーを変えるものはすべて、ViewModel の寿命も変えます。
 
 | スコープにあるオーナー | ViewModel の寿命 |
 |---|---|
@@ -45,7 +46,7 @@ inline fun <reified ViewModel : PulseViewModel<*, *, *, *, *>> rememberPulseView
 - **オーナーが破棄されるまで、ViewModel がオーナーから取り除かれることはありません。** 長生きするオーナーの下で ViewModel を生成し続けると、オーナーの寿命の間ずっと溜まっていきます。画面が二度と使わない ViewModel を作るなら、より狭いオーナーにスコープしてください
 
 ::: tip
-テストでは独自のオーナーを与えることで両方の側面を確認できます。コンポジションの作り直しをまたいで保持すればコンポジションの再起動を、破棄すれば画面が消える状況を再現できます。
+テストでは、独自のオーナーを与えることで両方の側面を確認できます。オーナーをコンポジションの作り直しをまたいで保持すれば、コンポジションの再起動を再現できます。オーナーを破棄すれば、画面が消える状況を再現できます。
 :::
 
 ### 例
@@ -80,7 +81,7 @@ inline fun <reified Container : PulseContainer<*, *>> rememberPulseContainer(
 ): Container
 ```
 
-コンポジションの再起動をまたいで生き残る Container を生成し、Unicast の購読を維持します。オーナーの `ViewModelStore` が破棄されるときに `PulseContainer.close()` が呼ばれます。
+コンポジションの再起動をまたいで生き残る Container を生成します。Unicast の購読は維持されます。オーナーの `ViewModelStore` が破棄されるときに、`PulseContainer.close()` が呼ばれます。
 
 ### パラメータ
 
@@ -103,9 +104,9 @@ val container = rememberPulseContainer { CounterContainer(viewModels = listOf(vi
 fun <T : Any> rememberPulseNavEntryDecorators(): List<NavEntryDecorator<T>>
 ```
 
-ViewModel をバックスタックエントリにスコープするために `NavDisplay` が必要とする `NavEntryDecorator` のリストです。saveable state holder のデコレータと ViewModel のデコレータの 2 つを含みます。
+`NavDisplay` に渡す `NavEntryDecorator` のリストです。ViewModel をバックスタックエントリにスコープするために必要です。saveable state holder のデコレータと、ViewModel のデコレータの 2 つを含みます。
 
-`NavDisplay` の `entryDecorators` の既定値は saveable state holder のみなので、ViewModel のデコレータだけを渡すと saveable state が黙って失われます。この関数は両方を返します。
+`NavDisplay` の `entryDecorators` の既定値は saveable state holder のみです。ViewModel のデコレータだけを渡すと、saveable state が黙って失われます。この関数は両方を返します。
 
 ```kotlin
 NavDisplay(

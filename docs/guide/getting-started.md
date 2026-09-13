@@ -89,7 +89,7 @@ class CounterViewModel(
 
 ## 3. Create a Container
 
-`PulseContainer` takes a list of ViewModels and lets you broadcast to all of them or refresh the view:
+`PulseContainer` takes a list of ViewModels. It lets you broadcast to all of them, or refresh the view:
 
 ```kotlin
 class CounterContainer(
@@ -181,12 +181,12 @@ fun CounterContent(viewModel: CounterViewModel, modifier: Modifier = Modifier) {
 
 ## 5. Scope the ViewModel to a Navigation 3 destination
 
-Step 4 created the ViewModel at the top level, so it lives as long as the window. With Navigation 3,
-create it inside a destination instead and it lives exactly as long as that route is on the back
-stack. Two things make that happen: `NavDisplay` gets `rememberPulseNavEntryDecorators()` as its
-`entryDecorators`, which gives every back stack entry its own `ViewModelStoreOwner`, and the
-ViewModel and Container are created inside the destination rather than above `NavDisplay`. How this
-works is covered in [Navigation 3](/guide/navigation3).
+Step 4 created the ViewModel at the top level. There it lives as long as the window. With
+Navigation 3, create it inside a destination instead. It then lives exactly as long as that route is
+on the back stack. Two things make that happen. First, `NavDisplay` gets
+`rememberPulseNavEntryDecorators()` as its `entryDecorators`, which gives every back stack entry its
+own `ViewModelStoreOwner`. Second, the ViewModel and Container are created inside the destination,
+not above `NavDisplay`. How this works is covered in [Navigation 3](/guide/navigation3).
 
 ```kotlin
 sealed interface Route : NavKey {
@@ -219,8 +219,8 @@ fun main() = application {
 
 ## Running the Demo
 
-The repository includes a pulse grid demo: four areas sharing one Container, where a tap on one
-spreads to the two it shares an edge with. Clone the repo and run:
+The repository includes a pulse grid demo. Four areas share one Container. A tap on one spreads to
+the two it shares an edge with. Clone the repo and run:
 
 ```bash
 ./gradlew :demo:run

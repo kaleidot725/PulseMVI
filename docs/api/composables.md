@@ -13,9 +13,9 @@ fun <Broadcast : PulseBroadcast, Unicast : PulseUnicast> PulseHost(
 )
 ```
 
-Scopes a `PulseContainer` to this subtree. It emits no UI of its own: it publishes the Container key that `PulseContent` re-creates its content on, and provides `onRefresh` and `onBroadcast` to the content block. All `PulseContent` composables placed inside respond to `container.refresh()`.
+Scopes a `PulseContainer` to this subtree. It emits no UI of its own. It publishes the Container key. `PulseContent` re-creates its content on that key. It also provides `onRefresh` and `onBroadcast` to the content block. All `PulseContent` composables placed inside respond to `container.refresh()`.
 
-An app can contain several of them. Each destination that owns a Container hosts its own, which is how the demo builds every screen.
+An app can contain several of them. In the demo, each destination that owns a Container hosts its own.
 
 ### Parameters
 
@@ -60,7 +60,7 @@ PulseContent(
 )
 ```
 
-Observes a `PulseViewModel` and provides state and an action dispatcher to the content block. Runs `onSetup()` the first time it observes an instance; it never cancels one. Observe each instance from one `PulseContent` at a time, since `event` is a single-consumer channel.
+Observes a `PulseViewModel`. Provides state and an action dispatcher to the content block. Runs `onSetup()` the first time it observes an instance. It never cancels one. `event` is a single-consumer channel, so observe each instance from one `PulseContent` at a time.
 
 ### Parameters
 
@@ -73,10 +73,11 @@ Observes a `PulseViewModel` and provides state and an action dispatcher to the c
 ### Lifecycle behavior
 
 - `PulseContent` never cancels the ViewModel; teardown belongs to whoever owns it
-- `LaunchedEffect(viewModel)` collects `event`, always through the latest `onEvent` passed in
-- `onSetup()` runs once, the first time a `PulseContent` observes the ViewModel; the scope is cancelled when the owning `ViewModelStoreOwner` is cleared
+- `LaunchedEffect(viewModel)` collects `event`. It always delivers through the latest `onEvent` passed in
+- `onSetup()` runs once, the first time a `PulseContent` observes the ViewModel
+- The scope is cancelled when the owning `ViewModelStoreOwner` is cleared
 - Leaving and re-entering composition — a navigation destination covering the route, for example — never repeats `onSetup()`
-- When inside `PulseHost`, the composable is wrapped in `key(containerKey)` and re-creates on `refresh()`
+- Inside `PulseHost`, the composable is wrapped in `key(containerKey)`. It re-creates on `refresh()`
 
 ### Example
 

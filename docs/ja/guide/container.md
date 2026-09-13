@@ -1,10 +1,10 @@
 # Container
 
-`PulseContainer` は 1 つ以上の ViewModel の上に位置し、**Broadcast**、**Unicast の処理**、**View Refresh** の 3 つの調整機能を提供します。
+`PulseContainer` は 1 つ以上の ViewModel の上に位置します。**Broadcast**、**Unicast の処理**、**View Refresh** の 3 つの調整機能を提供します。
 
 ## Container を作る
 
-調整したい ViewModel のリストを受け取るクラスを定義し、ViewModel と同じ階層で生成します。
+調整したい ViewModel のリストを受け取るクラスを定義します。ViewModel と同じ階層で生成します。
 
 ```kotlin
 class AppContainer(
@@ -22,7 +22,7 @@ val container = rememberPulseContainer {
 
 ## Broadcast
 
-登録済みの**すべての** ViewModel へ、型付きメッセージを同時に送ります。リスト内のすべての ViewModel が `onReceive(AppBroadcast.UserLoggedOut)` を受け取り、それぞれ独立して反応できます。
+登録済みの**すべての** ViewModel へ、型付きメッセージを同時に送ります。リスト内のすべての ViewModel が `onReceive(AppBroadcast.UserLoggedOut)` を受け取ります。それぞれ独立して反応できます。
 
 ```kotlin
 container.broadcast(AppBroadcast.UserLoggedOut)
@@ -55,7 +55,7 @@ container.refresh()
 
 ## PulseHost の中で使う
 
-`PulseHost` は Container の内部キーを読み、コンテンツを `CompositionLocalProvider` で包みます。`PulseHost` 内の `PulseContent` は `refresh()` に自動的に反応します。
+`PulseHost` は Container の内部キーを読みます。コンテンツを `CompositionLocalProvider` で包みます。`PulseHost` 内の `PulseContent` は `refresh()` に自動的に反応します。
 
 ```kotlin
 PulseHost(container = appContainer) { onRefresh, onBroadcast ->

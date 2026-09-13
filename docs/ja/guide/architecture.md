@@ -1,6 +1,6 @@
 # アーキテクチャ
 
-PulseMVI は MVI（Model-View-Intent）パターンに従い、**Broadcast**、**Unicast**、**View Refresh** の 3 つの調整プリミティブを加えています。
+PulseMVI は MVI（Model-View-Intent）パターンに従います。そこに **Broadcast**、**Unicast**、**View Refresh** の 3 つの調整プリミティブを加えています。
 
 ## データフロー
 
@@ -48,7 +48,7 @@ flowchart LR
 
 ## View Refresh のフロー
 
-`Container.refresh()` は Compose のビューツリーを強制的に再構築します。ViewModel の状態は**保持**され、Composable だけが作り直されます。
+`Container.refresh()` は Compose のビューツリーを強制的に再構築します。ViewModel の状態は**保持**されます。Composable だけが作り直されます。
 
 ```mermaid
 flowchart TB
@@ -74,9 +74,9 @@ flowchart TB
 ## ライフサイクル
 
 ::: tip
-`onSetup()` は `PulseContent` が ViewModel を最初に観測したときに一度だけ実行され、ViewModel は `ViewModelStoreOwner` が生きている間ずっと有効です。コンポジションの再起動でも `refresh()` でもセットアップは繰り返されません。
+`onSetup()` は、`PulseContent` が ViewModel を最初に観測したときに一度だけ実行されます。ViewModel は `ViewModelStoreOwner` が生きている間ずっと有効です。コンポジションの再起動でも `refresh()` でも、セットアップは繰り返されません。
 
-どのオーナーかによって ViewModel のライフタイムが決まります。ホストのオーナー配下で生成すれば画面全体の間生き続けます。Navigation 3 の destination の中で、`NavDisplay` のデコレータとして `rememberPulseNavEntryDecorators()` を渡して生成すれば、そのバックスタックエントリにスコープされます。別の destination で覆われても ViewModel は保持され、ルートが pop されるとキャンセルされます。デモはすべての destination をこの方法で構築しています。
+どのオーナーかによって、ViewModel のライフタイムが決まります。ホストのオーナー配下で生成すれば、画面全体の間生き続けます。Navigation 3 の destination の中で生成すれば、そのバックスタックエントリにスコープされます。このとき `NavDisplay` のデコレータには `rememberPulseNavEntryDecorators()` を渡します。別の destination で覆われても、ViewModel は保持されます。ルートが pop されるとキャンセルされます。デモはすべての destination をこの方法で構築しています。
 :::
 
 ```mermaid

@@ -1,6 +1,6 @@
 # Broadcast
 
-Broadcast は、`PulseContainer` から登録済みのすべての `PulseViewModel` インスタンスへ、型付きメッセージを同時に届けるための PulseMVI の仕組みです。
+Broadcast は PulseMVI の仕組みの 1 つです。`PulseContainer` から登録済みのすべての `PulseViewModel` インスタンスへ、型付きメッセージを同時に届けます。
 
 ## Broadcast を定義する
 

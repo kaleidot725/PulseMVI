@@ -9,7 +9,7 @@ abstract class PulseContainer<Broadcast : PulseBroadcast, Unicast : PulseUnicast
 
 Coordinates multiple `PulseViewModel` instances. Provides broadcast delivery, child unicast handling, and view refresh.
 
-The internal unicast collector uses `Dispatchers.Default` unless another dispatcher is passed to the constructor.
+The internal unicast collector uses `Dispatchers.Default`. Another dispatcher can be passed to the constructor.
 
 ## Methods
 
@@ -19,7 +19,7 @@ The internal unicast collector uses `Dispatchers.Default` unless another dispatc
 fun broadcast(broadcast: Broadcast)
 ```
 
-Delivers `broadcast` to every `PulseViewModel` registered at construction time by calling each ViewModel's `onReceive()`.
+Delivers `broadcast` to every `PulseViewModel` registered at construction time. It calls each ViewModel's `onReceive()`.
 
 ```kotlin
 container.broadcast(AppBroadcast.UserLoggedOut)
@@ -33,7 +33,7 @@ container.broadcast(AppBroadcast.UserLoggedOut)
 open fun onReceived(unicast: Unicast)
 ```
 
-Called when a registered `PulseViewModel` emits an unicast. `PulseContainer` collects each ViewModel's `unicast` flow internally and forwards each value to this hook.
+Called when a registered `PulseViewModel` emits an unicast. `PulseContainer` collects each ViewModel's `unicast` flow internally. It forwards each value to this hook.
 
 ```kotlin
 override fun onReceived(unicast: AppUnicast) {
@@ -51,7 +51,7 @@ override fun onReceived(unicast: AppUnicast) {
 fun refresh()
 ```
 
-Bumps the container's internal key, causing `PulseHost` to re-create every `PulseContent` block inside it. ViewModel state is preserved; only Compose state is discarded.
+Bumps the container's internal key. `PulseHost` then re-creates every `PulseContent` block inside it. ViewModel state is preserved. Only Compose state is discarded.
 
 ```kotlin
 container.refresh()
@@ -65,7 +65,7 @@ container.refresh()
 fun close()
 ```
 
-Cancels the Container scope and stops collecting Unicast messages from the ViewModels. Call it when the Container is gone for good. `rememberPulseContainer` calls it for you when the owning `ViewModelStore` is cleared.
+Cancels the Container scope. Stops collecting Unicast messages from the ViewModels. Call it when the Container is gone for good. `rememberPulseContainer` calls it for you when the owning `ViewModelStore` is cleared.
 
 ```kotlin
 container.close()
