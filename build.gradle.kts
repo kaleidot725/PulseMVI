@@ -3,6 +3,7 @@ plugins {
     kotlin("plugin.compose") version "2.3.10" apply false
     id("org.jetbrains.compose") version "1.10.1" apply false
     id("org.jlleitschuh.gradle.ktlint") version "14.0.1" apply false
+    id("org.jetbrains.kotlinx.kover") version "0.9.9"
 }
 
 allprojects {
@@ -23,6 +24,20 @@ subprojects {
         ignoreFailures.set(false)
         filter {
             exclude("**/build/**")
+        }
+    }
+}
+
+dependencies {
+    kover(project(":library"))
+    kover(project(":navigation3"))
+}
+
+kover {
+    reports {
+        total {
+            html { onCheck = false }
+            xml { onCheck = false }
         }
     }
 }
