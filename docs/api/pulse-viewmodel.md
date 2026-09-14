@@ -46,7 +46,7 @@ val event: Flow<Event>
 ```
 
 A cold `Flow` of one-time side effects emitted via `event()`. Collected by `PulseContent`. Each
-event goes to a single collector. Events are consumed. They are not replayed to later collectors.
+event goes to a single collector and is consumed; it is not replayed to later collectors.
 
 ---
 
@@ -66,7 +66,9 @@ A hot stream of child-to-parent unicasts emitted via `unicast()`.
 val coroutineScope: CoroutineScope
 ```
 
-A `CoroutineScope` backed by `SupervisorJob` and the dispatcher passed to the constructor. The dispatcher defaults to `Dispatchers.Default`. Pass `Dispatchers.Main` or a test dispatcher when required. The owned scope is cancelled on `cancel()`. It is then recreated.
+A `CoroutineScope` backed by `SupervisorJob` and the dispatcher passed to the constructor. The dispatcher defaults to `Dispatchers.Default` and can be swapped for `Dispatchers.Main` or a test dispatcher.
+
+`cancel()` cancels this scope and replaces it with a fresh one.
 
 ## Methods
 
@@ -76,9 +78,11 @@ A `CoroutineScope` backed by `SupervisorJob` and the dispatcher passed to the co
 open fun onSetup()
 ```
 
-Called once, by `PulseContent`, the first time it observes the ViewModel. The instance outlives the composition. So leaving and re-entering the composition does not repeat it. Override it to start data-collection coroutines. They run in `coroutineScope`. They stop when it is cancelled.
+Called once, by `PulseContent`, the first time it observes the ViewModel. The instance outlives the composition, so leaving and re-entering it does not repeat the call.
 
-Observe an instance from one `PulseContent` at a time. `event` is a single-consumer channel. A second observer would take events the first never sees.
+Override it to start data-collection coroutines. They run in `coroutineScope` and stop when it is cancelled.
+
+Observe an instance from one `PulseContent` at a time. `event` is a single-consumer channel, so a second observer would take events the first never sees.
 
 ---
 
@@ -124,9 +128,11 @@ fun event(effect: Event)
 
 Emits a one-time side effect to the UI layer. Collected by the `onEvent` lambda in `PulseContent`.
 
-Buffered, so it never suspends. It keeps emission order. Events emitted while no `PulseContent` is
-collecting wait in the buffer. That happens when the destination is covered by another one, say.
-They arrive when a collector returns. The buffer holds 64. Beyond that, the oldest event is dropped.
+Buffered, so it never suspends and keeps emission order.
+
+Events emitted while no `PulseContent` is collecting — the destination is covered by another one,
+say — wait in the buffer and arrive when a collector returns. The buffer holds 64; beyond that, the
+oldest event is dropped.
 
 ---
 
@@ -136,7 +142,7 @@ They arrive when a collector returns. The buffer holds 64. Beyond that, the olde
 fun unicast(unicast: Unicast)
 ```
 
-Emits a child-to-parent message. The parent `PulseContainer` collects the ViewModel's `unicast` flow. It receives the message through `onReceived()`.
+Emits a child-to-parent message. The parent `PulseContainer` collects the ViewModel's `unicast` flow and receives the message through `onReceived()`.
 
 ---
 
@@ -146,7 +152,7 @@ Emits a child-to-parent message. The parent `PulseContainer` collects the ViewMo
 fun cancel()
 ```
 
-Cancels the work started in `onSetup()`. Replaces the scope with a fresh one, with the state preserved. The next `PulseContent` to observe the instance runs `onSetup()` again. Use it when the ViewModel may become active again.
+Cancels the work started in `onSetup()` and replaces the scope with a fresh one, with the state preserved. The next `PulseContent` to observe the instance runs `onSetup()` again. Use it when the ViewModel may become active again.
 
 ---
 
@@ -156,7 +162,7 @@ Cancels the work started in `onSetup()`. Replaces the scope with a fresh one, wi
 fun close()
 ```
 
-Cancels the work started in `onSetup()` for good. It does not replace the scope. `onCleared()` calls it when the owning `ViewModelStore` is cleared. So a discarded ViewModel cannot launch anything that outlives it.
+Cancels the work started in `onSetup()` for good. Unlike `cancel()`, it does not replace the scope. `onCleared()` calls it when the owning `ViewModelStore` is cleared, so a discarded ViewModel cannot launch anything that outlives it.
 
 ## Example
 

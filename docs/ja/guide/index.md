@@ -10,7 +10,9 @@ PulseMVI は **Compose Desktop** 向けの軽量な MVI（Model-View-Intent）�
 
 ## なぜ PulseMVI か
 
-Compose アプリはたいてい、それぞれ独自の状態を持つ独立した Composable のセクションを複数含みます。PulseMVI は、それらを密結合させずに調整できるようにします。次の図では、`PulseContainer` が両方の ViewModel の上に位置しています。`container.broadcast(MyBroadcast.Sync)` を呼ぶと、ViewModel A と ViewModel B の両方がメッセージを受け取ります。それぞれは独立して反応できます。
+Compose アプリはたいてい、独立した Composable のセクションを複数含みます。それぞれが独自の状態を持ちます。PulseMVI は、それらを密結合させずに調整できるようにします。
+
+次の図では、`PulseContainer` が両方の ViewModel の上に位置しています。`container.broadcast(MyBroadcast.Sync)` を呼ぶと、ViewModel A と ViewModel B の両方がメッセージを受け取り、それぞれ独立して反応します。
 
 ```mermaid
 flowchart TB
@@ -41,7 +43,9 @@ dependencyResolutionManagement {
 
 ### 依存
 
-`build.gradle.kts` に依存を追加します。`<version>` は [GitHub Releases](https://github.com/kaleidot725/PulseMVI/releases) の最新タグに置き換えてください。`pulsemvi` 単体では、ViewModel のライフタイムは利用側に委ねられます（[ViewModel](/ja/guide/viewmodel) を参照）。バックスタックエントリにスコープしたい場合は、`pulsemvi-navigation3` を追加します（[Navigation 3](/ja/guide/navigation3) を参照）。
+`build.gradle.kts` に依存を追加します。`<version>` は [GitHub Releases](https://github.com/kaleidot725/PulseMVI/releases) の最新タグに置き換えてください。
+
+`pulsemvi-navigation3` は任意です。ViewModel をバックスタックエントリにスコープしたい場合に追加します（[Navigation 3](/ja/guide/navigation3) を参照）。
 
 ```kotlin
 // build.gradle.kts

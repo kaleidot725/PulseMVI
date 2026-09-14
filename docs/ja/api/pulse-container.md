@@ -51,7 +51,7 @@ override fun onReceived(unicast: AppUnicast) {
 fun refresh()
 ```
 
-Container の内部キーを進めます。`PulseHost` 内のすべての `PulseContent` ブロックが作り直されます。ViewModel の状態は保持されます。Compose の状態だけが破棄されます。
+Container の内部キーを進めます。`PulseHost` 内のすべての `PulseContent` ブロックが作り直されます。ViewModel の状態は保持され、Compose の状態だけが破棄されます。
 
 ```kotlin
 container.refresh()
@@ -65,7 +65,7 @@ container.refresh()
 fun close()
 ```
 
-Container のスコープをキャンセルします。ViewModel からの Unicast の収集を止めます。Container が完全に不要になったときに呼んでください。`rememberPulseContainer` を使っていれば、所有する `ViewModelStore` が破棄されるときに自動で呼ばれます。
+Container のスコープをキャンセルし、ViewModel からの Unicast の収集を止めます。Container が完全に不要になったときに呼んでください。`rememberPulseContainer` を使っていれば、所有する `ViewModelStore` が破棄されるときに自動で呼ばれます。
 
 ```kotlin
 container.close()

@@ -23,11 +23,9 @@ class MyViewModel : PulseViewModel<MyState, MyAction, MyEvent, MyBroadcast, MyUn
 Called once, by `PulseContent`, the first time it observes the ViewModel. Use this to start long-running coroutines such as repository flows.
 
 ::: tip
-With `pulsemvi-navigation3`, create the ViewModel with `rememberPulseViewModel`. `PulseContent` runs `onSetup()` once. The scope is cancelled when the owning `ViewModelStoreOwner` is cleared. A composition restart preserves state. It does not repeat `onSetup()`.
+The lifetime follows the `ViewModelStoreOwner` holding the ViewModel, not the composition. A composition restart, another destination covering the route, or a refresh of the subtree all keep the state, and none of them repeats `onSetup()`. The scope is cancelled when the owner is cleared.
 
-The lifecycle follows the owner, not the composition. So covering the route with another Navigation 3 destination never repeats setup. Neither does refreshing its subtree.
-
-A ViewModel can also be tied to a single destination instead of the whole screen. Pass `rememberPulseNavEntryDecorators()` as `NavDisplay`'s `entryDecorators`, and call `rememberPulseViewModel` inside the destination. The entry then owns the ViewModel. Popping the route cancels it.
+For tying a ViewModel to a single destination, see [Navigation 3](/guide/navigation3).
 :::
 
 ```kotlin
@@ -98,14 +96,15 @@ override fun onAction(uiAction: MyAction) {
 
 ## Driving the lifecycle yourself
 
-`PulseContent` runs `onSetup()` for you, whichever way the ViewModel was built. Teardown is the part
-that depends on the owner. `close()` runs from `onCleared()`, and only a `ViewModelStore` calls that.
-Hold a ViewModel in a plain `remember` and nothing ever clears it. Cancel it yourself. A Container
-needs the same treatment.
+`PulseContent` runs `onSetup()` for you, whichever way the ViewModel was built. What changes is
+teardown. `close()` is called by `onCleared()`, and only a `ViewModelStore` calls that.
+
+Hold a ViewModel in a plain `remember` and nothing ever clears it, so cancel it yourself. A
+Container needs the same treatment.
 
 ::: warning
 The ViewModel then lives exactly as long as this composition. Leaving and re-entering it builds a
-new instance. Its state is lost. Add `pulsemvi-navigation3` when that matters.
+new instance, and its state is lost. Add `pulsemvi-navigation3` when that matters.
 :::
 
 ```kotlin

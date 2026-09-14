@@ -1,17 +1,21 @@
 # Navigation 3
 
 `pulsemvi-navigation3` is an optional artifact. It ties a `PulseViewModel`'s lifetime to a
-Navigation 3 back stack entry. The core artifact has no opinion about lifetime. `PulseViewModel`
-extends `androidx.lifecycle.ViewModel`, so whichever `ViewModelStore` holds an instance decides how
-long it lives. This artifact supplies two things: a store per back stack entry, and the composables
-that put a ViewModel into it. The wiring itself is in
+Navigation 3 back stack entry.
+
+The core artifact has no opinion about lifetime. `PulseViewModel` is an
+`androidx.lifecycle.ViewModel`, so whichever `ViewModelStore` holds it decides how long it lives.
+This artifact supplies a store per back stack entry, and the composables that put a ViewModel into
+it.
+
+The wiring itself is in
 [Getting Started, step 5](/guide/getting-started#_5-scope-the-viewmodel-to-a-navigation-3-destination).
 This page explains what that wiring does.
 
 ## What the artifact adds
 
-Three composables, and nothing else. The core artifact stays free of Navigation 3 and the lifecycle
-compose dependencies.
+Three composables, and nothing else. The core does not depend on Navigation 3 or
+lifecycle-compose.
 
 | Composable | Role |
 |---|---|
@@ -21,14 +25,19 @@ compose dependencies.
 
 ## How an owner is found
 
-`rememberPulseViewModel` reads `LocalViewModelStoreOwner.current`. It keeps the instance in that
-owner's `ViewModelStore`, under a key. It never creates an owner of its own. So whatever owner is in
-scope at the call site decides the lifetime. Under a plain Compose Desktop `Window`, that owner is
-the window. The ViewModel lives as long as the screen. Under a `NavDisplay` decorated with
-`rememberPulseNavEntryDecorators()`, each entry on the back stack carries its own owner. A ViewModel
-created inside a destination goes into that entry's store. It follows that nothing may be created
-above `NavDisplay` if it is meant to belong to a route. A ViewModel created outside the destinations
-lands in the window's store. It outlives every route.
+`rememberPulseViewModel` reads `LocalViewModelStoreOwner.current` and keeps the instance in that
+owner's `ViewModelStore`. It never creates an owner of its own. Whatever owner is in scope at the
+call site decides the lifetime.
+
+Where you call it changes which owner that is.
+
+- **Directly under `Window`** — the owner is the window. The ViewModel lives as long as the screen
+- **Inside a `NavDisplay` destination** — with `rememberPulseNavEntryDecorators()` passed to
+  `NavDisplay`, each back stack entry carries its own owner. The ViewModel goes into that entry's
+  store
+
+It follows that nothing meant to belong to a route may be created above `NavDisplay`. A ViewModel
+created outside the destinations lands in the window's store and outlives every route.
 
 ```mermaid
 flowchart TB
@@ -50,34 +59,33 @@ flowchart TB
 
 ## Why both decorators
 
-`NavDisplay` takes a list of `NavEntryDecorator`s. It defaults to the saveable state holder alone,
-which is what keeps `rememberSaveable` state across the back stack. Scoping ViewModels needs a
-second decorator: `rememberViewModelStoreNavEntryDecorator()` from
-`lifecycle-viewmodel-navigation3`. Passing only that one, though, would silently drop saveable
-state. `rememberPulseNavEntryDecorators()` returns both, in the order `NavDisplay` expects. Making
-that mistake hard to make is part of why the artifact exists.
+`NavDisplay` defaults `entryDecorators` to a single decorator, the saveable state holder. That is
+what keeps `rememberSaveable` state across the back stack.
+
+Scoping ViewModels to an entry needs a second one: `rememberViewModelStoreNavEntryDecorator()` from
+`lifecycle-viewmodel-navigation3`. Passing only that one, though, replaces the default, and
+saveable state is silently lost.
+
+`rememberPulseNavEntryDecorators()` returns both, in the order `NavDisplay` expects. Making that
+mistake hard to make is part of why the artifact exists.
 
 ## Lifetime along the back stack
 
-The store belongs to the entry. So the ViewModel follows the route, not the composition. Covering
-the route with another destination removes its composable. It does not remove its entry. The
-instance and its running coroutines are untouched. Coming back finds the same instance. `PulseContent`
-does not repeat `onSetup()`. Popping the route clears the entry's store. That calls `onCleared()` on
-everything in it.
+The store belongs to the entry, so the ViewModel follows the route rather than the composition.
 
 | Route | ViewModel |
 |---|---|
 | Pushed | Created; `PulseContent` runs `onSetup()` once |
-| Covered by another destination | Kept, with its state and coroutines |
-| Returned to | The same instance; `onSetup()` is not repeated |
+| Covered by another destination | The composable goes, the entry stays. State and running coroutines are kept |
+| Returned to | The same instance is found; `onSetup()` is not repeated |
 | Popped | The entry's `ViewModelStore` is cleared: `onCleared()` cancels the scope and closes the Container |
 | Composition restarted under a surviving owner | Reused; state stands |
 
 ## Keys
 
-The key defaults to the ViewModel's qualified class name. A key is unique per owner, not globally.
-Two instances of one type under a single owner therefore collide. Give them explicit keys. The demo's
-four areas are the same class four times over, so it does this for all four.
+The key defaults to the ViewModel's qualified class name. A key is unique per owner, so two
+instances of one type under a single owner collide. Give them explicit keys. The demo's four areas
+are the same class, so all four carry a key.
 
 ```kotlin
 val left = rememberPulseViewModel(key = "left") { CounterViewModel(leftRepository) }
@@ -86,10 +94,13 @@ val right = rememberPulseViewModel(key = "right") { CounterViewModel(rightReposi
 
 ## Without Navigation 3
 
-You do not have to use this artifact. `PulseViewModel` extends `androidx.lifecycle.ViewModel`. So
-`viewModel()` and `koinViewModel()` build one just as well. `PulseContent` runs `onSetup()` whichever
-way it was built. What changes is teardown. `close()` runs from `onCleared()`, and only a
-`ViewModelStore` calls that. See [Driving the lifecycle yourself](/guide/viewmodel#driving-the-lifecycle-yourself).
+This artifact is not required. `PulseViewModel` is an `androidx.lifecycle.ViewModel`, so
+`viewModel()` and `koinViewModel()` build one just as well. `PulseContent` runs `onSetup()`
+whichever way it was built.
+
+What changes is teardown. `close()` is called by `onCleared()`, and only a `ViewModelStore` calls
+that. For holding one without a store, see
+[Driving the lifecycle yourself](/guide/viewmodel#driving-the-lifecycle-yourself).
 
 ## Next Steps
 

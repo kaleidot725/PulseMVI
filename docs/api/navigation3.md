@@ -1,9 +1,10 @@
 # Navigation 3
 
 Everything on this page lives in the optional `pulsemvi-navigation3` artifact. The package is
-`jp.kaleidot725.pulse.mvi.navigation3`. The core artifact leaves the ViewModel lifetime to the
-caller (see [ViewModel](/guide/viewmodel)). For how the pieces fit together, see the
-[Navigation 3 guide](/guide/navigation3).
+`jp.kaleidot725.pulse.mvi.navigation3`.
+
+For how the pieces fit together, see the [Navigation 3 guide](/guide/navigation3). For using the
+core alone, see [ViewModel](/guide/viewmodel).
 
 ## rememberPulseViewModel
 

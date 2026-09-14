@@ -13,7 +13,7 @@ fun <Broadcast : PulseBroadcast, Unicast : PulseUnicast> PulseHost(
 )
 ```
 
-Scopes a `PulseContainer` to this subtree. It emits no UI of its own. It publishes the Container key. `PulseContent` re-creates its content on that key. It also provides `onRefresh` and `onBroadcast` to the content block. All `PulseContent` composables placed inside respond to `container.refresh()`.
+Scopes a `PulseContainer` to this subtree. It emits no UI of its own and does two things: it publishes the Container key, so the `PulseContent` composables inside respond to `container.refresh()`, and it provides `onRefresh` and `onBroadcast` to the content block.
 
 An app can contain several of them. In the demo, each destination that owns a Container hosts its own.
 
@@ -60,7 +60,9 @@ PulseContent(
 )
 ```
 
-Observes a `PulseViewModel`. Provides state and an action dispatcher to the content block. Runs `onSetup()` the first time it observes an instance. It never cancels one. `event` is a single-consumer channel, so observe each instance from one `PulseContent` at a time.
+Observes a `PulseViewModel` and provides state and an action dispatcher to the content block. It runs `onSetup()` the first time it observes an instance, but never cancels one.
+
+Observe each instance from one `PulseContent` at a time. `event` is a single-consumer channel.
 
 ### Parameters
 
