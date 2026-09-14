@@ -16,6 +16,10 @@ changelog:
       labels:
         - "bugfix"
 
+    - title: "📝 Documentation"
+      labels:
+        - "documentation"
+
     - title: "🧹 Maintenance"
       labels:
         - "chore"
