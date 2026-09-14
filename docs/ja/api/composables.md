@@ -13,7 +13,7 @@ fun <Broadcast : PulseBroadcast, Unicast : PulseUnicast> PulseHost(
 )
 ```
 
-`PulseContainer` をこのサブツリーにスコープします。自身は UI を描画しません。Container のキーを公開します。`PulseContent` はこのキーを基準に、コンテンツを作り直します。コンテンツブロックには `onRefresh` と `onBroadcast` を渡します。内側に置かれたすべての `PulseContent` が、`container.refresh()` に反応します。
+`PulseContainer` をこのサブツリーにスコープします。自身は UI を描画せず、役割は 2 つです。Container のキーを公開して、内側の `PulseContent` が `container.refresh()` に反応できるようにします。コンテンツブロックには `onRefresh` と `onBroadcast` を渡します。
 
 アプリには複数置くことができます。デモでは、Container を所有する各 destination がそれぞれ自分の `PulseHost` を持っています。
 
@@ -60,7 +60,9 @@ PulseContent(
 )
 ```
 
-`PulseViewModel` を観測します。コンテンツブロックに、状態と Action のディスパッチャを渡します。インスタンスを最初に観測したときに `onSetup()` を実行します。キャンセルは決して行いません。`event` は単一消費者のチャネルです。1 つのインスタンスは、同時に 1 つの `PulseContent` からだけ観測してください。
+`PulseViewModel` を観測し、コンテンツブロックに状態と Action のディスパッチャを渡します。インスタンスを最初に観測したときに `onSetup()` を実行しますが、キャンセルは行いません。
+
+1 つのインスタンスは、同時に 1 つの `PulseContent` からだけ観測してください。`event` は単一消費者のチャネルです。
 
 ### パラメータ
 

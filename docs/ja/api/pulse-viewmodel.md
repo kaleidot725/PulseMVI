@@ -45,7 +45,7 @@ val currentState: UiState
 val event: Flow<Event>
 ```
 
-`event()` で発行された一度きりの副作用の、コールドな `Flow` です。`PulseContent` が収集します。各 Event は単一の収集者に届きます。消費されるものです。後から来た収集者に再生されることはありません。
+`event()` で発行された一度きりの副作用の、コールドな `Flow` です。`PulseContent` が収集します。各 Event は 1 つの収集者に届いて消費され、後から来た収集者に再生されることはありません。
 
 ---
 
@@ -65,7 +65,9 @@ val unicast: SharedFlow<Unicast>
 val coroutineScope: CoroutineScope
 ```
 
-`SupervisorJob` と、コンストラクタに渡されたディスパッチャに支えられた `CoroutineScope` です。ディスパッチャの既定値は `Dispatchers.Default` です。必要に応じて `Dispatchers.Main` やテスト用ディスパッチャを渡せます。このスコープは `cancel()` でキャンセルされます。その後、作り直されます。
+`SupervisorJob` と、コンストラクタに渡されたディスパッチャに支えられた `CoroutineScope` です。ディスパッチャの既定値は `Dispatchers.Default` で、`Dispatchers.Main` やテスト用ディスパッチャに差し替えられます。
+
+`cancel()` を呼ぶと、このスコープはキャンセルされ、新しいものに作り直されます。
 
 ## メソッド
 
@@ -75,9 +77,11 @@ val coroutineScope: CoroutineScope
 open fun onSetup()
 ```
 
-`PulseContent` が ViewModel を最初に観測したときに、一度だけ呼ばれます。インスタンスはコンポジションより長く生きます。そのため、コンポジションを離れて戻ってきても繰り返されません。データ収集のコルーチンを開始するためにオーバーライドしてください。それらは `coroutineScope` で動きます。スコープがキャンセルされると止まります。
+`PulseContent` が ViewModel を最初に観測したときに、一度だけ呼ばれます。インスタンスはコンポジションより長く生きるので、コンポジションを離れて戻ってきても繰り返されません。
 
-1 つのインスタンスは、同時に 1 つの `PulseContent` からだけ観測してください。`event` は単一消費者のチャネルです。2 つ目の観測者がいると、最初の観測者に届かない Event が出てきます。
+データ収集のコルーチンを開始するためにオーバーライドしてください。コルーチンは `coroutineScope` で動き、スコープがキャンセルされると止まります。
+
+1 つのインスタンスは、同時に 1 つの `PulseContent` からだけ観測してください。`event` は単一消費者のチャネルなので、2 つ目の観測者がいると、最初の観測者に届かない Event が出てきます。
 
 ---
 
@@ -123,7 +127,9 @@ fun event(effect: Event)
 
 一度きりの副作用を UI 層へ発行します。`PulseContent` の `onEvent` ラムダが収集します。
 
-バッファリングされるため、中断しません。発行順序も保たれます。`PulseContent` が収集していない間に発行された Event は、バッファで待機します。別の destination に覆われている間などです。収集者が戻ってきたときに届きます。バッファは 64 件です。それを超えると、最も古い Event が捨てられます。
+バッファリングされるため中断せず、発行順序も保たれます。
+
+`PulseContent` が収集していない間（別の destination に覆われている間など）に発行された Event は、バッファで待機し、収集者が戻ってきたときに届きます。バッファは 64 件で、それを超えると最も古い Event が捨てられます。
 
 ---
 
@@ -133,7 +139,7 @@ fun event(effect: Event)
 fun unicast(unicast: Unicast)
 ```
 
-子から親へのメッセージを発行します。親の `PulseContainer` が ViewModel の `unicast` Flow を収集します。`onReceived()` で受け取ります。
+子から親へのメッセージを発行します。親の `PulseContainer` が ViewModel の `unicast` Flow を収集し、`onReceived()` で受け取ります。
 
 ---
 
@@ -143,7 +149,7 @@ fun unicast(unicast: Unicast)
 fun cancel()
 ```
 
-`onSetup()` で開始した処理をキャンセルします。状態を保ったまま、スコープを新しいものに置き換えます。次にこのインスタンスを観測した `PulseContent` が、`onSetup()` を再実行します。ViewModel が再び有効になる可能性があるときに使ってください。
+`onSetup()` で開始した処理をキャンセルし、状態を保ったままスコープを新しいものに置き換えます。次にこのインスタンスを観測した `PulseContent` が、`onSetup()` を再実行します。ViewModel が再び有効になる可能性があるときに使ってください。
 
 ---
 
@@ -153,7 +159,7 @@ fun cancel()
 fun close()
 ```
 
-`onSetup()` で開始した処理を完全にキャンセルします。スコープは置き換えません。所有する `ViewModelStore` が破棄されるときに、`onCleared()` がこれを呼びます。そのため、破棄された ViewModel がそれより長く生きる処理を起動することはありません。
+`onSetup()` で開始した処理を完全にキャンセルします。`cancel()` と違い、スコープは置き換えません。所有する `ViewModelStore` が破棄されるときに、`onCleared()` がこれを呼びます。そのため、破棄された ViewModel がそれより長く生きる処理を起動することはありません。
 
 ## 例
 

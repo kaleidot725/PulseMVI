@@ -1,6 +1,8 @@
 # Navigation 3
 
-このページの内容はすべて、任意のアーティファクト `pulsemvi-navigation3` にあります。パッケージは `jp.kaleidot725.pulse.mvi.navigation3` です。コアのアーティファクトでは、ViewModel のライフタイムは呼び出し側に委ねられます（[ViewModel](/ja/guide/viewmodel) を参照）。組み合わせ方は [Navigation 3 ガイド](/ja/guide/navigation3) を参照してください。
+このページの内容はすべて、任意のアーティファクト `pulsemvi-navigation3` にあります。パッケージは `jp.kaleidot725.pulse.mvi.navigation3` です。
+
+仕組みの解説は [Navigation 3 ガイド](/ja/guide/navigation3) を、コアのみで使う場合は [ViewModel](/ja/guide/viewmodel) を参照してください。
 
 ## rememberPulseViewModel
 

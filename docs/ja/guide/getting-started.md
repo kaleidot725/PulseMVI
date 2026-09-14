@@ -2,8 +2,7 @@
 
 このガイドでは、PulseMVI でシンプルなカウンターアプリを作る手順を追います。
 
-ViewModel の所有には `pulsemvi-navigation3` アーティファクトの `rememberPulseViewModel` を使います。
-コアと一緒に追加してください。コアのみでライフサイクルを自前で扱う場合は [ViewModel](/ja/guide/viewmodel) を参照してください。
+ViewModel の生成には `pulsemvi-navigation3` の `rememberPulseViewModel` を使うので、コアと一緒に追加してください。コアのみでライフサイクルを自前で扱う場合は [ViewModel](/ja/guide/viewmodel) を参照してください。
 
 ```kotlin
 dependencies {
@@ -88,7 +87,7 @@ class CounterViewModel(
 
 ## 3. Container を作る
 
-`PulseContainer` は ViewModel のリストを受け取ります。全員への Broadcast や、ビューの Refresh を可能にします。
+`PulseContainer` は ViewModel のリストを受け取り、全員への Broadcast やビューの Refresh を提供します。
 
 ```kotlin
 class CounterContainer(
@@ -180,7 +179,14 @@ fun CounterContent(viewModel: CounterViewModel, modifier: Modifier = Modifier) {
 
 ## 5. ViewModel を Navigation 3 の destination にスコープする
 
-手順 4 では ViewModel をトップレベルで生成しました。この場合、ViewModel はウィンドウと同じ長さだけ生きます。Navigation 3 を使う場合は destination の中で生成します。すると、そのルートがバックスタックにある間だけ生きるようになります。必要なのは 2 つです。1 つは、`NavDisplay` の `entryDecorators` に `rememberPulseNavEntryDecorators()` を渡すことです。これでバックスタックの各エントリが独自の `ViewModelStoreOwner` を持ちます。もう 1 つは、ViewModel と Container を destination の中で生成することです。`NavDisplay` より上では生成しません。この仕組みは [Navigation 3](/ja/guide/navigation3) で解説しています。
+手順 4 では ViewModel をトップレベルで生成しました。この場合、ViewModel はウィンドウと同じ長さだけ生きます。Navigation 3 の destination の中で生成すると、そのルートがバックスタックにある間だけ生きるようになります。
+
+必要なのは 2 つです。
+
+- `NavDisplay` の `entryDecorators` に `rememberPulseNavEntryDecorators()` を渡す。これでバックスタックの各エントリが独自の `ViewModelStoreOwner` を持ちます
+- ViewModel と Container を destination の中で生成する。`NavDisplay` より上では生成しません
+
+この仕組みは [Navigation 3](/ja/guide/navigation3) で解説しています。
 
 ```kotlin
 sealed interface Route : NavKey {

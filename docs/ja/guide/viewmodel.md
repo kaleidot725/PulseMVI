@@ -23,11 +23,9 @@ class MyViewModel : PulseViewModel<MyState, MyAction, MyEvent, MyBroadcast, MyUn
 `PulseContent` が ViewModel を最初に観測したときに一度だけ呼ばれます。リポジトリの Flow のような長時間動くコルーチンの開始に使います。
 
 ::: tip
-`pulsemvi-navigation3` を使う場合は、`rememberPulseViewModel` で ViewModel を生成してください。`PulseContent` が `onSetup()` を一度だけ実行します。所有する `ViewModelStoreOwner` が破棄されると、スコープがキャンセルされます。コンポジションの再起動では状態が保持されます。`onSetup()` は繰り返されません。
+寿命はコンポジションではなく、ViewModel を保持する `ViewModelStoreOwner` に従います。コンポジションが再起動しても、別の destination に覆われても、サブツリーが Refresh されても、状態は保持され `onSetup()` は繰り返されません。オーナーが破棄されたときにスコープがキャンセルされます。
 
-ライフサイクルは、コンポジションではなくオーナーに従います。そのため、別の Navigation 3 destination でルートが覆われてもセットアップは繰り返されません。サブツリーが Refresh されても同じです。
-
-ViewModel を画面全体ではなく、1 つの destination に紐づけることもできます。`NavDisplay` の `entryDecorators` に `rememberPulseNavEntryDecorators()` を渡し、destination の中で `rememberPulseViewModel` を呼んでください。エントリが ViewModel を所有します。ルートが pop されるとキャンセルされます。
+ViewModel を 1 つの destination に紐づける方法は [Navigation 3](/ja/guide/navigation3) を参照してください。
 :::
 
 ```kotlin
@@ -98,10 +96,12 @@ override fun onAction(uiAction: MyAction) {
 
 ## ライフサイクルを自前で扱う
 
-`PulseContent` は、ViewModel がどう作られたかに関係なく `onSetup()` を実行します。オーナーによって変わるのは後始末の方です。`close()` は `onCleared()` から呼ばれます。それを呼ぶのは `ViewModelStore` だけです。ViewModel を素の `remember` で持つと、誰も破棄しません。自分でキャンセルしてください。Container も同様です。
+`PulseContent` は、ViewModel がどう作られたかに関係なく `onSetup()` を実行します。変わるのは後始末です。`close()` を呼ぶのは `onCleared()` で、それを呼ぶのは `ViewModelStore` だけです。
+
+ViewModel を素の `remember` で持つと誰も破棄しないので、自分でキャンセルしてください。Container も同様です。
 
 ::: warning
-この場合、ViewModel はこのコンポジションとまったく同じ長さだけ生きます。離れて戻ってくると、新しいインスタンスが作られます。状態は失われます。それが問題になるなら、`pulsemvi-navigation3` を追加してください。
+この場合、ViewModel はこのコンポジションと同じ長さだけ生きます。離れて戻ってくると新しいインスタンスが作られ、状態は失われます。それが問題になるなら `pulsemvi-navigation3` を追加してください。
 :::
 
 ```kotlin
