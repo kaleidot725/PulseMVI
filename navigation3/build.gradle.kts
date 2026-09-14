@@ -34,6 +34,12 @@ kotlin {
             dependencies {
                 implementation(kotlin("test"))
             }
+            val jvmTest by getting {
+                dependencies {
+                    implementation(compose.desktop.currentOs)
+                    implementation("org.jetbrains.compose.ui:ui-test-junit4:1.10.1")
+                }
+            }
         }
     }
 }
