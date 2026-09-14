@@ -29,6 +29,16 @@ jobs:
         run: |
           ./gradlew test
         continue-on-error: true
+      - name: Run coverage
+        run: |
+          ./gradlew koverXmlReport koverHtmlReport
+        continue-on-error: true
+      - name: Upload coverage report
+        uses: actions/upload-artifact@v4
+        with:
+          name: kover-report
+          path: build/reports/kover/
+          if-no-files-found: ignore
       - name: Run ktlint
         run: |
           ./gradlew ktlintCheck

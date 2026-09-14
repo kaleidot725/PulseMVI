@@ -99,6 +99,19 @@ class PulseViewModelTest {
     }
 
     @Test
+    fun hooksDoNothingUnlessOverridden() {
+        val viewModel =
+            object : PulseViewModel<TestState, TestAction, TestEvent, TestBroadcast, TestUnicast>(TestState()) {
+                override fun onAction(uiAction: TestAction) = Unit
+            }
+
+        viewModel.setupOnce()
+        viewModel.onReceive(TestBroadcast)
+
+        assertEquals(TestState(), viewModel.currentState)
+    }
+
+    @Test
     fun stateIsPreservedAcrossSetups() {
         val viewModel = TestViewModel()
 

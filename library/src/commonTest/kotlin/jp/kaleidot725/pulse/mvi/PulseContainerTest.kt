@@ -29,6 +29,17 @@ class PulseContainerTest {
     }
 
     @Test
+    fun receivedHookDoesNothingUnlessOverridden() {
+        val viewModel = BroadcastViewModel()
+        val container =
+            object : PulseContainer<ContainerBroadcast, ContainerUnicast>(listOf(viewModel), Dispatchers.Unconfined) {}
+
+        viewModel.unicast(ContainerUnicast)
+
+        assertEquals(0L, container.key.value)
+    }
+
+    @Test
     fun closeStopsUnicastCollection() {
         val viewModel = BroadcastViewModel()
         val container = TestContainer(listOf(viewModel), coroutineDispatcher = Dispatchers.Unconfined)

@@ -26,6 +26,7 @@ artifact adds `rememberPulseViewModel` / `rememberPulseContainer`, and
 - **Run tests**: `./gradlew test`
 - **Clean build**: `./gradlew clean`
 - **Check code quality**: `./gradlew ktlintCheck` (auto-fix with `./gradlew ktlintFormat`)
+- **Test coverage**: `./gradlew koverHtmlReport` (opens at `build/reports/kover/html/index.html`; XML via `koverXmlReport`)
 - **Publish to local Maven**: `./gradlew :library:publishToMavenLocal :navigation3:publishToMavenLocal`
 - **Run the demo**: `./gradlew :demo:run`
 

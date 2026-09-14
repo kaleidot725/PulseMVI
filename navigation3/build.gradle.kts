@@ -2,6 +2,7 @@ plugins {
     kotlin("multiplatform")
     kotlin("plugin.compose")
     id("org.jetbrains.compose")
+    id("org.jetbrains.kotlinx.kover")
     `maven-publish`
 }
 
@@ -32,6 +33,12 @@ kotlin {
         val commonTest by getting {
             dependencies {
                 implementation(kotlin("test"))
+            }
+            val jvmTest by getting {
+                dependencies {
+                    implementation(compose.desktop.currentOs)
+                    implementation("org.jetbrains.compose.ui:ui-test-junit4:1.10.1")
+                }
             }
         }
     }

@@ -1,16 +1,17 @@
 package jp.kaleidot725.pulse.mvi.navigation3
 
 import androidx.compose.runtime.Composable
+import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelStoreOwner
 import androidx.lifecycle.viewmodel.compose.LocalViewModelStoreOwner
 import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.navigation3.rememberViewModelStoreNavEntryDecorator
 import androidx.lifecycle.viewmodel.viewModelFactory
 import androidx.navigation3.runtime.NavEntryDecorator
 import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import jp.kaleidot725.pulse.mvi.PulseContainer
 import jp.kaleidot725.pulse.mvi.PulseViewModel
+import kotlin.reflect.KClass
 
 /**
  * Creates a [PulseViewModel] scoped to the current [ViewModelStoreOwner].
@@ -31,12 +32,7 @@ import jp.kaleidot725.pulse.mvi.PulseViewModel
 public inline fun <reified VM : PulseViewModel<*, *, *, *, *>> rememberPulseViewModel(
     key: String? = null,
     noinline factory: () -> VM,
-): VM =
-    viewModel(
-        viewModelStoreOwner = rememberPulseViewModelStoreOwner(),
-        key = key ?: (VM::class.qualifiedName ?: VM::class.simpleName ?: "PulseViewModel"),
-        factory = viewModelFactory { initializer { factory() } },
-    )
+): VM = rememberPulseInstance(VM::class, key, fallbackKey = "PulseViewModel", factory)
 
 /**
  * Creates a [PulseContainer] scoped to the current [ViewModelStoreOwner].
@@ -50,11 +46,21 @@ public inline fun <reified VM : PulseViewModel<*, *, *, *, *>> rememberPulseView
 public inline fun <reified Container : PulseContainer<*, *>> rememberPulseContainer(
     key: String? = null,
     noinline factory: () -> Container,
-): Container =
+): Container = rememberPulseInstance(Container::class, key, fallbackKey = "PulseContainer", factory)
+
+@PublishedApi
+@Composable
+internal fun <T : ViewModel> rememberPulseInstance(
+    type: KClass<T>,
+    key: String?,
+    fallbackKey: String,
+    factory: () -> T,
+): T =
     viewModel(
+        modelClass = type,
         viewModelStoreOwner = rememberPulseViewModelStoreOwner(),
-        key = key ?: (Container::class.qualifiedName ?: Container::class.simpleName ?: "PulseContainer"),
-        factory = viewModelFactory { initializer { factory() } },
+        key = key ?: defaultPulseKey(type, fallbackKey),
+        factory = viewModelFactory { addInitializer(type) { factory() } },
     )
 
 /**
@@ -65,12 +71,26 @@ public inline fun <reified Container : PulseContainer<*, *>> rememberPulseContai
  */
 @PublishedApi
 @Composable
-internal fun rememberPulseViewModelStoreOwner(): ViewModelStoreOwner =
-    checkNotNull(LocalViewModelStoreOwner.current) {
+internal fun rememberPulseViewModelStoreOwner(): ViewModelStoreOwner = requirePulseViewModelStoreOwner(LocalViewModelStoreOwner.current)
+
+@PublishedApi
+internal fun requirePulseViewModelStoreOwner(owner: ViewModelStoreOwner?): ViewModelStoreOwner =
+    checkNotNull(owner) {
         "No ViewModelStoreOwner in scope. Provide one with " +
             "CompositionLocalProvider(LocalViewModelStoreOwner provides owner), or drive the " +
             "PulseViewModel lifecycle yourself with the pulsemvi artifact alone."
     }
+
+/**
+ * The key a ViewModel or Container is stored under when the caller passes none: the qualified
+ * class name, falling back to the simple name for local classes and to [fallback] for anonymous
+ * ones, which have neither.
+ */
+@PublishedApi
+internal fun defaultPulseKey(
+    type: KClass<*>,
+    fallback: String,
+): String = type.qualifiedName ?: type.simpleName ?: fallback
 
 /**
  * The [NavEntryDecorator] list `NavDisplay` needs for PulseMVI ViewModels to be scoped to a back
