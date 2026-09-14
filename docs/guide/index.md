@@ -10,7 +10,9 @@ PulseMVI is a lightweight MVI (Model-View-Intent) library for **Compose Desktop*
 
 ## Why PulseMVI?
 
-Compose apps often contain multiple independent Composable sections, each with its own state. PulseMVI makes it easy to coordinate these sections without tightly coupling them. In the layout below, `PulseContainer` sits above both ViewModels. When you call `container.broadcast(MyBroadcast.Sync)`, both ViewModel A and ViewModel B receive the message. Each reacts independently.
+Compose apps often contain multiple independent Composable sections, each with its own state. PulseMVI makes it easy to coordinate these sections without tightly coupling them.
+
+In the layout below, `PulseContainer` sits above both ViewModels. When you call `container.broadcast(MyBroadcast.Sync)`, both ViewModel A and ViewModel B receive the message and react independently.
 
 ```mermaid
 flowchart TB
@@ -42,9 +44,10 @@ dependencyResolutionManagement {
 ### Dependencies
 
 Add the dependencies to `build.gradle.kts`. Replace `<version>` with the latest tag from
-[GitHub Releases](https://github.com/kaleidot725/PulseMVI/releases). `pulsemvi` alone leaves the
-ViewModel lifetime to you (see [ViewModel](/guide/viewmodel)). Add `pulsemvi-navigation3` to scope it
-to a back stack entry instead (see [Navigation 3](/guide/navigation3)).
+[GitHub Releases](https://github.com/kaleidot725/PulseMVI/releases).
+
+`pulsemvi-navigation3` is optional. Add it to scope ViewModels to a back stack entry (see
+[Navigation 3](/guide/navigation3)).
 
 ```kotlin
 // build.gradle.kts

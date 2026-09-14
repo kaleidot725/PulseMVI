@@ -4,8 +4,8 @@
 
 ## Creating a Container
 
-Define a class that takes the list of ViewModels you want to coordinate. Instantiate it at the same
-level as those ViewModels.
+Define a class that takes the list of ViewModels you want to coordinate, and instantiate it at the
+same level as those ViewModels.
 
 ```kotlin
 class AppContainer(
@@ -24,7 +24,7 @@ val container = rememberPulseContainer {
 ## Broadcast
 
 Send a typed message to **all** registered ViewModels simultaneously. Every ViewModel in the list
-receives `onReceive(AppBroadcast.UserLoggedOut)`. Each reacts independently.
+receives `onReceive(AppBroadcast.UserLoggedOut)` and reacts independently.
 
 ```kotlin
 container.broadcast(AppBroadcast.UserLoggedOut)
@@ -57,7 +57,7 @@ container.refresh()
 
 ## Using inside PulseHost
 
-`PulseHost` reads the Container's internal key. It wraps content in a `CompositionLocalProvider`. `PulseContent` composables inside `PulseHost` automatically respond to `refresh()`:
+`PulseHost` reads the Container's internal key and wraps content in a `CompositionLocalProvider`. `PulseContent` composables inside `PulseHost` automatically respond to `refresh()`:
 
 ```kotlin
 PulseHost(container = appContainer) { onRefresh, onBroadcast ->
