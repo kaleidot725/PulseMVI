@@ -25,10 +25,17 @@ import kotlin.test.assertNotSame
 import kotlin.test.assertSame
 import kotlin.test.assertTrue
 
+/**
+ * Instance lookup in the navigation3 artifact: which owner holds an instance, which key identifies it, and what happens
+ * when no owner is in scope.
+ */
 class PulseNavigationTest {
     @get:Rule
     val composeRule = createComposeRule()
 
+    /**
+     * One owner returns one instance of each type across recompositions.
+     */
     @Test
     fun viewModelAndContainerSurviveRecompositionUnderTheSameOwner() {
         val owner = TestOwner()
@@ -53,6 +60,9 @@ class PulseNavigationTest {
         assertSame(containers.first(), containers.last())
     }
 
+    /**
+     * Explicit keys tell two instances of one type apart under the same owner.
+     */
     @Test
     fun explicitKeysTellTwoInstancesOfOneTypeApart() {
         val owner = TestOwner()
@@ -76,6 +86,10 @@ class PulseNavigationTest {
         assertNotSame(left, right)
     }
 
+    /**
+     * The default key falls back from the qualified name to the simple name to the given fallback, so a local class and
+     * an anonymous object still get distinct keys.
+     */
     @Test
     fun defaultKeyFallsBackFromQualifiedNameToSimpleNameToTheGivenName() {
         class Local : PulseViewModel<NavState, NavAction, NavEvent, NavBroadcast, NavUnicast>(NavState()) {
@@ -91,6 +105,9 @@ class PulseNavigationTest {
         assertEquals("PulseViewModel", defaultPulseKey(anonymous::class, "PulseViewModel"))
     }
 
+    /**
+     * A call with no ViewModelStoreOwner in scope fails with a message naming what is missing.
+     */
     @Test
     fun failsPlainlyWithoutAnOwner() {
         val error = assertFailsWith<IllegalStateException> { requirePulseViewModelStoreOwner(null) }
@@ -100,6 +117,10 @@ class PulseNavigationTest {
         assertSame(owner, requirePulseViewModelStoreOwner(owner))
     }
 
+    /**
+     * `rememberPulseNavEntryDecorators` returns the saveable state holder decorator and the ViewModel store decorator,
+     * in the order NavDisplay expects.
+     */
     @Test
     fun navEntryDecoratorsAreTheSaveableStateHolderAndTheViewModelStore() {
         lateinit var decorators: List<NavEntryDecorator<Any>>

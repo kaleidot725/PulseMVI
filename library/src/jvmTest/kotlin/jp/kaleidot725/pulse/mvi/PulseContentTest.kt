@@ -23,10 +23,17 @@ import org.junit.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
+/**
+ * The [PulseHost] and [PulseContent] composables in a real composition: rendering and action dispatch, one-time setup
+ * and event delivery, and the recomposition paths the Compose compiler generates.
+ */
 class PulseContentTest {
     @get:Rule
     val composeRule = createComposeRule()
 
+    /**
+     * [PulseContent] renders the current state and sends actions back to the ViewModel.
+     */
     @Test
     fun rendersStateAndDispatchesActions() {
         val viewModel = ContentViewModel()
@@ -44,6 +51,10 @@ class PulseContentTest {
         composeRule.onNodeWithText("count 1").assertTextEquals("count 1")
     }
 
+    /**
+     * [PulseContent] runs setup once per instance, and events reach the `onEvent` handler from the latest composition
+     * rather than the one captured first.
+     */
     @Test
     fun runsSetupOnceAndDeliversEventsThroughTheLatestHandler() {
         val viewModel = ContentViewModel()
@@ -69,6 +80,10 @@ class PulseContentTest {
         assertEquals(listOf("first:a", "second:b"), received)
     }
 
+    /**
+     * Leaving out `content` and `onEvent` observes the instance without rendering or handling anything, and setup still
+     * runs.
+     */
     @Test
     fun defaultsObserveWithoutRenderingOrHandling() {
         val viewModel = ContentViewModel()
@@ -91,6 +106,10 @@ class PulseContentTest {
         assertEquals(listOf<ContentEvent>(ContentEvent.Ping("kept")), received)
     }
 
+    /**
+     * [PulseHost] hands its content the Container's `refresh` and `broadcast`, and a refresh re-creates the content
+     * below it.
+     */
     @Test
     fun hostHandsOutRefreshAndBroadcast() {
         val viewModel = ContentViewModel()
@@ -122,6 +141,10 @@ class PulseContentTest {
         composeRule.onNodeWithTag("count").assertTextEquals("count 0 gen 1")
     }
 
+    /**
+     * A recomposition with no changed parameter is skipped, and setup is not repeated — including when the parent
+     * recomposes in the same frame as the children's own state changes.
+     */
     @Test
     fun skipsRecompositionWhenNothingChanged() {
         val viewModel = ContentViewModel()
@@ -147,6 +170,10 @@ class PulseContentTest {
         assertEquals(1, viewModel.setupCount)
     }
 
+    /**
+     * Both composables work when the caller already knows whether each parameter changed and says so in the `$changed`
+     * mask.
+     */
     @Test
     fun acceptsParametersWhoseChangednessTheCallerAlreadyKnows() {
         val viewModel = ContentViewModel()
@@ -169,6 +196,9 @@ class PulseContentTest {
         composeRule.onNodeWithText("content").assertTextEquals("content")
     }
 
+    /**
+     * Lambdas hoisted out of the composition are reused rather than treated as new on every recomposition.
+     */
     @Test
     fun reusesLambdasPassedInFromOutsideTheComposition() {
         val viewModel = ContentViewModel()
@@ -191,6 +221,9 @@ class PulseContentTest {
         assertEquals(1, viewModel.setupCount)
     }
 
+    /**
+     * Content handed over as a value the caller cannot judge can be swapped without setting the ViewModel up again.
+     */
     @Test
     fun swapsContentHandedOverAsAValue() {
         val viewModel = ContentViewModel()
@@ -224,6 +257,9 @@ class PulseContentTest {
     }
 
     @OptIn(InternalComposeTracingApi::class)
+    /**
+     * Both composables report themselves to a composition tracer when one is installed.
+     */
     @Test
     fun reportsToTheComposeTracerWhenOneIsInstalled() {
         val viewModel = ContentViewModel()
