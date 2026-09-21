@@ -47,12 +47,6 @@ export default withMermaid(defineConfig({
                 { text: 'Navigation 3', link: '/guide/navigation3' },
               ],
             },
-            {
-              text: 'Project',
-              items: [
-                { text: 'Tested Behavior', link: '/guide/testing' },
-              ],
-            },
           ],
           '/api/': [
             {
@@ -117,12 +111,6 @@ export default withMermaid(defineConfig({
               text: '拡張',
               items: [
                 { text: 'Navigation 3', link: '/ja/guide/navigation3' },
-              ],
-            },
-            {
-              text: 'プロジェクト',
-              items: [
-                { text: 'テストで保証していること', link: '/ja/guide/testing' },
               ],
             },
           ],

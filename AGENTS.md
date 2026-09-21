@@ -30,6 +30,36 @@ artifact adds `rememberPulseViewModel` / `rememberPulseContainer`, and
 - **Publish to local Maven**: `./gradlew :library:publishToMavenLocal :navigation3:publishToMavenLocal`
 - **Run the demo**: `./gradlew :demo:run`
 
+## Writing Tests
+
+Every test class and every test case carries a KDoc line naming the behavior it guarantees, with
+links to the API it covers. Names describe the behavior, not the method under test, so a reader who
+only has the code can tell what breaks when a test fails.
+
+```kotlin
+/**
+ * [PulseViewModel.onSetup] does not run until something observes the instance.
+ */
+@Test
+fun setupIsNotRunUntilTheOwnerStartsIt() {
+```
+
+### Where a test goes
+
+Put a test in the source set that matches what it needs.
+
+| Source set | Use it for |
+|---|---|
+| `library/src/commonTest` | `PulseViewModel` and `PulseContainer` — anything that needs no composition |
+| `library/src/jvmTest` | The composables, through `createComposeRule()` from `ui-test-junit4` |
+| `navigation3/src/jvmTest` | `rememberPulseViewModel`, `rememberPulseContainer`, `rememberPulseNavEntryDecorators` |
+
+### Coverage
+
+Coverage is enforced rather than reported: `./gradlew koverVerify` fails when lines or branches fall
+below 95%, and the pull request check runs it. Both metrics are at 100% today, so a new public
+declaration is expected to arrive with the test that covers it.
+
 ## Project Structure
 
 ```
