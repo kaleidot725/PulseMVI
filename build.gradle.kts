@@ -1,3 +1,5 @@
+import kotlinx.kover.gradle.plugin.dsl.CoverageUnit
+
 plugins {
     kotlin("multiplatform") version "2.3.10" apply false
     kotlin("plugin.compose") version "2.3.10" apply false
@@ -38,6 +40,15 @@ kover {
         total {
             html { onCheck = false }
             xml { onCheck = false }
+
+            verify {
+                onCheck = true
+
+                rule {
+                    minBound(95, CoverageUnit.LINE)
+                    minBound(95, CoverageUnit.BRANCH)
+                }
+            }
         }
     }
 }
