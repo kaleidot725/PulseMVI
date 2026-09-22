@@ -23,7 +23,7 @@ artifact adds `rememberPulseViewModel` / `rememberPulseContainer`, and
 
 ### Build and Testing
 - **Build the project**: `./gradlew build`
-- **Run tests**: `./gradlew test`
+- **Run tests**: `./gradlew allTests`
 - **Clean build**: `./gradlew clean`
 - **Check code quality**: `./gradlew ktlintCheck` (auto-fix with `./gradlew ktlintFormat`)
 - **Test coverage**: `./gradlew koverHtmlReport` (opens at `build/reports/kover/html/index.html`; XML via `koverXmlReport`)

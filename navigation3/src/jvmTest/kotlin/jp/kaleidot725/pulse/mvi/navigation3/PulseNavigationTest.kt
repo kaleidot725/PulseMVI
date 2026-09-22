@@ -6,28 +6,17 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.test.junit4.createComposeRule
-import androidx.lifecycle.ViewModelStore
-import androidx.lifecycle.ViewModelStoreOwner
 import androidx.lifecycle.viewmodel.compose.LocalViewModelStoreOwner
 import androidx.navigation3.runtime.NavEntryDecorator
-import jp.kaleidot725.pulse.mvi.PulseAction
-import jp.kaleidot725.pulse.mvi.PulseBroadcast
-import jp.kaleidot725.pulse.mvi.PulseContainer
-import jp.kaleidot725.pulse.mvi.PulseEvent
-import jp.kaleidot725.pulse.mvi.PulseState
-import jp.kaleidot725.pulse.mvi.PulseUnicast
-import jp.kaleidot725.pulse.mvi.PulseViewModel
 import org.junit.Rule
 import org.junit.Test
 import kotlin.test.assertEquals
-import kotlin.test.assertFailsWith
 import kotlin.test.assertNotSame
 import kotlin.test.assertSame
-import kotlin.test.assertTrue
 
 /**
- * Instance lookup in the navigation3 artifact: which owner holds an instance, which key identifies it, and what happens
- * when no owner is in scope.
+ * The navigation3 composables under a real composition: which owner holds an instance, which key identifies it, and
+ * what `rememberPulseNavEntryDecorators` hands to `NavDisplay`.
  */
 class PulseNavigationTest {
     @get:Rule
@@ -87,37 +76,6 @@ class PulseNavigationTest {
     }
 
     /**
-     * The default key falls back from the qualified name to the simple name to the given fallback, so a local class and
-     * an anonymous object still get distinct keys.
-     */
-    @Test
-    fun defaultKeyFallsBackFromQualifiedNameToSimpleNameToTheGivenName() {
-        class Local : PulseViewModel<NavState, NavAction, NavEvent, NavBroadcast, NavUnicast>(NavState()) {
-            override fun onAction(uiAction: NavAction) = Unit
-        }
-        val anonymous =
-            object : PulseViewModel<NavState, NavAction, NavEvent, NavBroadcast, NavUnicast>(NavState()) {
-                override fun onAction(uiAction: NavAction) = Unit
-            }
-
-        assertEquals("jp.kaleidot725.pulse.mvi.navigation3.NavViewModel", defaultPulseKey(NavViewModel::class, "x"))
-        assertEquals("Local", defaultPulseKey(Local::class, "x"))
-        assertEquals("PulseViewModel", defaultPulseKey(anonymous::class, "PulseViewModel"))
-    }
-
-    /**
-     * A call with no ViewModelStoreOwner in scope fails with a message naming what is missing.
-     */
-    @Test
-    fun failsPlainlyWithoutAnOwner() {
-        val error = assertFailsWith<IllegalStateException> { requirePulseViewModelStoreOwner(null) }
-        assertTrue(error.message!!.startsWith("No ViewModelStoreOwner in scope"))
-
-        val owner = TestOwner()
-        assertSame(owner, requirePulseViewModelStoreOwner(owner))
-    }
-
-    /**
      * `rememberPulseNavEntryDecorators` returns the saveable state holder decorator and the ViewModel store decorator,
      * in the order NavDisplay expects.
      */
@@ -133,27 +91,3 @@ class PulseNavigationTest {
         assertEquals(2, decorators.size)
     }
 }
-
-private class TestOwner : ViewModelStoreOwner {
-    override val viewModelStore = ViewModelStore()
-}
-
-private data class NavState(
-    val value: Int = 0,
-) : PulseState
-
-private data object NavAction : PulseAction
-
-private data object NavEvent : PulseEvent
-
-private data object NavBroadcast : PulseBroadcast
-
-private data object NavUnicast : PulseUnicast
-
-private class NavViewModel : PulseViewModel<NavState, NavAction, NavEvent, NavBroadcast, NavUnicast>(NavState()) {
-    override fun onAction(uiAction: NavAction) = Unit
-}
-
-private class NavContainer(
-    viewModels: List<PulseViewModel<*, *, *, NavBroadcast, NavUnicast>>,
-) : PulseContainer<NavBroadcast, NavUnicast>(viewModels)

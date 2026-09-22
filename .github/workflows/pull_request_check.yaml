@@ -27,7 +27,7 @@ jobs:
           gem install danger danger-junit danger-checkstyle_format
       - name: Run test
         run: |
-          ./gradlew test
+          ./gradlew allTests
         continue-on-error: true
       - name: Run ktlint
         run: |
