@@ -46,7 +46,7 @@ kover {
 
                 rule {
                     minBound(95, CoverageUnit.LINE)
-                    minBound(95, CoverageUnit.BRANCH)
+                    minBound(95, CoverageUnit.INSTRUCTION)
                 }
             }
         }

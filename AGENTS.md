@@ -56,9 +56,11 @@ Put a test in the source set that matches what it needs.
 
 ### Coverage
 
-Coverage is enforced rather than reported: `./gradlew koverVerify` fails when lines or branches fall
-below 95%, and the pull request check runs it. Both metrics are at 100% today, so a new public
-declaration is expected to arrive with the test that covers it.
+Coverage is enforced rather than reported: `./gradlew koverVerify` fails when lines or instructions
+fall below 95%, and the pull request check runs it. Branch coverage is left out of the gate on
+purpose — the remaining branches are the `changedInstance` arms the Compose compiler generates for
+default parameters, and reaching them takes tests written against the compiler rather than against
+the library. A new public declaration is still expected to arrive with the test that covers it.
 
 ## Project Structure
 

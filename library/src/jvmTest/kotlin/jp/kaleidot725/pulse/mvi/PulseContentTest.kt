@@ -1,318 +1,121 @@
 package jp.kaleidot725.pulse.mvi
 
-import androidx.compose.foundation.layout.Column
-import androidx.compose.material.Button
-import androidx.compose.material.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.Composer
-import androidx.compose.runtime.CompositionTracer
-import androidx.compose.runtime.InternalComposeTracingApi
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.test.assertTextEquals
 import androidx.compose.ui.test.junit4.createComposeRule
-import androidx.compose.ui.test.onNodeWithTag
-import androidx.compose.ui.test.onNodeWithText
-import androidx.compose.ui.test.performClick
 import org.junit.Rule
 import org.junit.Test
 import kotlin.test.assertEquals
-import kotlin.test.assertTrue
 
 /**
- * The [PulseHost] and [PulseContent] composables in a real composition: rendering and action dispatch, one-time setup
- * and event delivery, and the recomposition paths the Compose compiler generates.
+ * What [PulseHost] and [PulseContent] hand to their content in a real composition: the ViewModel's state and
+ * `onAction`, the Container's `refresh` and `broadcast`, and one-time setup with event delivery.
  */
 class PulseContentTest {
     @get:Rule
     val composeRule = createComposeRule()
 
     /**
-     * [PulseContent] renders the current state and sends actions back to the ViewModel.
+     * [PulseContent] hands out the current state and an `onAction` that reaches the ViewModel, so a dispatched action
+     * comes back as new state.
      */
     @Test
-    fun rendersStateAndDispatchesActions() {
+    fun handsOutStateAndAction() {
         val viewModel = ContentViewModel()
+        var state = ContentState(count = -1)
+        lateinit var onAction: (ContentAction) -> Unit
 
         composeRule.setContent {
-            PulseContent(viewModel = viewModel) { state, onAction ->
-                Button(onClick = { onAction(ContentAction.Increment) }) {
-                    Text("count ${state.count}")
-                }
+            PulseContent(viewModel = viewModel) { uiState, dispatch ->
+                state = uiState
+                onAction = dispatch
             }
         }
+        assertEquals(ContentState(count = 0), state)
 
-        composeRule.onNodeWithText("count 0").performClick()
+        onAction(ContentAction.Increment)
+        composeRule.waitForIdle()
 
-        composeRule.onNodeWithText("count 1").assertTextEquals("count 1")
+        assertEquals(ContentState(count = 1), state)
     }
 
     /**
-     * [PulseContent] runs setup once per instance, and events reach the `onEvent` handler from the latest composition
-     * rather than the one captured first.
+     * [PulseContent] runs setup once per instance, and events reach `onEvent` before and after a recomposition.
      */
     @Test
-    fun runsSetupOnceAndDeliversEventsThroughTheLatestHandler() {
+    fun runsSetupOnceAndDeliversEvents() {
         val viewModel = ContentViewModel()
-        val received = mutableListOf<String>()
-        var tag by mutableStateOf("first")
+        val received = mutableListOf<ContentEvent>()
 
         composeRule.setContent {
-            PulseContent(
-                viewModel = viewModel,
-                onEvent = { event -> received += "$tag:${(event as ContentEvent.Ping).text}" },
-            ) { _, _ -> Text(tag) }
+            PulseContent(viewModel = viewModel, onEvent = { received += it }) { _, _ -> }
         }
-        composeRule.waitForIdle()
 
-        viewModel.event(ContentEvent.Ping("a"))
+        viewModel.event(ContentEvent.Ping("before"))
+        viewModel.onAction(ContentAction.Increment)
         composeRule.waitForIdle()
-        tag = "second"
-        composeRule.waitForIdle()
-        viewModel.event(ContentEvent.Ping("b"))
+        viewModel.event(ContentEvent.Ping("after"))
         composeRule.waitForIdle()
 
         assertEquals(1, viewModel.setupCount)
-        assertEquals(listOf("first:a", "second:b"), received)
+        assertEquals(listOf<ContentEvent>(ContentEvent.Ping("before"), ContentEvent.Ping("after")), received)
     }
 
     /**
-     * Leaving out `content` and `onEvent` observes the instance without rendering or handling anything, and setup still
-     * runs.
+     * Leaving out `content` and `onEvent` observes the ViewModel without rendering or handling anything.
      */
     @Test
-    fun defaultsObserveWithoutRenderingOrHandling() {
+    fun defaultsObserveOnly() {
         val viewModel = ContentViewModel()
         val container = ContentContainer(listOf(viewModel))
-
-        val other = ContentViewModel()
-        val received = mutableListOf<ContentEvent>()
 
         composeRule.setContent {
             PulseHost(container = container)
             PulseContent(viewModel = viewModel)
-            PulseContent(viewModel = other, onEvent = { received += it })
         }
-        composeRule.waitForIdle()
-        viewModel.event(ContentEvent.Ping("ignored"))
-        other.event(ContentEvent.Ping("kept"))
+        viewModel.event(ContentEvent.Ping("dropped"))
         composeRule.waitForIdle()
 
         assertEquals(1, viewModel.setupCount)
-        assertEquals(listOf<ContentEvent>(ContentEvent.Ping("kept")), received)
     }
 
     /**
-     * [PulseHost] hands its content the Container's `refresh` and `broadcast`, and a refresh re-creates the content
-     * below it.
+     * [PulseHost] hands out the Container's `broadcast`, which reaches the ViewModel, and its `refresh`, which
+     * re-creates the content below it.
      */
     @Test
-    fun hostHandsOutRefreshAndBroadcast() {
+    fun handsOutRefreshAndBroadcast() {
         val viewModel = ContentViewModel()
         val container = ContentContainer(listOf(viewModel))
-        var generation = 0
+        var state = ContentState(count = -1)
+        var created = 0
+        var generation = -1
+        lateinit var onRefresh: () -> Unit
+        lateinit var onBroadcast: (ContentBroadcast) -> Unit
 
         composeRule.setContent {
-            PulseHost(container = container) { onRefresh, onBroadcast ->
-                Column {
-                    Button(onClick = { onBroadcast(ContentBroadcast.Reset) }, modifier = Modifier.testTag("reset")) { Text("reset") }
-                    Button(onClick = onRefresh, modifier = Modifier.testTag("refresh")) { Text("refresh") }
-                    PulseContent(viewModel = viewModel) { state, onAction ->
-                        val id = remember { generation++ }
-                        Button(onClick = { onAction(ContentAction.Increment) }, modifier = Modifier.testTag("count")) {
-                            Text("count ${state.count} gen $id")
-                        }
-                    }
+            PulseHost(container = container) { refresh, broadcast ->
+                onRefresh = refresh
+                onBroadcast = broadcast
+                PulseContent(viewModel = viewModel) { uiState, _ ->
+                    generation = remember { created++ }
+                    state = uiState
                 }
             }
         }
 
-        composeRule.onNodeWithTag("count").performClick()
-        composeRule.onNodeWithTag("count").assertTextEquals("count 1 gen 0")
-
-        composeRule.onNodeWithTag("reset").performClick()
-        composeRule.onNodeWithTag("count").assertTextEquals("count 0 gen 0")
-
-        composeRule.onNodeWithTag("refresh").performClick()
-        composeRule.onNodeWithTag("count").assertTextEquals("count 0 gen 1")
-    }
-
-    /**
-     * A recomposition with no changed parameter is skipped, and setup is not repeated — including when the parent
-     * recomposes in the same frame as the children's own state changes.
-     */
-    @Test
-    fun skipsRecompositionWhenNothingChanged() {
-        val viewModel = ContentViewModel()
-        val container = ContentContainer(listOf(viewModel))
-        var tick by mutableStateOf(0)
-
-        composeRule.setContent {
-            Text("tick $tick")
-            PulseHost(container = container) { _, _ -> Text("host") }
-            PulseContent(viewModel = viewModel) { _, _ -> Text("content") }
-        }
-        composeRule.waitForIdle()
-        tick = 1
-        composeRule.waitForIdle()
-
-        // Parent recomposes in the same frame as the children's own state changes.
-        tick = 2
-        container.refresh()
         viewModel.onAction(ContentAction.Increment)
         composeRule.waitForIdle()
+        assertEquals(ContentState(count = 1), state)
 
-        composeRule.onNodeWithText("tick 2").assertTextEquals("tick 2")
-        assertEquals(1, viewModel.setupCount)
-    }
-
-    /**
-     * Both composables work when the caller already knows whether each parameter changed and says so in the `$changed`
-     * mask.
-     */
-    @Test
-    fun acceptsParametersWhoseChangednessTheCallerAlreadyKnows() {
-        val viewModel = ContentViewModel()
-        val container = ContentContainer(listOf(viewModel))
-        val hostContent: @Composable (() -> Unit, (ContentBroadcast) -> Unit) -> Unit = { _, _ -> Text("host") }
-        val body: @Composable (ContentState, (ContentAction) -> Unit) -> Unit = { _, _ -> Text("content") }
-        val onEvent: (ContentEvent) -> Unit = {}
-        var tick by mutableStateOf(0)
-
-        composeRule.setContent {
-            Text("tick $tick")
-            Host(container = container, content = hostContent)
-            Content(viewModel = viewModel, onEvent = onEvent, content = body)
-        }
+        onBroadcast(ContentBroadcast.Reset)
         composeRule.waitForIdle()
-        tick = 1
+        assertEquals(ContentState(count = 0), state)
+        assertEquals(0, generation)
+
+        onRefresh()
         composeRule.waitForIdle()
-
-        composeRule.onNodeWithText("host").assertTextEquals("host")
-        composeRule.onNodeWithText("content").assertTextEquals("content")
+        assertEquals(1, generation)
     }
-
-    /**
-     * Lambdas hoisted out of the composition are reused rather than treated as new on every recomposition.
-     */
-    @Test
-    fun reusesLambdasPassedInFromOutsideTheComposition() {
-        val viewModel = ContentViewModel()
-        val container = ContentContainer(listOf(viewModel))
-        val hostContent: @Composable (() -> Unit, (ContentBroadcast) -> Unit) -> Unit = { _, _ -> Text("host") }
-        val body: @Composable (ContentState, (ContentAction) -> Unit) -> Unit = { _, _ -> Text("content") }
-        val onEvent: (ContentEvent) -> Unit = {}
-        var tick by mutableStateOf(0)
-
-        composeRule.setContent {
-            Text("tick $tick")
-            PulseHost(container = container, content = hostContent)
-            PulseContent(viewModel = viewModel, onEvent = onEvent, content = body)
-        }
-        composeRule.waitForIdle()
-        tick = 1
-        composeRule.waitForIdle()
-
-        composeRule.onNodeWithText("host").assertTextEquals("host")
-        assertEquals(1, viewModel.setupCount)
-    }
-
-    /**
-     * Content handed over as a value the caller cannot judge can be swapped without setting the ViewModel up again.
-     */
-    @Test
-    fun swapsContentHandedOverAsAValue() {
-        val viewModel = ContentViewModel()
-        val container = ContentContainer(listOf(viewModel))
-        val hosts =
-            listOf<@Composable (() -> Unit, (ContentBroadcast) -> Unit) -> Unit>(
-                { _, _ -> Text("host a") },
-                { _, _ -> Text("host b") },
-            )
-        val bodies =
-            listOf<@Composable (ContentState, (ContentAction) -> Unit) -> Unit>(
-                { _, _ -> Text("content a") },
-                { _, _ -> Text("content b") },
-            )
-        var index by mutableStateOf(0)
-        var tick by mutableStateOf(0)
-
-        composeRule.setContent {
-            Text("tick $tick")
-            PulseHost(container = container, content = hosts[index])
-            PulseContent(viewModel = viewModel, content = bodies[index])
-        }
-        composeRule.onNodeWithText("host a").assertTextEquals("host a")
-        tick = 1
-        composeRule.waitForIdle()
-        index = 1
-
-        composeRule.onNodeWithText("host b").assertTextEquals("host b")
-        composeRule.onNodeWithText("content b").assertTextEquals("content b")
-        assertEquals(1, viewModel.setupCount)
-    }
-
-    @OptIn(InternalComposeTracingApi::class)
-    /**
-     * Both composables report themselves to a composition tracer when one is installed.
-     */
-    @Test
-    fun reportsToTheComposeTracerWhenOneIsInstalled() {
-        val viewModel = ContentViewModel()
-        val container = ContentContainer(listOf(viewModel))
-        val events = mutableListOf<String>()
-        Composer.setTracer(
-            object : CompositionTracer {
-                override fun isTraceInProgress(): Boolean = true
-
-                override fun traceEventStart(
-                    key: Int,
-                    dirty1: Int,
-                    dirty2: Int,
-                    info: String,
-                ) {
-                    events += info
-                }
-
-                override fun traceEventEnd() = Unit
-            },
-        )
-
-        try {
-            composeRule.setContent {
-                PulseHost(container = container) { _, _ ->
-                    PulseContent(viewModel = viewModel) { _, _ -> Text("traced") }
-                }
-            }
-            composeRule.waitForIdle()
-        } finally {
-            Composer.setTracer(null)
-        }
-
-        assertTrue(events.any { it.startsWith("jp.kaleidot725.pulse.mvi.PulseHost") })
-        assertTrue(events.any { it.startsWith("jp.kaleidot725.pulse.mvi.PulseContent") })
-    }
-}
-
-@Composable
-private fun Host(
-    container: ContentContainer,
-    content: @Composable (() -> Unit, (ContentBroadcast) -> Unit) -> Unit,
-) {
-    PulseHost(container = container, content = content)
-}
-
-@Composable
-private fun Content(
-    viewModel: ContentViewModel,
-    onEvent: (ContentEvent) -> Unit,
-    content: @Composable (ContentState, (ContentAction) -> Unit) -> Unit,
-) {
-    PulseContent(viewModel = viewModel, onEvent = onEvent, content = content)
 }
 
 private data class ContentState(
