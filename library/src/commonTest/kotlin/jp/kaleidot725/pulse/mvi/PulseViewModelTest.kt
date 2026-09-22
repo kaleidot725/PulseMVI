@@ -19,20 +19,22 @@ import kotlin.test.assertTrue
  */
 class PulseViewModelTest {
     /**
-     * Work is launched on the dispatcher the ViewModel was given.
+     * The dispatcher reaches `coroutineScope`, which is what [PulseViewModel.onSetup] launches into, so a test can pin the
+     * ViewModel to its own dispatcher.
      */
     @Test
-    fun usesConfiguredCoroutineDispatcher() {
+    fun `launches its work on the dispatcher it was constructed with`() {
         val viewModel = TestViewModel(coroutineDispatcher = Dispatchers.Unconfined)
 
         assertSame(Dispatchers.Unconfined, viewModel.coroutineScope.coroutineContext[ContinuationInterceptor])
     }
 
     /**
-     * [PulseViewModel.onSetup] does not run until something observes the instance.
+     * Construction stays cheap: whoever owns the instance decides when the work starts, which for a composition is
+     * [PulseContent] calling [PulseViewModel.setupOnce].
      */
     @Test
-    fun setupIsNotRunUntilTheOwnerStartsIt() {
+    fun `does not run onSetup until it is set up`() {
         val viewModel = TestViewModel()
 
         assertEquals(0, viewModel.setupCount)
@@ -44,10 +46,11 @@ class PulseViewModelTest {
     }
 
     /**
-     * [PulseViewModel.cancel] stops the work [PulseViewModel.onSetup] started.
+     * [PulseViewModel.cancel] is for a ViewModel that is kept but no longer observed, so the job launched in
+     * [PulseViewModel.onSetup] must end with it.
      */
     @Test
-    fun cancelStopsWorkStartedInSetup() {
+    fun `cancels the coroutines onSetup started when cancel is called`() {
         val viewModel = TestViewModel()
 
         viewModel.onSetup()
@@ -58,10 +61,11 @@ class PulseViewModelTest {
     }
 
     /**
-     * [PulseViewModel.close] leaves no scope to launch into, so a later emission cannot resurrect the ViewModel.
+     * [PulseViewModel.close] is the end of the instance, called from `onCleared`. Anything launched afterwards must not
+     * run, so the scope is no longer active.
      */
     @Test
-    fun closeLeavesNoScopeToLaunchInto() {
+    fun `leaves a dead scope behind after close`() {
         val viewModel = TestViewModel()
 
         viewModel.onSetup()
@@ -73,10 +77,11 @@ class PulseViewModelTest {
     }
 
     /**
-     * Events emitted before anything collects them are buffered and keep their order.
+     * Events are one-time messages to the UI, and the UI is not collecting yet while it composes for the first time. The
+     * buffer keeps them until it does, in the order they were sent.
      */
     @Test
-    fun eventsEmittedWithNoCollectorKeepTheirOrder() =
+    fun `buffers events emitted before a collector arrives, in order`() =
         runTest {
             val viewModel = TestViewModel()
 
@@ -90,10 +95,11 @@ class PulseViewModelTest {
         }
 
     /**
-     * Once the event buffer is full it drops the oldest event instead of suspending the emitter.
+     * Emitting an event never suspends the caller, so a full buffer has to lose something: it is the oldest event, not the
+     * newest.
      */
     @Test
-    fun eventBufferDropsTheOldestOnceItIsFull() =
+    fun `drops the oldest event once the buffer is full`() =
         runTest {
             val viewModel = TestViewModel()
 
@@ -103,10 +109,11 @@ class PulseViewModelTest {
         }
 
     /**
-     * After [PulseViewModel.cancel], the next observer sets the instance up again.
+     * [PulseViewModel.setupOnce] is once per setup, not once per instance — the pair of calls is what lets an observer come
+     * back to a ViewModel it had released.
      */
     @Test
-    fun setupOnceRunsAgainAfterCancel() {
+    fun `runs onSetup again on the first setup after cancel`() {
         val viewModel = TestViewModel()
 
         viewModel.setupOnce()
@@ -120,10 +127,10 @@ class PulseViewModelTest {
     }
 
     /**
-     * [PulseViewModel.onSetup] and [PulseViewModel.onReceive] do nothing unless a subclass overrides them.
+     * Both hooks are optional: a ViewModel that needs neither can leave them alone.
      */
     @Test
-    fun hooksDoNothingUnlessOverridden() {
+    fun `does nothing in onSetup and onReceive until a subclass overrides them`() {
         val viewModel =
             object : PulseViewModel<TestState, TestAction, TestEvent, TestBroadcast, TestUnicast>(TestState()) {
                 override fun onAction(uiAction: TestAction) = Unit
@@ -136,10 +143,10 @@ class PulseViewModelTest {
     }
 
     /**
-     * State survives a [PulseViewModel.cancel] and the setup that follows it.
+     * Cancelling is about the running work, not the data. A ViewModel that is observed again shows what it held before.
      */
     @Test
-    fun stateIsPreservedAcrossSetups() {
+    fun `keeps its state across a cancel and the setup that follows`() {
         val viewModel = TestViewModel()
 
         viewModel.onSetup()

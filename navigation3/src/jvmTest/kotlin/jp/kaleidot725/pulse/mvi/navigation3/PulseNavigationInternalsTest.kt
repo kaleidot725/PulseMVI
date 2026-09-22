@@ -12,13 +12,12 @@ import kotlin.test.assertTrue
  */
 class PulseNavigationInternalsTest {
     /**
-     * [defaultPulseKey] is what identifies an instance in its owner's `ViewModelStore` when the caller passes no key,
-     * and `viewModel()` needs it to be a name, never null. A class declared at the top level has a qualified name, a
-     * class declared inside a function only has a simple name, and an anonymous object has neither — so the fallback
-     * chain ends at the name the caller supplies.
+     * The key identifies the instance inside its owner's `ViewModelStore` and `viewModel()` will not take null for it. A
+     * top-level class has a qualified name, a class declared in a function has only a simple name, and an anonymous object
+     * has neither — hence the third step.
      */
     @Test
-    fun defaultKeyFallsBackFromQualifiedNameToSimpleNameToTheGivenName() {
+    fun `defaultPulseKey falls back from the qualified name to the simple name to the given name`() {
         class Local : PulseViewModel<NavState, NavAction, NavEvent, NavBroadcast, NavUnicast>(NavState()) {
             override fun onAction(uiAction: NavAction) = Unit
         }
@@ -34,10 +33,11 @@ class PulseNavigationInternalsTest {
     }
 
     /**
-     * A call with no ViewModelStoreOwner in scope fails with a message naming what is missing.
+     * Calling `rememberPulseViewModel` outside a `NavDisplay` or a window is an easy mistake, and the message has to name
+     * the cause rather than read as a null pointer.
      */
     @Test
-    fun failsPlainlyWithoutAnOwner() {
+    fun `requirePulseViewModelStoreOwner says what is missing when no owner is in scope`() {
         val error = assertFailsWith<IllegalStateException> { requirePulseViewModelStoreOwner(null) }
         assertTrue(error.message!!.startsWith("No ViewModelStoreOwner in scope"))
 

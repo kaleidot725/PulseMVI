@@ -32,16 +32,17 @@ artifact adds `rememberPulseViewModel` / `rememberPulseContainer`, and
 
 ## Writing Tests
 
-Every test class and every test case carries a KDoc line naming the behavior it guarantees, with
-links to the API it covers. Names describe the behavior, not the method under test, so a reader who
-only has the code can tell what breaks when a test fails.
+Name a test case with a backticked sentence, written from the subject's point of view, so a failing
+test reads as the promise that broke. Every test class and test case also carries a KDoc line, and it
+says what the name cannot: why the behavior matters, with links to the API it covers.
 
 ```kotlin
 /**
- * [PulseViewModel.onSetup] does not run until something observes the instance.
+ * Construction stays cheap: whoever owns the instance decides when the work starts, which for a
+ * composition is [PulseContent] calling [PulseViewModel.setupOnce].
  */
 @Test
-fun setupIsNotRunUntilTheOwnerStartsIt() {
+fun `does not run onSetup until it is set up`() {
 ```
 
 ### Where a test goes
