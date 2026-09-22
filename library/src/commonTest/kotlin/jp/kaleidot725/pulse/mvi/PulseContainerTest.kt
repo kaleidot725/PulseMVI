@@ -5,7 +5,14 @@ import kotlinx.coroutines.Dispatchers
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
+/**
+ * Message passing in [PulseContainer]: a broadcast reaching every registered ViewModel, the key that [PulseContent] re-
+ * creates its content on, and what [PulseContainer.close] stops.
+ */
 class PulseContainerTest {
+    /**
+     * A broadcast reaches every ViewModel registered in the Container.
+     */
     @Test
     fun broadcastReachesEveryViewModel() {
         val firstViewModel = BroadcastViewModel()
@@ -18,6 +25,9 @@ class PulseContainerTest {
         assertEquals(1, secondViewModel.receivedCount)
     }
 
+    /**
+     * [PulseContainer.refresh] changes the key that [PulseContent] re-creates its content on.
+     */
     @Test
     fun refreshChangesContainerKey() {
         val container = TestContainer(emptyList())
@@ -28,6 +38,23 @@ class PulseContainerTest {
         assertEquals(2L, container.key.value)
     }
 
+    /**
+     * [PulseContainer.onReceived] does nothing unless a subclass overrides it.
+     */
+    @Test
+    fun receivedHookDoesNothingUnlessOverridden() {
+        val viewModel = BroadcastViewModel()
+        val container =
+            object : PulseContainer<ContainerBroadcast, ContainerUnicast>(listOf(viewModel), Dispatchers.Unconfined) {}
+
+        viewModel.unicast(ContainerUnicast)
+
+        assertEquals(0L, container.key.value)
+    }
+
+    /**
+     * [PulseContainer.close] stops the Container from collecting unicasts.
+     */
     @Test
     fun closeStopsUnicastCollection() {
         val viewModel = BroadcastViewModel()

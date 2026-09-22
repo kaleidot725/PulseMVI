@@ -27,7 +27,7 @@ jobs:
           gem install danger danger-junit danger-checkstyle_format
       - name: Run test
         run: |
-          ./gradlew test
+          ./gradlew allTests
         continue-on-error: true
       - name: Run ktlint
         run: |
@@ -38,3 +38,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           danger
+      - name: Verify coverage
+        run: |
+          ./gradlew koverVerify

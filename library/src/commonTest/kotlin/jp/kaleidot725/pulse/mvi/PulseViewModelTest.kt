@@ -17,7 +17,14 @@ import kotlin.test.assertFalse
 import kotlin.test.assertSame
 import kotlin.test.assertTrue
 
+/**
+ * Lifecycle and event delivery of [PulseViewModel]: when [PulseViewModel.onSetup] runs, what [PulseViewModel.cancel]
+ * and [PulseViewModel.close] leave behind, and what happens to events nobody is collecting yet.
+ */
 class PulseViewModelTest {
+    /**
+     * Work is launched on the dispatcher the ViewModel was given.
+     */
     @Test
     fun usesConfiguredCoroutineDispatcher() {
         val viewModel = TestViewModel(coroutineDispatcher = Dispatchers.Unconfined)
@@ -25,6 +32,9 @@ class PulseViewModelTest {
         assertSame(Dispatchers.Unconfined, viewModel.coroutineScope.coroutineContext[ContinuationInterceptor])
     }
 
+    /**
+     * [PulseViewModel.onSetup] does not run until something observes the instance.
+     */
     @Test
     fun setupIsNotRunUntilTheOwnerStartsIt() {
         val viewModel = TestViewModel()
@@ -37,6 +47,9 @@ class PulseViewModelTest {
         assertFalse(requireNotNull(viewModel.setupJob).isCancelled)
     }
 
+    /**
+     * [PulseViewModel.cancel] stops the work [PulseViewModel.onSetup] started.
+     */
     @Test
     fun cancelStopsWorkStartedInSetup() {
         val viewModel = TestViewModel()
@@ -48,6 +61,9 @@ class PulseViewModelTest {
         assertTrue(setupJob.isCancelled)
     }
 
+    /**
+     * [PulseViewModel.close] leaves no scope to launch into, so a later emission cannot resurrect the ViewModel.
+     */
     @Test
     fun closeLeavesNoScopeToLaunchInto() {
         val viewModel = TestViewModel()
@@ -60,6 +76,9 @@ class PulseViewModelTest {
         assertFalse(viewModel.coroutineScope.isActive)
     }
 
+    /**
+     * Events emitted before anything collects them are buffered and keep their order.
+     */
     @Test
     fun eventsEmittedWithNoCollectorKeepTheirOrder() =
         runTest {
@@ -74,6 +93,9 @@ class PulseViewModelTest {
             )
         }
 
+    /**
+     * Once the event buffer is full it drops the oldest event instead of suspending the emitter.
+     */
     @Test
     fun eventBufferDropsTheOldestOnceItIsFull() =
         runTest {
@@ -84,6 +106,9 @@ class PulseViewModelTest {
             assertEquals(TestEvent.Message("event 6"), viewModel.event.first())
         }
 
+    /**
+     * After [PulseViewModel.cancel], the next observer sets the instance up again.
+     */
     @Test
     fun setupOnceRunsAgainAfterCancel() {
         val viewModel = TestViewModel()
@@ -98,6 +123,25 @@ class PulseViewModelTest {
         assertEquals(2, viewModel.setupCount)
     }
 
+    /**
+     * [PulseViewModel.onSetup] and [PulseViewModel.onReceive] do nothing unless a subclass overrides them.
+     */
+    @Test
+    fun hooksDoNothingUnlessOverridden() {
+        val viewModel =
+            object : PulseViewModel<TestState, TestAction, TestEvent, TestBroadcast, TestUnicast>(TestState()) {
+                override fun onAction(uiAction: TestAction) = Unit
+            }
+
+        viewModel.setupOnce()
+        viewModel.onReceive(TestBroadcast)
+
+        assertEquals(TestState(), viewModel.currentState)
+    }
+
+    /**
+     * State survives a [PulseViewModel.cancel] and the setup that follows it.
+     */
     @Test
     fun stateIsPreservedAcrossSetups() {
         val viewModel = TestViewModel()
