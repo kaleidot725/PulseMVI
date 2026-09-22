@@ -23,10 +23,11 @@ class PulseNavigationTest {
     val composeRule = createComposeRule()
 
     /**
-     * One owner returns one instance of each type across recompositions.
+     * The instance lives in the owner's `ViewModelStore`, not in the composition, so recomposing finds what is already
+     * there.
      */
     @Test
-    fun viewModelAndContainerSurviveRecompositionUnderTheSameOwner() {
+    fun `returns the same ViewModel and Container while the owner stays the same`() {
         val owner = TestOwner()
         var tick by mutableStateOf(0)
         val viewModels = mutableListOf<NavViewModel>()
@@ -50,10 +51,11 @@ class PulseNavigationTest {
     }
 
     /**
-     * Explicit keys tell two instances of one type apart under the same owner.
+     * Without a key the type name identifies the instance, so two calls share it. A screen that needs several of one
+     * ViewModel passes keys, as the demo's four areas do.
      */
     @Test
-    fun explicitKeysTellTwoInstancesOfOneTypeApart() {
+    fun `separates two instances of one type when each is given its own key`() {
         val owner = TestOwner()
         lateinit var unkeyedA: NavViewModel
         lateinit var unkeyedB: NavViewModel
@@ -76,11 +78,11 @@ class PulseNavigationTest {
     }
 
     /**
-     * `rememberPulseNavEntryDecorators` returns the saveable state holder decorator and the ViewModel store decorator,
-     * in the order NavDisplay expects.
+     * Passing `entryDecorators` replaces the default saveable state holder decorator, and losing it silently throws away
+     * `rememberSaveable` state — so both are returned together, in the order NavDisplay expects.
      */
     @Test
-    fun navEntryDecoratorsAreTheSaveableStateHolderAndTheViewModelStore() {
+    fun `returns both NavEntry decorators, not only the ViewModel store one`() {
         lateinit var decorators: List<NavEntryDecorator<Any>>
 
         composeRule.setContent {

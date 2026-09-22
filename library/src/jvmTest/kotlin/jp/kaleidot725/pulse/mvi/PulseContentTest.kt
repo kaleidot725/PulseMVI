@@ -15,11 +15,11 @@ class PulseContentTest {
     val composeRule = createComposeRule()
 
     /**
-     * [PulseContent] hands out the current state and an `onAction` that reaches the ViewModel, so a dispatched action
-     * comes back as new state.
+     * This is the whole contract of the composable: the content never touches the ViewModel itself, and a dispatched action
+     * comes back as the next state.
      */
     @Test
-    fun handsOutStateAndAction() {
+    fun `PulseContent hands the content the state and an onAction that reaches the ViewModel`() {
         val viewModel = ContentViewModel()
         var state = ContentState(count = -1)
         lateinit var onAction: (ContentAction) -> Unit
@@ -39,10 +39,11 @@ class PulseContentTest {
     }
 
     /**
-     * [PulseContent] runs setup once per instance, and events reach `onEvent` before and after a recomposition.
+     * Setup belongs to the instance, not to the composition, and `onEvent` is re-read on every recomposition, so events
+     * still arrive after the content changes.
      */
     @Test
-    fun runsSetupOnceAndDeliversEvents() {
+    fun `PulseContent sets the ViewModel up once and keeps delivering its events`() {
         val viewModel = ContentViewModel()
         val received = mutableListOf<ContentEvent>()
 
@@ -61,10 +62,11 @@ class PulseContentTest {
     }
 
     /**
-     * Leaving out `content` and `onEvent` observes the ViewModel without rendering or handling anything.
+     * Both composables are useful with no content at all: the setup still runs, which is how a ViewModel can be started
+     * from a place that draws nothing.
      */
     @Test
-    fun defaultsObserveOnly() {
+    fun `PulseHost and PulseContent observe without rendering when content is left out`() {
         val viewModel = ContentViewModel()
         val container = ContentContainer(listOf(viewModel))
 
@@ -79,11 +81,11 @@ class PulseContentTest {
     }
 
     /**
-     * [PulseHost] hands out the Container's `broadcast`, which reaches the ViewModel, and its `refresh`, which
-     * re-creates the content below it.
+     * A broadcast reaches the ViewModels through the Container, and a refresh rebuilds the content below the host without
+     * setting the ViewModels up again.
      */
     @Test
-    fun handsOutRefreshAndBroadcast() {
+    fun `PulseHost hands the content the refresh and broadcast of its Container`() {
         val viewModel = ContentViewModel()
         val container = ContentContainer(listOf(viewModel))
         var state = ContentState(count = -1)

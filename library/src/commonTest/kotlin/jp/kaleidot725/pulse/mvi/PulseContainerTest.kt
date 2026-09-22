@@ -1,6 +1,5 @@
 package jp.kaleidot725.pulse.mvi
 
-import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -11,10 +10,10 @@ import kotlin.test.assertEquals
  */
 class PulseContainerTest {
     /**
-     * A broadcast reaches every ViewModel registered in the Container.
+     * This is the fan-out the Container exists for: one message, `onReceive` on all of them, not just the first.
      */
     @Test
-    fun broadcastReachesEveryViewModel() {
+    fun `delivers a broadcast to every registered ViewModel`() {
         val firstViewModel = BroadcastViewModel()
         val secondViewModel = BroadcastViewModel()
         val container = TestContainer(listOf(firstViewModel, secondViewModel))
@@ -26,10 +25,11 @@ class PulseContainerTest {
     }
 
     /**
-     * [PulseContainer.refresh] changes the key that [PulseContent] re-creates its content on.
+     * The key is what [PulseContent] rebuilds its content on, so a refresh discards the composition below every [PulseHost]
+     * holding this Container.
      */
     @Test
-    fun refreshChangesContainerKey() {
+    fun `changes its key when refresh is called`() {
         val container = TestContainer(emptyList())
 
         container.refresh()
@@ -39,10 +39,10 @@ class PulseContainerTest {
     }
 
     /**
-     * [PulseContainer.onReceived] does nothing unless a subclass overrides it.
+     * A Container that only broadcasts does not have to answer unicasts.
      */
     @Test
-    fun receivedHookDoesNothingUnlessOverridden() {
+    fun `does nothing in onReceived until a subclass overrides it`() {
         val viewModel = BroadcastViewModel()
         val container =
             object : PulseContainer<ContainerBroadcast, ContainerUnicast>(listOf(viewModel), Dispatchers.Unconfined) {}
@@ -53,10 +53,11 @@ class PulseContainerTest {
     }
 
     /**
-     * [PulseContainer.close] stops the Container from collecting unicasts.
+     * [PulseContainer.close] cancels the scope that collects each ViewModel's `unicast` flow, so a message sent afterwards
+     * reaches nobody.
      */
     @Test
-    fun closeStopsUnicastCollection() {
+    fun `stops collecting unicasts after close`() {
         val viewModel = BroadcastViewModel()
         val container = TestContainer(listOf(viewModel), coroutineDispatcher = Dispatchers.Unconfined)
 
@@ -67,39 +68,5 @@ class PulseContainerTest {
         viewModel.unicast(ContainerUnicast)
 
         assertEquals(1, container.receivedCount)
-    }
-}
-
-private data object ContainerState : PulseState
-
-private data object ContainerAction : PulseAction
-
-private data object ContainerEvent : PulseEvent
-
-private sealed interface ContainerBroadcast : PulseBroadcast {
-    data object Refresh : ContainerBroadcast
-}
-
-private data object ContainerUnicast : PulseUnicast
-
-private class BroadcastViewModel :
-    PulseViewModel<ContainerState, ContainerAction, ContainerEvent, ContainerBroadcast, ContainerUnicast>(ContainerState) {
-    var receivedCount: Int = 0
-
-    override fun onAction(uiAction: ContainerAction) = Unit
-
-    override fun onReceive(broadcast: ContainerBroadcast) {
-        receivedCount += 1
-    }
-}
-
-private class TestContainer(
-    viewModels: List<PulseViewModel<*, *, *, ContainerBroadcast, ContainerUnicast>>,
-    coroutineDispatcher: CoroutineDispatcher = Dispatchers.Default,
-) : PulseContainer<ContainerBroadcast, ContainerUnicast>(viewModels, coroutineDispatcher) {
-    var receivedCount: Int = 0
-
-    override fun onReceived(unicast: ContainerUnicast) {
-        receivedCount += 1
     }
 }
