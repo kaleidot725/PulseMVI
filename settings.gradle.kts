@@ -14,4 +14,5 @@ rootProject.name = "PulseMVI"
 
 include(":library")
 include(":navigation3")
+include(":konsist")
 include(":demo")

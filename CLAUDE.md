@@ -19,6 +19,9 @@ runs `onSetup()` the first time an instance is observed and never again. The `pu
 artifact adds `rememberPulseViewModel` / `rememberPulseContainer`, and
 `rememberPulseNavEntryDecorators()` scopes an instance to a Navigation 3 back stack entry.
 
+The `pulsemvi-konsist` artifact publishes the conventions themselves as Konsist assertions, so an app
+can check in its own test suite that it uses PulseMVI the way the library expects.
+
 ## Development Commands
 
 ### Build and Testing
@@ -83,6 +86,11 @@ PulseMVI/
 │   └── src/commonMain/kotlin/jp/kaleidot725/pulse/mvi/navigation3/
 │       └── PulseNavigation.kt        # rememberPulseViewModel / rememberPulseContainer /
 │                                     # rememberPulseNavEntryDecorators
+├── konsist/                          # Optional artifact: pulsemvi-konsist
+│   └── src/
+│       ├── jvmMain/kotlin/jp/kaleidot725/pulse/mvi/konsist/
+│       │   └── PulseConventions.kt   # assertPulseMviConventions and the checks it runs
+│       └── jvmTest/…                 # the checks, over conforming and violating fixtures
 ├── demo/                             # Pulse grid demo app (Navigation 3)
 │   └── src/{commonMain,jvmMain}/
 │       # Four areas share a Container: an area counts its own tap and announces
@@ -96,7 +104,8 @@ PulseMVI/
 ```
 
 Sources sit in `commonMain` even though `jvm()` is the only target. Keeping the source set makes
-re-adding a target a build-file change rather than a file move.
+re-adding a target a build-file change rather than a file move. The exception is `konsist`, whose
+sources are in `jvmMain` because Konsist publishes a JVM artifact only.
 
 ## Technical Details
 
@@ -107,12 +116,16 @@ re-adding a target a build-file change rather than a file move.
 - **Coroutines Version**: 1.10.2
 - **Lifecycle Version**: 2.10.0
 - **Navigation 3 Version**: 1.1.1 (`navigation3` module only)
+- **Konsist Version**: 0.17.3 (`konsist` module only)
 - **JVM Toolchain**: Java 17
 - **Code Style**: Official Kotlin code style with explicit API mode
 
 ## Key Configuration
 
 - Group ID: `com.github.kaleidot725.PulseMVI` (what JitPack serves for a multi-module repo)
-- Artifact IDs: `pulsemvi`, `pulsemvi-navigation3`
-- Packages: `jp.kaleidot725.pulse.mvi`, `jp.kaleidot725.pulse.mvi.navigation3`
-- JitPack dependency: `implementation("com.github.kaleidot725.PulseMVI:pulsemvi:<version>")`
+- Artifact IDs: `pulsemvi`, `pulsemvi-navigation3`, `pulsemvi-konsist`
+- Packages: `jp.kaleidot725.pulse.mvi`, `jp.kaleidot725.pulse.mvi.navigation3`,
+  `jp.kaleidot725.pulse.mvi.konsist`
+- JitPack dependency: `implementation("com.github.kaleidot725.PulseMVI:pulsemvi:<version>")`, and
+  `testImplementation("com.github.kaleidot725.PulseMVI:pulsemvi-konsist:<version>")` for the
+  convention checks
