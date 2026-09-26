@@ -22,8 +22,9 @@ Read [What is PulseMVI?](https://kaleidot725.github.io/PulseMVI/guide/) for the 
 ## Installation
 
 Add JitPack to `settings.gradle.kts`, then the dependencies to `build.gradle.kts`. Replace
-`<version>` with a tag from [Releases](https://github.com/kaleidot725/PulseMVI/releases).
-`pulsemvi-navigation3` is optional and scopes ViewModels to a Navigation 3 back stack entry.
+`<version>` with a tag from [Releases](https://github.com/kaleidot725/PulseMVI/releases). Both extra
+artifacts are optional: `pulsemvi-navigation3` scopes ViewModels to a Navigation 3 back stack entry,
+and `pulsemvi-konsist` checks in your tests that the code follows the PulseMVI conventions.
 
 ```kotlin
 // settings.gradle.kts
@@ -37,6 +38,7 @@ dependencyResolutionManagement {
 dependencies {
     implementation("com.github.kaleidot725.PulseMVI:pulsemvi:<version>")
     implementation("com.github.kaleidot725.PulseMVI:pulsemvi-navigation3:<version>")
+    testImplementation("com.github.kaleidot725.PulseMVI:pulsemvi-konsist:<version>")
 }
 ```
 

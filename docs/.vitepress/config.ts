@@ -45,6 +45,7 @@ export default withMermaid(defineConfig({
               text: 'Extensions',
               items: [
                 { text: 'Navigation 3', link: '/guide/navigation3' },
+                { text: 'Konsist', link: '/guide/konsist' },
               ],
             },
           ],
@@ -63,6 +64,7 @@ export default withMermaid(defineConfig({
               text: 'Extensions',
               items: [
                 { text: 'Navigation 3', link: '/api/navigation3' },
+                { text: 'Konsist', link: '/api/konsist' },
               ],
             },
           ],
@@ -111,6 +113,7 @@ export default withMermaid(defineConfig({
               text: '拡張',
               items: [
                 { text: 'Navigation 3', link: '/ja/guide/navigation3' },
+                { text: 'Konsist', link: '/ja/guide/konsist' },
               ],
             },
           ],
@@ -129,6 +132,7 @@ export default withMermaid(defineConfig({
               text: '拡張',
               items: [
                 { text: 'Navigation 3', link: '/ja/api/navigation3' },
+                { text: 'Konsist', link: '/ja/api/konsist' },
               ],
             },
           ],
