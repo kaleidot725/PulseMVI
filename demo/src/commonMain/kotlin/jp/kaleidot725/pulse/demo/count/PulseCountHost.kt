@@ -22,9 +22,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import jp.kaleidot725.pulse.demo.count.component.PulseCountHeader
-import jp.kaleidot725.pulse.demo.count.content.area.PulseAreaContent
-import jp.kaleidot725.pulse.demo.count.content.area.PulseAreaViewModel
-import jp.kaleidot725.pulse.demo.count.content.area.state.PulseAreaPosition
+import jp.kaleidot725.pulse.demo.count.section.area.PulseAreaContent
+import jp.kaleidot725.pulse.demo.count.section.area.PulseAreaViewModel
+import jp.kaleidot725.pulse.demo.count.section.area.state.PulseAreaPosition
 import jp.kaleidot725.pulse.demo.count.state.PulseCountBroadcast
 import jp.kaleidot725.pulse.mvi.PulseHost
 import jp.kaleidot725.pulse.mvi.navigation3.rememberPulseContainer

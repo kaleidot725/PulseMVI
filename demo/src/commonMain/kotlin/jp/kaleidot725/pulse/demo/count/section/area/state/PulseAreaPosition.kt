@@ -1,4 +1,4 @@
-package jp.kaleidot725.pulse.demo.count.content.area.state
+package jp.kaleidot725.pulse.demo.count.section.area.state
 
 enum class PulseAreaPosition(
     val label: String,

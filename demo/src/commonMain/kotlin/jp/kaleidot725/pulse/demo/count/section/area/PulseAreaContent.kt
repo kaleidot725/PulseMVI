@@ -1,13 +1,13 @@
-package jp.kaleidot725.pulse.demo.count.content.area
+package jp.kaleidot725.pulse.demo.count.section.area
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
-import jp.kaleidot725.pulse.demo.count.content.area.component.PulseAreaCell
-import jp.kaleidot725.pulse.demo.count.content.area.state.PulseAreaAction
-import jp.kaleidot725.pulse.demo.count.content.area.state.PulseAreaEvent
-import jp.kaleidot725.pulse.demo.count.content.area.state.PulseAreaPosition
-import jp.kaleidot725.pulse.demo.count.content.area.state.PulseAreaState
+import jp.kaleidot725.pulse.demo.count.section.area.component.PulseAreaCell
+import jp.kaleidot725.pulse.demo.count.section.area.state.PulseAreaAction
+import jp.kaleidot725.pulse.demo.count.section.area.state.PulseAreaEvent
+import jp.kaleidot725.pulse.demo.count.section.area.state.PulseAreaPosition
+import jp.kaleidot725.pulse.demo.count.section.area.state.PulseAreaState
 import jp.kaleidot725.pulse.mvi.PulseContent
 
 @Composable
