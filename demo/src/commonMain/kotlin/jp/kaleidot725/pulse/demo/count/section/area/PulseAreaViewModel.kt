@@ -1,9 +1,9 @@
-package jp.kaleidot725.pulse.demo.count.content.area
+package jp.kaleidot725.pulse.demo.count.section.area
 
-import jp.kaleidot725.pulse.demo.count.content.area.state.PulseAreaAction
-import jp.kaleidot725.pulse.demo.count.content.area.state.PulseAreaEvent
-import jp.kaleidot725.pulse.demo.count.content.area.state.PulseAreaPosition
-import jp.kaleidot725.pulse.demo.count.content.area.state.PulseAreaState
+import jp.kaleidot725.pulse.demo.count.section.area.state.PulseAreaAction
+import jp.kaleidot725.pulse.demo.count.section.area.state.PulseAreaEvent
+import jp.kaleidot725.pulse.demo.count.section.area.state.PulseAreaPosition
+import jp.kaleidot725.pulse.demo.count.section.area.state.PulseAreaState
 import jp.kaleidot725.pulse.demo.count.state.PulseCountBroadcast
 import jp.kaleidot725.pulse.demo.count.state.PulseCountUnicast
 import jp.kaleidot725.pulse.mvi.PulseViewModel

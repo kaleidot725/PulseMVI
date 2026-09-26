@@ -1,4 +1,4 @@
-package jp.kaleidot725.pulse.demo.count.content.area.state
+package jp.kaleidot725.pulse.demo.count.section.area.state
 
 import jp.kaleidot725.pulse.mvi.PulseAction
 

@@ -20,7 +20,11 @@ artifact adds `rememberPulseViewModel` / `rememberPulseContainer`, and
 `rememberPulseNavEntryDecorators()` scopes an instance to a Navigation 3 back stack entry.
 
 The `pulsemvi-konsist` artifact publishes the conventions themselves as Konsist assertions, so an app
-can check in its own test suite that it uses PulseMVI the way the library expects.
+can check in its own test suite that it uses PulseMVI the way the library expects. Among them is the
+view layout the demo follows: a **screen** at the root of a feature package creates the ViewModels and
+lays out **sections**, a section binds one ViewModel with `PulseContent`, and a **component** takes
+data and callbacks only. Packages decide which is which — `section` and `component` — and names are
+free.
 
 ## Development Commands
 
@@ -92,7 +96,18 @@ PulseMVI/
 │       │   └── PulseConventions.kt   # assertPulseMviConventions and the checks it runs
 │       └── jvmTest/…                 # the checks, over conforming and violating fixtures
 ├── demo/                             # Pulse grid demo app (Navigation 3)
-│   └── src/{commonMain,jvmMain}/
+│   └── src/commonMain/kotlin/jp/kaleidot725/pulse/demo/
+│       ├── DemoApp.kt                # NavDisplay and the back stack
+│       └── count/                    # One feature: screen at its root
+│           ├── PulseCountHost.kt     # Screen: creates the ViewModels and Container
+│           ├── PulseCountContainer.kt
+│           ├── component/            # Stateless composables of the screen
+│           ├── section/area/         # Section: one ViewModel bound with PulseContent
+│           │   ├── PulseAreaContent.kt
+│           │   ├── PulseAreaViewModel.kt
+│           │   ├── component/        # Stateless composables of the section
+│           │   └── state/
+│           └── state/
 │       # Four areas share a Container: an area counts its own tap and announces
 │       # it as a Unicast, the Container broadcasts it back to all four, and each
 │       # decides what to do — the origin ignores the copy of its own tap

@@ -78,6 +78,35 @@ class PulseConventionsTest {
         assertMessageMentions(failure, "Counter")
     }
 
+    /**
+     * A section that binds nothing is a component that ended up in the wrong package, and the mistake is invisible
+     * until someone looks for where the ViewModel is read.
+     */
+    @Test
+    fun `reports a section that binds no ViewModel`() {
+        val failure = assertFailsWith<KoAssertionFailedException> { violatingViews.assertSectionsBindOneViewModel() }
+        assertMessageMentions(failure, "SilentSection")
+    }
+
+    /**
+     * A component that takes a ViewModel cannot be reused by another section or previewed on its own, which is the whole
+     * reason it was split out.
+     */
+    @Test
+    fun `reports a component that takes a ViewModel`() {
+        val failure = assertFailsWith<KoAssertionFailedException> { violatingViews.assertComponentsAreStateless() }
+        assertMessageMentions(failure, "BoundComponent")
+    }
+
+    /**
+     * A screen that binds its own ViewModel is how a screen grows into the file that knows everything.
+     */
+    @Test
+    fun `reports a screen that binds a ViewModel`() {
+        val failure = assertFailsWith<KoAssertionFailedException> { violatingViews.assertScreensComposeSections() }
+        assertMessageMentions(failure, "BindingScreen")
+    }
+
     private fun assertMessageMentions(
         failure: KoAssertionFailedException,
         name: String,
@@ -89,4 +118,6 @@ class PulseConventionsTest {
     private val conforming get() = Konsist.scopeFromDirectory("konsist/src/jvmTest/resources/fixture/conforming")
 
     private val violating get() = Konsist.scopeFromDirectory("konsist/src/jvmTest/resources/fixture/violating")
+
+    private val violatingViews get() = Konsist.scopeFromDirectory("konsist/src/jvmTest/resources/fixture/violating-view")
 }
