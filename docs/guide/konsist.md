@@ -26,9 +26,9 @@ class PulseMviConventionTest {
 }
 ```
 
-## What it checks
+## What it checks about the declarations
 
-`assertPulseMviConventions()` runs four checks. A failure names the declaration and says how to fix it.
+`assertPulseMviConventions()` runs seven checks. Four of them are about the declarations. A failure names the declaration and says how to fix it.
 
 | Check | Rule | Why |
 |---|---|---|
@@ -37,9 +37,37 @@ class PulseMviConventionTest {
 | Names follow the base class | a `PulseViewModel` is named `…ViewModel`, a `PulseContainer` is named `…Container` | both are `ViewModel` subclasses to the compiler, so the name is what tells a reader which one this is |
 | Data lives in the state | a ViewModel and a Container declare no `var` property | a `var` beside the state changes without an emission, so nothing recomposes |
 
+## What it checks about the views
+
+The other three are about how the views are split. A **screen** is what a route shows: it creates the ViewModels and the Container and lays the parts out. A **section** is the part one ViewModel answers for. A **component** is a leaf that takes data and callbacks.
+
+The package decides which is which, so function names stay free. A screen sits at the root of its feature package, a section under `section`, a component under `component`. Being a component wins over the section around it, because a section's own components normally live inside it.
+
+```
+count/
+├── PulseCountHost.kt          # screen
+├── PulseCountContainer.kt
+├── component/                 # components of the screen
+│   └── PulseCountHeader.kt
+├── section/
+│   └── area/
+│       ├── PulseAreaContent.kt    # section
+│       ├── PulseAreaViewModel.kt
+│       ├── component/             # components of the section
+│       │   └── PulseAreaCell.kt
+│       └── state/
+└── state/
+```
+
+| Check | Rule | Why |
+|---|---|---|
+| Sections bind one ViewModel | a file with a composable under `section` calls `PulseContent` | the section is the only place the ViewModel and the UI meet. A file that binds nothing is a component in the wrong package |
+| Components are stateless | a composable under `component` takes no `…ViewModel` or `…Container` parameter, and calls neither `PulseContent` nor `PulseHost` | data and callbacks are what make a component reusable between sections and previewable on its own |
+| Screens compose sections | a composable outside both packages does not call `PulseContent` | binding a ViewModel in the screen instead of a section is how a screen grows into the file that knows everything |
+
 ## Choosing the checks
 
-Each check is public on its own. A project that disagrees with one can run the other three.
+Each check is public on its own. A project that disagrees with one can run the others.
 
 ```kotlin
 @Test
@@ -53,7 +81,7 @@ fun `follows the conventions we agreed on`() {
 
 ## Writing your own rules
 
-The queries behind the checks are public too, so a project can add rules of its own on top of them. `pulseViewModels()`, `pulseContainers()`, `pulseStateClasses()`, `pulseStateObjects()`, `pulseMessageInterfaces()`, `pulseMessageClasses()` and `pulseMessageObjects()` each return the declarations that extend or implement the matching type.
+The queries behind the checks are public too, so a project can add rules of its own on top of them. `pulseViewModels()`, `pulseContainers()`, `pulseStateClasses()`, `pulseStateObjects()`, `pulseMessageInterfaces()`, `pulseMessageClasses()` and `pulseMessageObjects()` each return the declarations that extend or implement the matching type, and `pulseScreens()`, `pulseSections()` and `pulseComponents()` return the files that hold composables of each role.
 
 ```kotlin
 @Test

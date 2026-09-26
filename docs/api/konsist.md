@@ -51,9 +51,33 @@ fun KoScope.assertViewModelsHoldTheirDataInTheirState()
 
 Requires every `PulseViewModel` and `PulseContainer` subclass to declare no `var` property.
 
+## assertSectionsBindOneViewModel
+
+```kotlin
+fun KoScope.assertSectionsBindOneViewModel()
+```
+
+Requires every file with a composable under a `section` package to call `PulseContent`. The check is per file, so the stateless overload and the `@Preview` beside a section are fine.
+
+## assertComponentsAreStateless
+
+```kotlin
+fun KoScope.assertComponentsAreStateless()
+```
+
+Requires every composable under a `component` package to take no parameter whose type name ends in `ViewModel` or `Container`, and the file to call neither `PulseContent` nor `PulseHost`.
+
+## assertScreensComposeSections
+
+```kotlin
+fun KoScope.assertScreensComposeSections()
+```
+
+Requires every file with a composable outside both a `section` and a `component` package — a screen — not to call `PulseContent`.
+
 ## Queries
 
-Each query returns the declarations that extend or implement the matching type directly. They are the building blocks of the assertions above, and of rules a project writes itself.
+The first seven queries return the declarations that extend or implement the matching type directly; the last three return files, since a role belongs to a file's package rather than to one function. They are the building blocks of the assertions above, and of rules a project writes itself.
 
 | Query | Returns |
 |---|---|
@@ -64,6 +88,9 @@ Each query returns the declarations that extend or implement the matching type d
 | `pulseMessageInterfaces()` | `List<KoInterfaceDeclaration>` — interfaces implementing one of the four message markers |
 | `pulseMessageClasses()` | `List<KoClassDeclaration>` — classes implementing one of the four message markers |
 | `pulseMessageObjects()` | `List<KoObjectDeclaration>` — objects implementing one of the four message markers |
+| `pulseScreens()` | `List<KoFileDeclaration>` — files with a composable outside a `section` and a `component` package |
+| `pulseSections()` | `List<KoFileDeclaration>` — files with a composable under a `section` package, components inside it excluded |
+| `pulseComponents()` | `List<KoFileDeclaration>` — files with a composable under a `component` package |
 
 ## Scopes
 

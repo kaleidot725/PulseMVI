@@ -26,9 +26,9 @@ class PulseMviConventionTest {
 }
 ```
 
-## 検査する内容
+## 宣言についての検査
 
-`assertPulseMviConventions()` は 4 つの検査を実行します。失敗したときは、該当する宣言の名前と直し方を出します。
+`assertPulseMviConventions()` は 7 つの検査を実行します。そのうち 4 つは宣言についてのものです。失敗したときは、該当する宣言の名前と直し方を出します。
 
 | 検査 | ルール | 理由 |
 |---|---|---|
@@ -37,9 +37,37 @@ class PulseMviConventionTest {
 | 名前は基底クラスに従う | `PulseViewModel` は `…ViewModel`、`PulseContainer` は `…Container` | コンパイラにとってはどちらも `ViewModel` のサブクラスなので、どちらなのかを示すのは名前だけ |
 | データは State に置く | ViewModel と Container は `var` プロパティを持たない | State の外の `var` は変更しても emission が起きず、何も再コンポジションされない |
 
+## View についての検査
+
+残りの 3 つは View の分割についてのものです。**Screen** はルートが表示するもので、ViewModel と Container を生成し、各パーツを配置します。**Section** は 1 つの ViewModel が受け持つ部分です。**Component** は末端で、データとコールバックだけを受け取ります。
+
+どれなのかを決めるのはパッケージなので、関数名は自由です。Screen は feature パッケージのルート、Section は `section` 配下、Component は `component` 配下に置きます。Section の内側にある `component` は Component として扱われます。Section 専用の Component は、その Section の中に置くのが自然だからです。
+
+```
+count/
+├── PulseCountHost.kt          # Screen
+├── PulseCountContainer.kt
+├── component/                 # Screen の Component
+│   └── PulseCountHeader.kt
+├── section/
+│   └── area/
+│       ├── PulseAreaContent.kt    # Section
+│       ├── PulseAreaViewModel.kt
+│       ├── component/             # Section の Component
+│       │   └── PulseAreaCell.kt
+│       └── state/
+└── state/
+```
+
+| 検査 | ルール | 理由 |
+|---|---|---|
+| Section は ViewModel を 1 つ束ねる | `section` 配下の Composable を持つファイルは `PulseContent` を呼ぶ | ViewModel と UI が出会うのは Section だけ。何も束ねていないファイルは、置き場所を間違えた Component |
+| Component は stateless | `component` 配下の Composable は `…ViewModel` や `…Container` を引数に取らず、`PulseContent` も `PulseHost` も呼ばない | データとコールバックだけで済むから、ほかの Section でも使え、単体で Preview できる |
+| Screen は Section を並べる | どちらのパッケージにも属さない Composable は `PulseContent` を呼ばない | Section ではなく Screen で束ねると、Screen がすべてを知るファイルに育つ |
+
 ## 検査を選ぶ
 
-それぞれの検査は単体でも公開しています。合わない検査があるプロジェクトは、残りだけを実行できます。
+それぞれの検査は単体でも公開しています。合わない検査があるプロジェクトは、ほかの検査だけを実行できます。
 
 ```kotlin
 @Test
@@ -53,7 +81,7 @@ fun `follows the conventions we agreed on`() {
 
 ## 自分のルールを書く
 
-検査の土台になっているクエリも公開しているので、その上に独自のルールを足せます。`pulseViewModels()`、`pulseContainers()`、`pulseStateClasses()`、`pulseStateObjects()`、`pulseMessageInterfaces()`、`pulseMessageClasses()`、`pulseMessageObjects()` が、それぞれ対応する型を継承・実装している宣言を返します。
+検査の土台になっているクエリも公開しているので、その上に独自のルールを足せます。`pulseViewModels()`、`pulseContainers()`、`pulseStateClasses()`、`pulseStateObjects()`、`pulseMessageInterfaces()`、`pulseMessageClasses()`、`pulseMessageObjects()` がそれぞれ対応する型を継承・実装している宣言を返し、`pulseScreens()`、`pulseSections()`、`pulseComponents()` が各役割の Composable を持つファイルを返します。
 
 ```kotlin
 @Test

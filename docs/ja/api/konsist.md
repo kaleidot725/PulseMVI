@@ -51,9 +51,33 @@ fun KoScope.assertViewModelsHoldTheirDataInTheirState()
 
 `PulseViewModel` と `PulseContainer` のサブクラスが `var` プロパティを宣言していないことを要求します。
 
+## assertSectionsBindOneViewModel
+
+```kotlin
+fun KoScope.assertSectionsBindOneViewModel()
+```
+
+`section` パッケージ配下の Composable を持つすべてのファイルに `PulseContent` の呼び出しを要求します。判定はファイル単位なので、Section の隣に置かれる stateless なオーバーロードや `@Preview` は問題ありません。
+
+## assertComponentsAreStateless
+
+```kotlin
+fun KoScope.assertComponentsAreStateless()
+```
+
+`component` パッケージ配下のすべての Composable に、型名が `ViewModel` または `Container` で終わる引数がないこと、そしてそのファイルが `PulseContent` も `PulseHost` も呼ばないことを要求します。
+
+## assertScreensComposeSections
+
+```kotlin
+fun KoScope.assertScreensComposeSections()
+```
+
+`section` にも `component` にも属さない Composable を持つファイル、つまり Screen に、`PulseContent` を呼ばないことを要求します。
+
 ## クエリ
 
-各クエリは、対応する型を直接継承・実装している宣言を返します。上のアサートの土台であり、プロジェクト独自のルールの土台にもなります。
+前半の 7 つは対応する型を直接継承・実装している宣言を返します。後半の 3 つは、役割が関数ではなくファイルのパッケージで決まるため、ファイルを返します。いずれも上のアサートの土台であり、プロジェクト独自のルールの土台にもなります。
 
 | クエリ | 戻り値 |
 |---|---|
@@ -64,6 +88,9 @@ fun KoScope.assertViewModelsHoldTheirDataInTheirState()
 | `pulseMessageInterfaces()` | `List<KoInterfaceDeclaration>` — 4 つのメッセージマーカーのいずれかを実装した interface |
 | `pulseMessageClasses()` | `List<KoClassDeclaration>` — 同じマーカーを実装した class |
 | `pulseMessageObjects()` | `List<KoObjectDeclaration>` — 同じマーカーを実装した object |
+| `pulseScreens()` | `List<KoFileDeclaration>` — `section` と `component` のどちらにも属さない Composable を持つファイル |
+| `pulseSections()` | `List<KoFileDeclaration>` — `section` 配下の Composable を持つファイル。内側の `component` を除く |
+| `pulseComponents()` | `List<KoFileDeclaration>` — `component` 配下の Composable を持つファイル |
 
 ## スコープ
 
